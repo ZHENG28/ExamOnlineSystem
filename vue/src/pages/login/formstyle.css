@@ -1,0 +1,69 @@
+* {
+	/* 初始化 清除页面元素的内外边距 */
+	padding: 0;
+	margin: 0;
+	/* 盒子模型 */
+	box-sizing: border-box;
+}
+.body {
+	/* 弹性布局 让页面元素垂直+水平居中 */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/* 让页面始终占浏览器可视区域总高度 */
+	height: 100vh;
+}
+.login {
+	/* 弹性布局 让子元素称为弹性项目 */
+	display: flex;
+	/* 让弹性项目垂直排列 原理是改变弹性盒子的主轴方向 父元素就是弹性盒子 现在改变后的主轴方向是向下了 */
+	flex-direction: column;
+	/* 让弹性项目在交叉轴方向水平居中 现在主轴的方向是向下 交叉轴的方向是与主轴垂直 交叉轴的方向是向右 */
+	align-items: center;
+	/* width: 400px;
+	padding: 40px;
+	background-color: rgba(0, 0, 0, 0.2);
+	box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4); */
+}
+.login h2 {
+	color: #026fa2;
+	margin-bottom: 20px;
+}
+.login .login_box {
+	/* 相对定位 */
+	position: relative;
+	width: 100%;
+}
+.login .login_box input {
+	/* 清除input框自带的边框和轮廓 */
+	outline: none;
+	border: none;
+	width: 300px;
+	padding: 10px 0;
+	margin-bottom: 30px;
+	color: black;
+	font-size: 16px;
+	border-bottom: 1px solid grey;
+	/* 背景颜色为透明色 */
+	background-color: transparent;
+}
+.login .login_box label {
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 10px 0;
+	color: grey;
+	/* 这个属性的默认值是auto 默认是这个元素可以被点击 但是如果我们写了none 就是这个元素不能被点击 , 就好像它可见但是不能用 可望而不可即 */
+	/* 这个就是两者的区别 */
+	pointer-events: none;
+	/* 加个过渡 */
+	transition: all 0.5s;
+}
+/* :focus 选择器是当input获得焦点是触发的样式 + 是相邻兄弟选择器 去找与input相邻的兄弟label */
+/* :valid 选择器是判断input框的内容是否合法,如果合法会执行下面的属性代码,不合法就不会执行,我们刚开始写布局的时候给input框写了required 我们删掉看对比 当没有required的话input框的值就会被认为一直合法,所以一直都是下方的样式 ,但是密码不会,密码框内的值为空,那么这句话局不合法,required不能为空 当我们给密码框写点东西的时候才会执行以下代码*/
+.login .login_box input:focus + label,
+.login .login_box input:valid + label {
+	top: -20px;
+	color: #026fa2;
+	font-size: 12px;
+}
