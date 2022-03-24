@@ -22,8 +22,8 @@ public class ExamsystemApplication implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception
     {
-        String pwd = new BCryptPasswordEncoder().encode("123");
-        Manager mgr = new Manager(1, "admin", pwd);
-        managerRepo.save(mgr);
+//        String pwd = new BCryptPasswordEncoder().encode("123");
+//        Manager mgr = new Manager(1, "admin", pwd);
+//        managerRepo.save(mgr);
     }
 }
