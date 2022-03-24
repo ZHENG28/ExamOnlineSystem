@@ -28,6 +28,7 @@
             <artifactId>hutool-all</artifactId>
             <version>4.5.1</version>
         </dependency>
+
         <!--数据库-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -44,6 +45,7 @@
             <scope>runtime</scope>
             <version>8.0.23</version>
         </dependency>
+
         <!--安全验证-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -58,6 +60,7 @@
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
         </dependency>
+
         <!--前端-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
