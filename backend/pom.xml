@@ -29,7 +29,7 @@
             <version>4.5.1</version>
         </dependency>
 
-        <!--数据库-->
+        <!-- database: jpa & h2 delete -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -45,8 +45,19 @@
             <scope>runtime</scope>
             <version>8.0.23</version>
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+        <!-- generator -->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.0</version>
+        </dependency>
 
-        <!--安全验证-->
+        <!-- security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -61,7 +72,7 @@
             <version>0.9.1</version>
         </dependency>
 
-        <!--前端-->
+        <!-- frontend -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
