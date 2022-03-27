@@ -10,3 +10,15 @@
         1. 修改配置文件中的各项参数：`spring.datasource.url/password`, `spring.jpa.hibernate.ddl-auto=create/update`
         2. 初始化好数据库后，再修改为`ddl-auto=update`，同时注释创建管理员的语句（管理员默认创建：账号：admin，密码：123）
 - 页面展示：
+    1. 登陆页面：
+        ![login](/res/img/login.jpg)
+    2. 管理员主页：
+        ![admin](/res/img/admin.jpg)
+    3. 教师主页：
+        ![tcr](/res/img/tcr.jpg)
+    4. 教师发布测验页面：
+        ![tcr-publish](/res/img/tcr-publish.jpg)
+    5. 学生主页：
+        ![stu](/res/img/stu.jpg)
+    6. 学生测验页面：
+        ![stu-test](/res/img/stu-test.jpg)
