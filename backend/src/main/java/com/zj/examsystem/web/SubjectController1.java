@@ -1,9 +1,8 @@
 package com.zj.examsystem.web;
 
 import com.zj.examsystem.model.Subject;
-import com.zj.examsystem.model.Teacher;
-import com.zj.examsystem.serviceImpl.SubjectServiceImpl;
-import com.zj.examsystem.serviceImpl.TeacherServiceImpl;
+import com.zj.examsystem.serviceImpl.SubjectServiceImpl1;
+import com.zj.examsystem.serviceImpl.TeacherServiceImpl1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,13 +13,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/sub")
-public class SubjectController
+public class SubjectController1
 {
     @Autowired
-    private SubjectServiceImpl subjectService;
+    private SubjectServiceImpl1 subjectService;
 
     @Autowired
-    private TeacherServiceImpl teacherService;
+    private TeacherServiceImpl1 teacherService;
 
     @PostMapping("/findAll")
     @ResponseBody

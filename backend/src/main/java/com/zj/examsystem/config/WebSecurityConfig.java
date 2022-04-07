@@ -69,12 +69,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
                 .and().csrf().disable()
                 // 异常处理机制
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 // 权限设置
-                .and().authorizeRequests()
-                .antMatchers("/sys/login", "/sys/logout").permitAll()
-                .antMatchers("/captcha/getCaptchaCode", "/captcha/checkCaptchaCode").permitAll()
-                .anyRequest().authenticated(); // 任何请求都需要认证
+//                .and().authorizeRequests()
+//                .antMatchers("/sys/login", "/sys/logout").permitAll()
+//                .antMatchers("/captcha/getCaptchaCode", "/captcha/checkCaptchaCode").permitAll()
+//                .anyRequest().authenticated(); // 任何请求都需要认证
 
         // 使用的过滤器及其使用时间
         // 将AuthTokenFilter放在UsernamePasswordAuthenticationFilter之前

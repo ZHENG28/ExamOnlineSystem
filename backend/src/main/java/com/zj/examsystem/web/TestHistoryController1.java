@@ -1,8 +1,8 @@
 package com.zj.examsystem.web;
 
 import com.zj.examsystem.model.TestHistory;
-import com.zj.examsystem.serviceImpl.SubjectServiceImpl;
-import com.zj.examsystem.serviceImpl.TestHistoryServiceImpl;
+import com.zj.examsystem.serviceImpl.SubjectServiceImpl1;
+import com.zj.examsystem.serviceImpl.TestHistoryServiceImpl1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/testHistory")
-public class TestHistoryController
+public class TestHistoryController1
 {
     @Autowired
-    private TestHistoryServiceImpl testHistoryService;
+    private TestHistoryServiceImpl1 testHistoryService;
 
     @Autowired
-    private SubjectServiceImpl subjectService;
+    private SubjectServiceImpl1 subjectService;
 
     @PostMapping("/commit")
     @ResponseBody

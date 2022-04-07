@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zj.examsystem.auto.mapper.ClazzMapper">
+
+<!--    <select id="getMaxId" parameterType="java.lang.Integer" resultType="com.zj.examsystem.auto.mapper.ClazzMapper">-->
+<!--        SELECT coalesce(max(clazzId), 0) FROM Clazz;-->
+<!--    </select>-->
+    <select id="selectDistinctMajor" resultType="java.lang.String">
+        SELECT distinct(major) FROM Clazz
+    </select>
+    <select id="selectDistinctClazzName" resultType="java.lang.String">
+        SELECT distinct(clazz_name) FROM Clazz
+    </select>
+</mapper>

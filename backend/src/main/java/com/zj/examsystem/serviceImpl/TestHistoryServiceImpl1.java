@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class TestHistoryServiceImpl
+public class TestHistoryServiceImpl1
 {
     @Autowired
     private TestHistoryRepository testHistoryRepo;

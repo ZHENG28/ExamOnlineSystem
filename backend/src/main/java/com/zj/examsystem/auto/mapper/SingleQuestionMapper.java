@@ -2,6 +2,9 @@ package com.zj.examsystem.auto.mapper;
 
 import com.zj.examsystem.auto.entity.SingleQuestion;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.zj.examsystem.model.Subject;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface SingleQuestionMapper extends BaseMapper<SingleQuestion> {
 
+    List<SingleQuestion> findBySub(Subject sub);
 }

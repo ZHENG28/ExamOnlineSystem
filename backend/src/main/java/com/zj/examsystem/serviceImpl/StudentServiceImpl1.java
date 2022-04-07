@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class StudentServiceImpl
+public class StudentServiceImpl1
 {
     @Autowired
     private StudentRepository studentRepo;

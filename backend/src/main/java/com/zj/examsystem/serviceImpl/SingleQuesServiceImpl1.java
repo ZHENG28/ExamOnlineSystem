@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class SingleQuesServiceImpl
+public class SingleQuesServiceImpl1
 {
     @Autowired
     private SingleQuesRepository singleQuesRepo;

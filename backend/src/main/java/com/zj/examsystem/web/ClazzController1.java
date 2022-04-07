@@ -1,7 +1,7 @@
 package com.zj.examsystem.web;
 
 import com.zj.examsystem.model.Clazz;
-import com.zj.examsystem.serviceImpl.ClazzServiceImpl;
+import com.zj.examsystem.serviceImpl.ClazzServiceImpl1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,10 +12,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/clazz")
-public class ClazzController
+public class ClazzController1
 {
     @Autowired
-    private ClazzServiceImpl clazzService;
+    private ClazzServiceImpl1 clazzService;
 
     @PostMapping("/findAll")
     @ResponseBody

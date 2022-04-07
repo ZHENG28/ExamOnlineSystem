@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ClazzServiceImpl
+public class ClazzServiceImpl1
 {
     @Autowired
     private ClazzRepository clazzRepo;

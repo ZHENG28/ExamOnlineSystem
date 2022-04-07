@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class SubjectServiceImpl
+public class SubjectServiceImpl1
 {
     @Autowired
     private SubjectRepository subjectRepo;

@@ -2,6 +2,7 @@ package com.zj.examsystem.auto.service;
 
 import com.zj.examsystem.auto.entity.Clazz;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.data.domain.Page;
 
 /**
  * <p>
@@ -13,4 +14,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ClazzService extends IService<Clazz> {
 
+    public Page<Clazz> findAll(Integer pageno, Integer size);
+
+    public int addClazz(Clazz clazz);
+
+    public void deleteClazz(Integer[] id);
+
+    public Clazz findById(Integer clazzId);
+
+    public int modify(Clazz clazz);
 }

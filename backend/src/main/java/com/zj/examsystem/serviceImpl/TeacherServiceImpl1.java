@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class TeacherServiceImpl
+public class TeacherServiceImpl1
 {
     @Autowired
     private TeacherRepository teacherRepo;

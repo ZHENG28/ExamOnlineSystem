@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/captcha")
-public class CaptchaController
+public class CaptchaController1
 {
     @Resource
     private Producer captchaProducer;

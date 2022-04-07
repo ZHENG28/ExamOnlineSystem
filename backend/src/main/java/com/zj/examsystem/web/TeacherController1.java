@@ -1,10 +1,9 @@
 package com.zj.examsystem.web;
 
-import com.zj.examsystem.model.Student;
-import com.zj.examsystem.serviceImpl.ClazzServiceImpl;
-import com.zj.examsystem.serviceImpl.StudentServiceImpl;
+import com.zj.examsystem.model.Teacher;
+import com.zj.examsystem.serviceImpl.ClazzServiceImpl1;
+import com.zj.examsystem.serviceImpl.TeacherServiceImpl1;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,20 +15,20 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping("/stu")
-public class StudentController
+@RequestMapping("/tch")
+public class TeacherController1
 {
     @Autowired
-    private StudentServiceImpl studentService;
+    private TeacherServiceImpl1 teacherService;
 
     @Autowired
-    private ClazzServiceImpl clazzService;
+    private ClazzServiceImpl1 clazzService;
 
     @PostMapping("/findAll")
     @ResponseBody
     public Object findAll(Integer pageno, Integer size)
     {
-        return studentService.findAll(pageno, size);
+        return teacherService.findAll(pageno, size);
     }
 
     @PostMapping("/findAllMajor")
@@ -39,35 +38,21 @@ public class StudentController
         return clazzService.findAllMajorAndClazz("major");
     }
 
-    @PostMapping("/findAllClazz")
-    @ResponseBody
-    public Object findAllClazz()
-    {
-        return clazzService.findAllMajorAndClazz("clazz");
-    }
-
-    @PostMapping("/findAllMajorAndClazz")
-    @ResponseBody
-    public Object findAllMajorAndClazz()
-    {
-        return clazzService.findAllMajorClazz();
-    }
-
     @RequestMapping("/add")
     @ResponseBody
-    public ResponseEntity<?> add(@RequestBody Student stu)
+    public ResponseEntity<?> add(@Valid @RequestBody Teacher tch)
     {
-        return studentService.addStu(stu);
+        return teacherService.addTch(tch);
     }
 
     @PostMapping("/del")
     public ModelAndView delete(String[] account, Integer pageno, Integer size)
     {
-        studentService.deleteStu(account);
+        teacherService.deleteTch(account);
         ModelAndView mv = new ModelAndView();
         mv.addObject("pageno", pageno);
         mv.addObject("size", size);
-        mv.setViewName("forward:/stu/findAll");
+        mv.setViewName("forward:/tch/findAll");
         return mv;
     }
 
@@ -75,13 +60,13 @@ public class StudentController
     @ResponseBody
     public Object findByAccount(String account)
     {
-        return studentService.findByAccount(account);
+        return teacherService.findByAccount(account);
     }
 
     @RequestMapping("/modify")
     @ResponseBody
-    public ResponseEntity<?> modify(@RequestBody Student stu)
+    public ResponseEntity<?> modify(@Valid @RequestBody Teacher tch)
     {
-        return studentService.modifyStu(stu);
+        return teacherService.modifyTch(tch);
     }
 }

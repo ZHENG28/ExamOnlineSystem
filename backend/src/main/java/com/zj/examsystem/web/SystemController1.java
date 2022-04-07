@@ -5,14 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zj.examsystem.config.security.jwt.JwtUtils;
 import com.zj.examsystem.config.security.payload.request.LoginRequest;
 import com.zj.examsystem.config.security.payload.response.JwtResponse;
-import com.zj.examsystem.model.Manager;
 import com.zj.examsystem.model.Student;
 import com.zj.examsystem.model.TestHistory;
-import com.zj.examsystem.repository.ManagerRepository;
 import com.zj.examsystem.repository.StudentRepository;
-import com.zj.examsystem.repository.TeacherRepository;
-import com.zj.examsystem.serviceImpl.SystemServiceImpl;
-import com.zj.examsystem.serviceImpl.TestHistoryServiceImpl;
+import com.zj.examsystem.serviceImpl.SystemServiceImpl1;
+import com.zj.examsystem.serviceImpl.TestHistoryServiceImpl1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,24 +21,22 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sys")
-public class SystemController
+public class SystemController1
 {
     @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
-    private TestHistoryServiceImpl testHistoryService;
+    private TestHistoryServiceImpl1 testHistoryService;
 
     @Autowired
-    private SystemServiceImpl systemService;
+    private SystemServiceImpl1 systemService;
 
     @Autowired
     JwtUtils jwtUtils;

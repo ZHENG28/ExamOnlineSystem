@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class SystemServiceImpl
+public class SystemServiceImpl1
 {
     @Autowired
     private ManagerRepository managerRepo;

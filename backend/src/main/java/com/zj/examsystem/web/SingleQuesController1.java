@@ -1,8 +1,8 @@
 package com.zj.examsystem.web;
 
 import com.zj.examsystem.model.SingleQuestion;
-import com.zj.examsystem.serviceImpl.SingleQuesServiceImpl;
-import com.zj.examsystem.serviceImpl.SubjectServiceImpl;
+import com.zj.examsystem.serviceImpl.SingleQuesServiceImpl1;
+import com.zj.examsystem.serviceImpl.SubjectServiceImpl1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,13 +13,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/singleQues")
-public class SingleQuesController
+public class SingleQuesController1
 {
     @Autowired
-    private SingleQuesServiceImpl singleQuesService;
+    private SingleQuesServiceImpl1 singleQuesService;
 
     @Autowired
-    private SubjectServiceImpl subjectService;
+    private SubjectServiceImpl1 subjectService;
 
     @PostMapping("/findAll")
     @ResponseBody

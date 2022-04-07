@@ -1,7 +1,6 @@
 package com.zj.examsystem.web;
 
 import com.zj.examsystem.model.Test;
-import com.zj.examsystem.model.TestHistory;
 import com.zj.examsystem.serviceImpl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,22 +12,22 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/test")
-public class TestController
+public class TestController1
 {
     @Autowired
-    private TestServiceImpl testService;
+    private TestServiceImpl1 testService;
 
     @Autowired
-    private ClazzServiceImpl clazzService;
+    private ClazzServiceImpl1 clazzService;
 
     @Autowired
-    private SubjectServiceImpl subjectService;
+    private SubjectServiceImpl1 subjectService;
 
     @Autowired
-    private SingleQuesServiceImpl singleQuesService;
+    private SingleQuesServiceImpl1 singleQuesService;
 
     @Autowired
-    private TestHistoryServiceImpl testHistoryService;
+    private TestHistoryServiceImpl1 testHistoryService;
 
     // testBuild
     @PostMapping("/findAllMajorAndClazz")
