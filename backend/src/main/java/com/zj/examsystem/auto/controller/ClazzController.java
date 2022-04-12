@@ -1,6 +1,7 @@
 package com.zj.examsystem.auto.controller;
 
 
+import com.zj.examsystem.auto.service.ClazzService;
 import com.zj.examsystem.auto.service.impl.ClazzServiceImpl;
 import com.zj.examsystem.auto.entity.Clazz;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author ${author}
@@ -23,56 +24,57 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("/auto/clazz")
 public class ClazzController {
-
     @Autowired
-    private ClazzServiceImpl clazzService;
+    private ClazzService clazzService;
 
-//    @PostMapping("/findAll")
-//    @ResponseBody
-//    public Object findAll(Integer pageno, Integer size)
-//    {
-//        return clazzService.findAll(pageno, size);
-//    }
-
-    @GetMapping("/add")
+    @PostMapping("/findAll")
     @ResponseBody
-    public String add(Clazz clazz)
-    {
-        int result = clazzService.addClazz(clazz);
-        System.out.println(clazz);
-//        if (c == null) {
-//            return "failed";
-//        }
-        return "success";
+    public Object findAll(Integer pageno, Integer size) {
+        return clazzService.findAll(pageno, size);
+    }
+
+    @GetMapping("/getDistinctMajor")
+    @ResponseBody
+    public Object getDistinctMajor() {
+        return clazzService.getDistinctMajorOrClazz("major");
+    }
+
+    @GetMapping("/getDistinctClazz")
+    @ResponseBody
+    public Object getDistinctClazz() {
+        return clazzService.getDistinctMajorOrClazz("clazz");
+    }
+
+    @GetMapping("/findAllMajorAndClazz")
+    @ResponseBody
+    public Object findAllMajorAndClazz() {
+        return clazzService.findAllMajorClazz();
+    }
+
+    @GetMapping("/save")
+    @ResponseBody
+    public Object save(Clazz clazz) {
+        int result = clazzService.saveClazz(clazz);
+        return result != 0;
     }
 
     @PostMapping("/del")
-    public ModelAndView delete(Integer[] clazzId, Integer pageno, Integer size)
-    {
-        clazzService.deleteClazz(clazzId);
+    public ModelAndView delete(Integer[] clazzId, Integer pageno, Integer size) {
+        int result = clazzService.deleteClazz(clazzId);
+
         ModelAndView mv = new ModelAndView();
-        mv.addObject("pageno", pageno);
-        mv.addObject("size", size);
-        mv.setViewName("forward:/clazz/findAll");
+        if (result != 0) {
+            mv.addObject("pageno", pageno);
+            mv.addObject("size", size);
+            mv.setViewName("forward:/auto/clazz/findAll");
+        }
         return mv;
     }
 
     @PostMapping("/findById")
     @ResponseBody
-    public Object findById(Integer clazzId)
-    {
+    public Object findById(Integer clazzId) {
         return clazzService.findById(clazzId);
-    }
-
-    @PostMapping("/modify")
-    @ResponseBody
-    public String modify(Clazz clazz)
-    {
-        int c = clazzService.modify(clazz);
-//        if (c == null) {
-//            return "failed";
-//        }
-        return "success";
     }
 }
 

@@ -28,8 +28,7 @@ import java.util.Map;
 @EnableWebSecurity
 // 提供 AOP security 的方法（如@PreAuthorize, @PostAuthorize）
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter
-{
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
@@ -37,33 +36,28 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
     private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter()
-    {
+    public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception
-    {
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(getBCPasswordEncoder());
     }
 
     @Bean
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception
-    {
+    public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
     @Bean
-    public PasswordEncoder getBCPasswordEncoder()
-    {
+    public PasswordEncoder getBCPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception
-    {
+    protected void configure(HttpSecurity http) throws Exception {
         // 配置了 CORS(Cross-Origin Resource Sharing) 和 CSRF(Cross-Site Request Forgery)
         http.cors()
                 .and().csrf().disable()
@@ -83,8 +77,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
     }
 
     @Bean
-    public AuthenticationFailureHandler authenticationFailureHandler()
-    {//验证失败返回JSON格式信息
+    public AuthenticationFailureHandler authenticationFailureHandler() {//验证失败返回JSON格式信息
         return (request, response, exception) -> {
             Map<String, Object> map = new HashMap<>();
             map.put("code", 401);

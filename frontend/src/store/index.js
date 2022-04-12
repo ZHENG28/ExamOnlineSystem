@@ -1,13 +1,47 @@
-import Vue from "vue";
-import Vuex from 'vuex';
-import { auth } from './auth.module';
-import user from '../services/user.service';
+import { createStore } from 'vuex'
+import userService from '../services/user.service'
 
-Vue.use(Vuex);
+const user = JSON.parse(localStorage.getItem('user'))
+const initialState = user
+  ? { status: { loggedIn: true }, user }
+  : { status: { loggedIn: false }, user: null }
 
-export default new Vuex.Store({
+export default createStore({
+  // namespaced: true,
+  state: { initialState },
+  mutations: {
+    loginSuccess(state, user) {
+      state.status.loggedIn = true
+      state.user = user
+    },
+    loginFailure(state) {
+      state.status.loggedIn = false
+      state.user = null
+    },
+    logout(state) {
+      state.status.loggedIn = false
+      state.user = null
+    },
+  },
+  actions: {
+    login({ commit }, user) {
+      return AuthService.login(user).then(
+        (user) => {
+          commit('loginSuccess', user)
+          return Promise.resolve(user)
+        },
+        (error) => {
+          commit('loginFailure')
+          return Promise.reject(error)
+        },
+      )
+    },
+    logout({ commit }) {
+      AuthService.logout()
+      commit('logout')
+    },
+  },
   modules: {
-    auth,
-    user
-  }
-});
+    userService,
+  },
+})

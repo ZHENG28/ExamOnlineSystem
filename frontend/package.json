@@ -1,56 +1,29 @@
 {
-  "name": "vue-black-dashboard",
-  "version": "1.0.0",
+  "name": "frontend",
+  "version": "0.1.0",
   "private": true,
-  "description": "A sample admin dashboard based on black dashboard UI template",
-  "author": "cristian.jora <joracristi@gmail.com>",
   "scripts": {
-    "serve": "vue-cli-service serve --open",
-    "build": "vue-cli-service build",
-    "e2e": "node test/e2e/runner.js",
-    "lint": "vue-cli-service lint",
-    "dev": "vue-cli-service serve --open",
-    "lint-fix": "vue-cli-service lint --fix"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.35",
-    "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fortawesome/vue-fontawesome": "^2.0.2",
-    "axios": "^0.21.1",
-    "bootstrap": "^5.0.1",
-    "chart.js": "^2.9.3",
-    "echarts": "^4.2.1",
-    "element-ui": "^2.15.1",
-    "i": "^0.3.6",
-    "jquery": "^3.6.0",
-    "popper.js": "^1.16.1",
-    "qs": "^6.10.1",
-    "register-service-worker": "^1.7.1",
-    "vee-validate": "^2.2.15",
-    "vue": "^2.6.11",
-    "vue-chartjs": "^3.5.0",
-    "vue-circular-count-down-timer": "^1.0.4",
-    "vue-cookies": "^1.7.4",
-    "vue-i18n": "^8.18.2",
-    "vue-moment": "^4.1.0",
-    "vue-router": "^3.0.3",
-    "vue-router-prefetch": "^1.6.0",
-    "vue2-transitions": "^0.3.0",
-    "vuex": "^3.6.2"
+    "@element-plus/icons-vue": "^1.1.4",
+    "axios": "^0.26.1",
+    "core-js": "^3.6.5",
+    "element-plus": "^2.1.5",
+    "vue": "^3.0.0",
+    "vue-router": "^4.0.0-0",
+    "vuex": "^4.0.0-0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.4.6",
-    "@vue/cli-plugin-eslint": "^4.4.6",
-    "@vue/cli-plugin-pwa": "^4.4.6",
-    "@vue/cli-service": "^4.4.6",
-    "node-sass": "^4.14.1",
+    "@vue/cli-plugin-babel": "~4.5.15",
+    "@vue/cli-plugin-router": "~4.5.15",
+    "@vue/cli-plugin-vuex": "~4.5.15",
+    "@vue/cli-service": "~4.5.15",
+    "@vue/compiler-sfc": "^3.0.0",
+    "axios": "^0.18.0",
+    "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "vue-cli-plugin-i18n": "^1.0.1",
-    "vue-template-compiler": "^2.6.11"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 11"
-  ]
+    "vue-cli-plugin-axios": "~0.0.4"
+  }
 }

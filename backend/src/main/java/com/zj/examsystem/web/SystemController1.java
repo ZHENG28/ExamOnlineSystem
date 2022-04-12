@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sys")
-public class SystemController1
-{
+public class SystemController1 {
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -44,8 +43,8 @@ public class SystemController1
     @Autowired
     private StudentRepository studentRepo;
 
-//    @Autowired
-//    Cache caffeineCache;
+    //    @Autowired
+    //    Cache caffeineCache;
 
     /**
      * 0. 校验验证码
@@ -59,8 +58,7 @@ public class SystemController1
      * @return
      */
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest)
-    {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         // 加上身份验证
         loginRequest.setAccount(loginRequest.getIdentity() + " " + loginRequest.getAccount());
         // 创建Token及认证
@@ -77,7 +75,7 @@ public class SystemController1
                 .collect(Collectors.toList());
 
         // 为什么不需要放在缓存中
-//        caffeineCache.put(CacheName.USER, userDetails.getUsername(), userDetails);
+        //        caffeineCache.put(CacheName.USER, userDetails.getUsername(), userDetails);
 
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getUsername(),
@@ -86,15 +84,13 @@ public class SystemController1
 
     @GetMapping("/findUsername")
     @ResponseBody
-    public Object findUsername(Integer role, String account)
-    {
+    public Object findUsername(Integer role, String account) {
         return systemService.findUsername(role, account);
     }
 
     @PostMapping("/getFinishTime")
     @ResponseBody
-    public Object getStuChartData(String account)
-    {
+    public Object getStuChartData(String account) {
         Student stu = studentRepo.findByAccount(account).orElseThrow();
         List<TestHistory> historyList = testHistoryService.getStuChartData(stu.getId());
         return systemService.countChartData(historyList);
@@ -103,23 +99,21 @@ public class SystemController1
     // 教师首页图表存在BUG：只能看到自己教授的科目的完成测验的次数
     @PostMapping("/getFinishStuNum")
     @ResponseBody
-    public Object getTchChartData()
-    {
-        List<TestHistory> historyList = testHistoryService.findAll();
+    public Object getTchChartData() {
+        //        List<TestHistory> historyList = testHistoryService.findAll();
+        List<TestHistory> historyList = null;
         return systemService.countChartData(historyList);
     }
 
     @GetMapping("/findInfo")
     @ResponseBody
-    public Object findUserInfo(Integer role, String account)
-    {
+    public Object findUserInfo(Integer role, String account) {
         return systemService.findUserInfo(role, account);
     }
 
     @PostMapping("/updateInfo")
     @ResponseBody
-    public ResponseEntity<?> updateInfo(@RequestBody String userInfo) throws JsonProcessingException
-    {
+    public ResponseEntity<?> updateInfo(@RequestBody String userInfo) throws JsonProcessingException {
         Map<String, String> jsonMap = new ObjectMapper().readValue(userInfo, Map.class);
         String role = jsonMap.get("role");
         String account = jsonMap.get("account");

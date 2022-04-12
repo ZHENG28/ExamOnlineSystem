@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.auto.mapper.StudentMapper">
+    <resultMap id="StudentWithClazz" type="com.zj.examsystem.auto.entity.Student">
+        <id column="id" property="id"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="stu_name" property="stuName" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="INTEGER"/>
+        <result column="clazz_id" property="clazzId" jdbcType="INTEGER"/>
+        <!-- extra property -->
+        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR"/>
+        <result column="major" property="major" jdbcType="VARCHAR"/>
+    </resultMap>
 
+    <select id="findAllWithClazz" resultType="map">
+        SELECT id, stu_name
+        FROM student
+    </select>
+
+    <select id="selectPageWithClazz" resultMap="StudentWithClazz">
+        SELECT s.*, c.*
+        FROM student s
+                 JOIN clazz c on s.clazz_id = c.clazz_id
+    </select>
 </mapper>

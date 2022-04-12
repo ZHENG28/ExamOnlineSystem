@@ -7,14 +7,14 @@ import java.util.List;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author ${author}
  * @since 2022-03-27
  */
 public interface ClazzMapper extends BaseMapper<Clazz> {
-//    Integer getMaxId();
+    //    Integer getMaxId();
 
     List<String> selectDistinctMajor();
 
