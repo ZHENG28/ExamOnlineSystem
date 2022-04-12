@@ -1,16 +1,20 @@
 package com.zj.examsystem.eos.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.examsystem.eos.entity.Test;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * <p>
- *  服务类
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
-public interface TestService extends IService<Test> {
+import java.util.Map;
 
+
+public interface TestService extends IService<Test> {
+    public IPage<Map<String, Object>> findAll(Integer pageno, Integer size, Integer... id);
+
+    public int saveTest(Test test);
+
+    public int deleteTest(Integer[] id);
+
+    public Test findById(Integer testId);
+
+    public Boolean findExamTimeByTestId(String stuAccount, Integer testId);
 }

@@ -2,16 +2,11 @@ package com.zj.examsystem.eos.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+
 import java.io.Serializable;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
+@Data
 public class Clazz implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -24,29 +19,6 @@ public class Clazz implements Serializable {
     private String major;
 
 
-    public Integer getClazzId() {
-        return clazzId;
-    }
-
-    public void setClazzId(Integer clazzId) {
-        this.clazzId = clazzId;
-    }
-
-    public String getClazzName() {
-        return clazzName;
-    }
-
-    public void setClazzName(String clazzName) {
-        this.clazzName = clazzName;
-    }
-
-    public String getMajor() {
-        return major;
-    }
-
-    public void setMajor(String major) {
-        this.major = major;
-    }
 
     @Override
     public String toString() {

@@ -1,16 +1,16 @@
 package com.zj.examsystem.eos.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.examsystem.eos.entity.TestHistory;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * <p>
- *  服务类
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
+import java.util.List;
+import java.util.Map;
+
+
 public interface TestHistoryService extends IService<TestHistory> {
+    public List<Map<String, Object>> findScoreByTestId(Integer testId);
+
+    public IPage<TestHistory> findAllByAccount(Integer pageno, Integer size, String account);
 
 }

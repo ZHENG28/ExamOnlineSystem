@@ -1,16 +1,16 @@
 package com.zj.examsystem.eos.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.examsystem.eos.entity.Question;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-/**
- * <p>
- *  Mapper 接口
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
-public interface QuestionMapper extends BaseMapper<Question> {
+import java.util.Map;
 
+
+public interface QuestionMapper extends BaseMapper<Question> {
+    IPage<Map<String, Object>> selectPageWithSubject(Page<Map<String, Object>> page, QueryWrapper<Map<String, Object>> queryWrapper);
+
+    Question selectById(Integer quesId);
 }

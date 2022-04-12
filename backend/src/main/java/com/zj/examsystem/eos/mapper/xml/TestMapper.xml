@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.eos.mapper.TestMapper">
+    <resultMap id="TestWithClazzAndSubject" type="com.zj.examsystem.auto.entity.Test">
+        <id column="test_id" property="testId" jdbcType="INTEGER"/>
+        <result column="test_name" property="testName" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="begin_date" property="beginDate" jdbcType="DATE"/>
+        <result column="end_date" property="endDate" jdbcType="DATE"/>
+        <result column="exam_dure" property="examDure" jdbcType="INTEGER"/>
+        <result column="exam_time" property="examTime" jdbcType="INTEGER"/>
+        <result column="test_clazz" property="testClazz" jdbcType="INTEGER"/>
+        <result column="sub_id" property="subId" jdbcType="INTEGER"/>
+        <result column="total_score" property="totalScore" jdbcType="INTEGER"/>
+        <result column="ques_arr" property="quesArr" jdbcType="VARCHAR"/>
+        <!-- extra property -->
+        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR"/>
+        <result column="sub_name" property="subName" jdbcType="VARCHAR"/>
+        <result column="major" property="major" jdbcType="VARCHAR"/>
+    </resultMap>
 
+    <select id="selectPageWithClazzAndSubject" resultMap="TestWithClazzAndSubject">
+        SELECT t.*, c.clazz_name, s.sub_name, c.major
+        FROM test t
+                 JOIN clazz c on t.test_clazz = c.clazz_id
+                 JOIN subject s on t.sub_id = s.sub_id
+    </select>
+    <select id="selectWithClazzAndSubjectById" resultMap="TestWithClazzAndSubject">
+        SELECT t.*, c.clazz_name, s.sub_name, c.major
+        FROM test t
+                 JOIN clazz c on t.test_clazz = c.clazz_id
+                 JOIN subject s on t.sub_id = s.sub_id
+        WHERE t.test_id = #{testId}
+    </select>
 </mapper>

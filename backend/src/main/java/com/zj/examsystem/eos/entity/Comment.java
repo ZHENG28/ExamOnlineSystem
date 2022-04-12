@@ -5,14 +5,7 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
+
 public class Comment implements Serializable {
 
     private static final long serialVersionUID = 1L;

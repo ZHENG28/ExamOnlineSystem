@@ -2,17 +2,14 @@ package com.zj.examsystem.eos.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+
 import java.io.Serializable;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
+@Data
 public class TestHistory implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,38 +23,14 @@ public class TestHistory implements Serializable {
 
     private Integer score;
 
+    @TableField(select = false)
+    private String testName;
 
-    public Integer getStudentId() {
-        return studentId;
-    }
+    @TableField(select = false)
+    private String description;
 
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
-    }
-
-    public Integer getTestId() {
-        return testId;
-    }
-
-    public void setTestId(Integer testId) {
-        this.testId = testId;
-    }
-
-    public LocalDateTime getFinishTime() {
-        return finishTime;
-    }
-
-    public void setFinishTime(LocalDateTime finishTime) {
-        this.finishTime = finishTime;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
+    @TableField(select = false)
+    private String subName;
 
     @Override
     public String toString() {

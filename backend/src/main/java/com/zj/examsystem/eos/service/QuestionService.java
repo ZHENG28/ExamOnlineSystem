@@ -1,16 +1,21 @@
 package com.zj.examsystem.eos.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.examsystem.eos.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * <p>
- *  服务类
- * </p>
- *
- * @author ${author}
- * @since 2022-04-12
- */
-public interface QuestionService extends IService<Question> {
+import java.util.List;
+import java.util.Map;
 
+
+public interface QuestionService extends IService<Question> {
+    public IPage<Map<String, Object>> findAll(Integer pageno, Integer size);
+
+    public int saveQuestion(Question question);
+
+    public int deleteQuestion(Integer[] id);
+
+    public Question findById(Integer quesId);
+
+    public List<Question> findQuesBySubId(Integer subId);
 }
