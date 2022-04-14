@@ -13,6 +13,7 @@ import java.util.Map;
 public interface SubjectMapper extends BaseMapper<Subject> {
     List<Map<String, Object>> selectDistinctSubject();
 
-    IPage<Map<String, Object>> selectPageWithTeacher(Page<Map<String, Object>> page, QueryWrapper<Map<String, Object>> queryWrapper);
+    IPage<Subject> selectPageWithTeacherAndClazz(Page<Subject> page, QueryWrapper<Subject> queryWrapper);
 
+    Subject findByIdWithTeacherAndClazz(Integer subjectId);
 }

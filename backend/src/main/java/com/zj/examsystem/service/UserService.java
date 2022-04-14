@@ -21,4 +21,6 @@ public interface UserService extends IService<User> {
     public Integer deleteUser(String[] account);
 
     public User findByAccount(String account);
+
+    public List<User> findAllTeacher();
 }

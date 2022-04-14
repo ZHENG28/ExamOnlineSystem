@@ -103,13 +103,15 @@ export default {
             if (response.data.token) {
               // 将该登录用户的令牌移入store
               localStorage.setItem("user", JSON.stringify(response.data));
-              this.$router.replace("/home");
+              localStorage.setItem("isLogin", true);
+              this.$router.push("/home");
             }
           })
           .catch((error) => {
             console.log(error);
             this.$message.error("存在错误，请检查！");
           });
+        this.user = new User("", "", "", "");
       }
     },
   },

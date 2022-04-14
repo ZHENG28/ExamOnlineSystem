@@ -20,14 +20,14 @@ public class Subject implements Serializable {
     private Integer teacherId;
 
     @TableField(select = false)
-    private String tchName;
+    private String teacherName;
 
-    @Override
-    public String toString() {
-        return "Subject{" +
-        "subjectId=" + subjectId +
-        ", subjectName=" + subjectName +
-        ", teacherId=" + teacherId +
-        "}";
-    }
+    private Integer clazzId;
+
+    @TableField(select = false)
+    private String clazzName;
+
+    @TableField(select = false)
+    private String major;
+
 }

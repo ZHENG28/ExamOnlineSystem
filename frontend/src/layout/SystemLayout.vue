@@ -19,14 +19,62 @@
               首页
             </template>
           </el-menu-item>
+          <!-- admin -->
           <el-menu-item
-            index="student"
-            route="/teacher/student"
+            index="clazz"
+            route="/admin/clazz"
             class="nav-font"
-            v-if="showTeacher"
+            v-if="showAdmin"
           >
-            <el-icon><user-filled /></el-icon>
-            学生信息
+            <template #title>
+              <el-icon><files /></el-icon>
+              班级管理
+            </template>
+          </el-menu-item>
+          <el-menu-item
+            index="user"
+            route="/admin/user"
+            class="nav-font"
+            v-if="showAdmin"
+          >
+            <template #title>
+              <el-icon><user-filled /></el-icon>
+              用户管理
+            </template>
+          </el-menu-item>
+          <el-menu-item
+            index="subject"
+            route="/admin/subject"
+            class="nav-font"
+            v-if="showAdmin"
+          >
+            <template #title>
+              <el-icon><help-filled /></el-icon>
+              科目管理
+            </template>
+          </el-menu-item>
+          <el-menu-item
+            index="questionType"
+            route="/admin/questionType"
+            class="nav-font"
+            v-if="showAdmin"
+          >
+            <template #title>
+              <el-icon><list /></el-icon>
+              问题类型管理
+            </template>
+          </el-menu-item>
+
+          <el-menu-item
+            index="subjectInfo"
+            route="/teacher/subjectInfo"
+            class="nav-font"
+            v-if="showAdmin"
+          >
+            <template #title>
+              <el-icon><help-filled /></el-icon>
+              管理科目信息
+            </template>
           </el-menu-item>
           <el-menu-item
             index="question"
@@ -36,7 +84,7 @@
           >
             <template #title>
               <el-icon><document /></el-icon>
-              题目信息
+              管理题目信息
             </template>
           </el-menu-item>
           <el-sub-menu index="tch-test" v-if="showTeacher">
@@ -63,39 +111,6 @@
               </el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
-          <el-menu-item
-            index="user"
-            route="/admin/user"
-            class="nav-font"
-            v-if="showAdmin"
-          >
-            <template #title>
-              <el-icon><user-filled /></el-icon>
-              用户管理
-            </template>
-          </el-menu-item>
-          <el-menu-item
-            index="clazz"
-            route="/admin/clazz"
-            class="nav-font"
-            v-if="showAdmin"
-          >
-            <template #title>
-              <el-icon><files /></el-icon>
-              班级管理
-            </template>
-          </el-menu-item>
-          <el-menu-item
-            index="subject"
-            route="/admin/subject"
-            class="nav-font"
-            v-if="showAdmin"
-          >
-            <template #title>
-              <el-icon><help-filled /></el-icon>
-              科目管理
-            </template>
-          </el-menu-item>
           <el-menu-item
             index="stu-test"
             route="/student/test"
@@ -134,31 +149,43 @@ export default {
     TopNavbar,
     DashboardContent,
   },
+  data() {
+    return {
+      showAdmin: true,
+      showTeacher: true,
+      showStudent: true,
+    };
+  },
   computed: {
-    currentUser() {
-      // return this.$store.state.auth.initialState.user;
-    },
-    showTeacher() {
-      // if (this.currentUser && this.currentUser.roles) {
-      //   return this.currentUser.roles.includes("ROLE_TEACHER");
-      // }
-
-      return true;
-    },
-    showAdmin() {
-      // if (this.currentUser && this.currentUser.roles) {
-      //   return this.currentUser.roles.includes("ROLE_ADMIN");
-      // }
-
-      return true;
-    },
-    showStudent() {
-      // if (this.currentUser && this.currentUser.roles) {
-      //   return this.currentUser.roles.includes("ROLE_STUDENT");
-      // }
-
-      return true;
-    },
+    // currentUser() {
+    //   // return this.$store.state.auth.initialState.user;
+    // },
+    // showTeacher() {
+    //   // if (this.currentUser && this.currentUser.roles) {
+    //   //   return this.currentUser.roles.includes("ROLE_TEACHER");
+    //   // }
+    //   return true;
+    // },
+    // showAdmin() {
+    //   // if (this.currentUser && this.currentUser.roles) {
+    //   //   return this.currentUser.roles.includes("ROLE_ADMIN");
+    //   // }
+    //   return true;
+    // },
+    // showStudent() {
+    //   // if (this.currentUser && this.currentUser.roles) {
+    //   //   return this.currentUser.roles.includes("ROLE_STUDENT");
+    //   // }
+    //   return true;
+    // },
+  },
+  created() {
+    let user = this.$store.state.initialState.user;
+    if (user && user.roles) {
+      // this.showAdmin = user.roles.includes("ROLE_ADMIN");
+      // this.showTeacher = user.roles.includes("ROLE_TEACHER");
+      // this.showStudent = user.roles.includes("ROLE_STUDENT");
+    }
   },
 };
 </script>

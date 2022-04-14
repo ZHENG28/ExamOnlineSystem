@@ -174,22 +174,22 @@ import User from "@/services/user.js";
 export default {
   data() {
     return {
-      multiSelection: [],
       isAdd: true,
       dialogFormVisible: false,
-      tchId: "",
-      tchPwd: "",
       userId: "",
       clazzId: "",
       user: new User("", "", "", ""),
-      majorclazzArr: [],
-      majorclazzName: [],
-      roleFilterData: [],
-      roleListData: [],
       formRules: {
         username: [{ required: true, message: "请填写名字", trigger: "blur" }],
         password: [{ required: true, message: "请填写密码", trigger: "blur" }],
       },
+
+      majorclazzArr: [],
+      majorclazzName: [],
+      roleListData: [],
+      roleFilterData: [],
+
+      multiSelection: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -201,6 +201,7 @@ export default {
     this.loadData();
   },
   methods: {
+    // 初始化页面
     loadData() {
       this.findAll();
       this.findDistinctRole();
@@ -269,10 +270,10 @@ export default {
         });
     },
     valueToCascade(row) {
-      console.log(row);
       this.clazzId = row[1];
     },
 
+    // 新增&编辑
     loadInfo(account) {
       this.$axios
         .post("/user/findByAccount", this.$qs.stringify({ account: account }), {
@@ -280,7 +281,6 @@ export default {
         })
         .then((response) => {
           this.user = response.data;
-          console.log(this.user);
           this.majorclazzName = [response.data.major, response.data.clazzId];
           this.userId = response.data.userId;
           this.clazzId = response.data.clazzId;
@@ -322,97 +322,51 @@ export default {
         }
       });
     },
-    modify() {
-      //   if (this.user.tchName == "") {
-      //     this.$message.warning("请填写姓名");
-      //     return;
-      //   }
-      //   if (this.user.password == "") {
-      //     this.$message.warning("请填写密码");
-      //     return;
-      //   }
-      //   if (this.user.password == "$2a$10$") {
-      //     this.user.password = this.tchPwd;
-      //   }
-      //   let gender = this.user.sex;
-      //   this.user.sex = gender == "" ? null : gender == "男" ? 1 : 0;
-      //   this.$axios
-      //     .post(
-      //       "/tch/modify",
-      //       {
-      //         id: this.tchId,
-      //         account: this.user.account,
-      //         tchName: this.user.tchName,
-      //         password: this.user.password,
-      //         sex: this.user.sex,
-      //         major: this.user.major,
-      //         tel: this.user.tel,
-      //         email: this.user.email,
-      //       },
-      //       { headers: authHeader() }
-      //     )
-      //     .then(
-      //       (res) => {
-      //         if (res.data.message == "OK") {
-      //           this.$message.success("修改成功");
-      //           this.loadData();
-      //         } else {
-      //           this.$message.error("修改失败");
-      //         }
-      //         this.clearFormFields();
-      //         this.modifyFormVisible = false;
-      //       },
-      //       (error) => {
-      //         console.log("error:" + error.message);
-      //         this.$message.info("数据出错");
-      //       }
-      //     )
-      //     .catch(function (error) {
-      //       this.$message.info("数据出错");
-      //       console.log(error);
-      //       this.clearFormFields();
-      //     });
-    },
 
+    // 删除
     handleSelectionChange(val) {
       this.multiSelection = val;
     },
     del(arr) {
-      this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = [];
-          arr.forEach(function (item) {
-            params.push(item.account);
-          });
-          this.$axios
-            .post(
-              "/user/del",
-              this.$qs.stringify(
-                {
-                  account: params,
-                  pageno: this.pageno,
-                  size: this.size,
-                },
-                { indices: false }
-              ),
-              { headers: authHeader() }
-            )
-            .then((response) => {
-              this.tableData = response.data.records;
-              this.totalItems = response.data.total;
-              this.$message.success("删除成功！");
-            })
-            .catch(() => {
-              this.$message.error("删除失败，请检查");
-            });
+      if (arr.length) {
+        this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         })
-        .catch(() => {
-          this.$message.info("已取消删除");
-        });
+          .then(() => {
+            let params = [];
+            arr.forEach(function (item) {
+              params.push(item.account);
+            });
+            this.$axios
+              .post(
+                "/user/del",
+                this.$qs.stringify(
+                  {
+                    account: params,
+                    pageno: this.pageno,
+                    size: this.size,
+                  },
+                  { indices: false }
+                ),
+                { headers: authHeader() }
+              )
+              .then((response) => {
+                this.tableData = response.data.records;
+                this.totalItems = response.data.total;
+                this.$message.success("删除成功！");
+              })
+              .catch(() => {
+                this.$message.error("删除失败，请检查");
+              });
+          })
+          .catch(() => {
+            this.$message.info("已取消删除");
+          });
+      } else {
+        this.$message.info("请选择要删除的信息");
+      }
     },
   },
 };

@@ -23,17 +23,16 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     @Autowired
     private SubjectMapper subjectMapper;
 
-//    @Autowired
-//    private TeacherMapper teacherMapper;
+    //    @Autowired
+    //    private TeacherMapper teacherMapper;
 
-    public IPage<Map<String, Object>> findAll(Integer pageno, Integer size) {
-        QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
-        Page<Map<String, Object>> page = new Page<>(pageno, size);
-
-        return subjectMapper.selectPageWithTeacher(page, queryWrapper);
+    public IPage<Subject> findAll(Integer pageno, Integer size) {
+        QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
+        Page<Subject> page = new Page<>(pageno, size);
+        return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
     }
 
-    public List<Map<String, Object>> findAllSubject() {
+    public List<Map<String, Object>> findDistinctSubject() {
         List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject();
         List<Map<String, Object>> List = new ArrayList<>();
         for (Map<String, Object> resMap : tmp) {
@@ -59,15 +58,7 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         return subjectMapper.deleteBatchIds(ids);
     }
 
-    public Map<String, Object> findById(Integer subId) {
-        Map<String, Object> result = new HashMap<>();
-        Subject subject = subjectMapper.selectById(subId);
-//        Teacher teacher = teacherMapper.selectById(subject.getTeacherId());
-//        result.put("subId", subject.getSubjectId());
-//        result.put("subName", subject.getSubjectName());
-//        result.put("tchId", teacher.getId());
-//        result.put("tchName", teacher.getTchName());
-//        result.put("tchMajor", teacher.getMajor());
-        return result;
+    public Subject findById(Integer subjectId) {
+        return subjectMapper.findByIdWithTeacherAndClazz(subjectId);
     }
 }

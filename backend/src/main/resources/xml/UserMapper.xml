@@ -42,4 +42,10 @@
                  JOIN clazz c on uc.clazz_id = c.clazz_id
         WHERE u.account = #{account}
     </select>
+    <select id="selectTeacher" resultType="com.zj.examsystem.entity.User">
+        SELECT u.*
+        FROM user u
+                 JOIN role r on u.role_id = r.role_id
+        WHERE r.role_name = 'ROLE_TEACHER'
+    </select>
 </mapper>

@@ -15,7 +15,7 @@
               <el-icon><setting /></el-icon>
               设置
             </el-dropdown-item>
-            <el-dropdown-item @click="logOut">
+            <el-dropdown-item @click="logOut()">
               <el-icon><right /></el-icon>
               登出
             </el-dropdown-item>
@@ -76,11 +76,11 @@ export default {
     },
   },
   created() {
-    let user = this.$store.state.initialState.user;
-    if (user == null) {
+    let state = this.$store.state.initialState;
+    if (!state.status.isLogin) {
       this.$router.replace("/");
     } else {
-      this.form.account = user.account;
+      this.form.account = state.user.account;
       this.findInfoByAccount();
     }
   },
@@ -156,6 +156,7 @@ export default {
 
     logOut() {
       localStorage.removeItem("user");
+      localStorage.setItem("isLogin", false);
       this.$router.replace("/");
     },
   },

@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SystemLayout from '@/layout/SystemLayout.vue'
-import Home from '../views/Home.vue'
 
 const routes = [
   {
@@ -9,13 +7,19 @@ const routes = [
   },
   {
     path: '/',
-    component: SystemLayout,
+    component: () => import('@/layout/SystemLayout.vue'),
     redirect: '/home',
     children: [
       {
         path: '/home',
         name: '首页',
-        component: Home,
+        component: () => import('../views/Home.vue'),
+      },
+      // admin
+      {
+        path: '/admin/clazz',
+        name: '班级管理',
+        component: () => import('../views/admin/Clazz.vue'),
       },
       {
         path: '/admin/user',
@@ -23,35 +27,25 @@ const routes = [
         component: () => import('../views/admin/User.vue'),
       },
       {
-        path: '/admin/clazz',
-        name: '班级管理',
-        component: () => import('../views/admin/Clazz.vue'),
-      },
-      {
         path: '/admin/subject',
         name: '科目管理',
         component: () => import('../views/admin/Subject.vue'),
       },
-    ],
-  },
-  {
-    path: '/',
-    component: SystemLayout,
-    redirect: '/home',
-    children: [
       {
-        path: '/home',
-        name: '首页',
-        component: Home,
+        path: '/admin/questionType',
+        name: '问题类型管理',
+        component: () => import('../views/admin/QuestionType.vue'),
       },
+
+      // teacher
       {
-        path: '/teacher/student',
-        name: '学生信息',
-        component: () => import('../views/teacher/Student.vue'),
+        path: '/teacher/subjectInfo',
+        name: '管理科目信息',
+        component: () => import('../views/teacher/SubjectInfo.vue'),
       },
       {
         path: '/teacher/question',
-        name: '题目信息',
+        name: '管理题目信息',
         component: () => import('../views/teacher/Question.vue'),
       },
       {
@@ -64,18 +58,8 @@ const routes = [
         name: '发布测验',
         component: () => import('../views/teacher/test/TestBuild.vue'),
       },
-    ],
-  },
-  {
-    path: '/',
-    component: SystemLayout,
-    redirect: '/home',
-    children: [
-      {
-        path: '/home',
-        name: '首页',
-        component: Home,
-      },
+
+      // student
       {
         path: '/student/test',
         name: '测验',

@@ -66,6 +66,9 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
         response.put("account", userDetails.getAccount());
+        response.put("roles", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
@@ -103,6 +106,12 @@ public class UserController {
     @ResponseBody
     public Object findByAccount(String account) {
         return userService.findByAccount(account);
+    }
+
+    @PostMapping("/findAllTeacher")
+    @ResponseBody
+    public Object findAllTeacher() {
+        return userService.findAllTeacher();
     }
 
 }

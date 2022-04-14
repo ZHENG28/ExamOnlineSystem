@@ -99,4 +99,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return user;
     }
+
+    @Override
+    public List<User> findAllTeacher() {
+        return userMapper.selectTeacher();
+    }
 }

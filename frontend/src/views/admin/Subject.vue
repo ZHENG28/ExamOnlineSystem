@@ -8,7 +8,8 @@
             clearFormFields();
             this.status = '新增';
             dialogFormVisible = true;
-            findAllTch();
+            findAllTeacher();
+            findAllMajorAndClazz();
           "
           >新增</el-button
         >
@@ -31,23 +32,28 @@
           <el-form-item label="科目名称" prop="subjectName">
             <el-input v-model="subForm.subjectName"></el-input>
           </el-form-item>
-          <el-form-item label="授课教师" prop="teacherId">
-            <el-cascader
-              @change="valueToCascade"
-              v-model="teacherName"
-              placeholder="请选择授课教师"
-              :options="tchArr"
+          <el-form-item label="授课教师" prop="userId">
+            <el-select
               filterable
-              :show-all-levels="false"
-              :props="{ expandTrigger: 'hover' }"
-            ></el-cascader>
+              placeholder="请选择授课教师"
+              @change="valueToUserId"
+              v-model="teacherName"
+            >
+              <el-option
+                v-for="tch in teacherList"
+                :key="tch.userId"
+                :label="tch.username"
+                :value="tch.userId"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="授课班级" prop="clazzId">
             <el-cascader
-              @change="valueToCascade"
-              v-model="teacherName"
-              placeholder="请选择授课教师"
-              :options="tchArr"
+              @change="valueToClazzId"
+              v-model="majorclazzName"
+              placeholder="请选择授课班级"
+              :options="clazzList"
               filterable
               :show-all-levels="false"
               :props="{ expandTrigger: 'hover' }"
@@ -126,25 +132,34 @@ import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
-      multiSelection: [],
       status: "",
       dialogFormVisible: false,
-      teacherName: [],
+      teacherList: [],
+      teacherName: "",
+      clazzList: [],
+      majorclazzName: [],
       subForm: {
         subjectId: "",
         subjectName: "",
-        tchId: "",
-        tchName: "",
+        userId: "",
+        username: "",
+        clazzId: "",
+        clazzName: "",
       },
       formRules: {
         subjectName: [
           { required: true, message: "请填写科目", trigger: "blur" },
         ],
-        tchId: [
-          { required: true, message: "请选择授课教师", trigger: "change" },
+        userId: [
+          { required: true, message: "请选择授课教师", trigger: "blur" },
+        ],
+        clazzId: [
+          { required: true, message: "请选择授课班级", trigger: "blur" },
         ],
       },
-      tchArr: [],
+
+      multiSelection: [],
+      clazzNameFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -166,7 +181,8 @@ export default {
       this.$nextTick(() => {
         this.$refs.subForm.clearValidate();
       });
-      this.teacherName = [];
+      this.teacherName = "";
+      this.majorclazzName = [];
     },
 
     findAll() {
@@ -196,7 +212,7 @@ export default {
 
     findDistinctClazzName() {
       this.$axios
-        .get("/clazz/findDistinctClazzName", { headers: authHeader() })
+        .get("/clazz/getDistinctClazz", { headers: authHeader() })
         .then((response) => {
           this.clazzNameFilterData = response.data;
         });
@@ -205,16 +221,29 @@ export default {
       return row.clazzName === value;
     },
 
-    findAllTch() {
+    findAllTeacher() {
       this.$axios
-        .post("/teacher/findAllTch", { headers: authHeader() })
+        .post("/user/findAllTeacher", { headers: authHeader() })
         .then((response) => {
-          this.tchArr = response.data;
+          this.teacherList = response.data;
         });
     },
-    valueToCascade(row) {
-      this.subForm.tchId = row[1];
+    valueToUserId(row) {
+      this.subForm.userId = row;
     },
+
+    findAllMajorAndClazz() {
+      this.$axios
+        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
+        .then((response) => {
+          this.clazzList = response.data;
+        });
+    },
+    valueToClazzId(row) {
+      this.subForm.clazzId = row[1];
+    },
+
+    // 新增&编辑
     loadInfo(id) {
       this.$axios
         .post("/subject/findById", this.$qs.stringify({ subjectId: id }), {
@@ -222,8 +251,10 @@ export default {
         })
         .then((response) => {
           this.subForm = response.data;
-          this.teacherName = [response.data.tchMajor, response.data.tchId];
-          this.findAllTch();
+          this.findAllTeacher();
+          this.teacherName = response.data.teacherId;
+          this.findAllMajorAndClazz();
+          this.majorclazzName = [response.data.major, response.data.clazzId];
         });
     },
     save() {
@@ -235,7 +266,8 @@ export default {
               params: {
                 subjectId: this.subForm.subjectId,
                 subjectName: this.subForm.subjectName,
-                teacherId: this.subForm.tchId,
+                teacherId: this.subForm.userId,
+                clazzId: this.subForm.clazzId,
               },
             })
             .then((response) => {

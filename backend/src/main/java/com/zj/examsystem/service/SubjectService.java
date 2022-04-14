@@ -9,13 +9,13 @@ import java.util.Map;
 
 
 public interface SubjectService extends IService<Subject> {
-    public IPage<Map<String, Object>> findAll(Integer pageno, Integer size);
+    public IPage<Subject> findAll(Integer pageno, Integer size);
 
-    public List<Map<String, Object>> findAllSubject();
+    public List<Map<String, Object>> findDistinctSubject();
 
     public int saveSubject(Subject subject);
 
     public int deleteSubject(Integer[] id);
 
-    public Map<String, Object> findById(Integer subId);
+    public Subject findById(Integer subjectId);
 }

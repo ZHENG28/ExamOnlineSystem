@@ -28,9 +28,8 @@ public class SubjectController {
 
     @PostMapping("/findAllSubId")
     @ResponseBody
-    public Object findAllSubId()
-    {
-        return subjectService.findAllSubject();
+    public Object findAllSubId() {
+        return subjectService.findDistinctSubject();
     }
 
     @GetMapping("/save")
