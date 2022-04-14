@@ -1,5 +1,4 @@
 import { createStore } from 'vuex'
-import userService from '../services/user.service'
 
 const user = JSON.parse(localStorage.getItem('user'))
 const initialState = user
@@ -41,7 +40,5 @@ export default createStore({
     //   commit('logout')
     // },
   },
-  modules: {
-    userService,
-  },
+  modules: {},
 })

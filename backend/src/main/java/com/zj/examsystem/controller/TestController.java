@@ -40,7 +40,7 @@ public class TestController {
         if (result != 0) {
             mv.addObject("pageno", pageno);
             mv.addObject("size", size);
-            mv.setViewName("forward:/auto/test/findAllByStuIdOrNot");
+            mv.setViewName("forward:/test/findAllByStuIdOrNot");
         }
         return mv;
     }

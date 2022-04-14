@@ -25,10 +25,7 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
 
     public IPage<Clazz> findAll(Integer pageno, Integer size) {
         QueryWrapper<Clazz> queryWrapper = new QueryWrapper<>();
-        IPage<Clazz> page = new Page<>();
-        page.setCurrent(pageno);
-        page.setSize(size);
-
+        IPage<Clazz> page = new Page<>(pageno, size);
         return clazzMapper.selectPage(page, queryWrapper);
     }
 
@@ -77,12 +74,12 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
         return result;
     }
 
-    public int saveClazz(Clazz clazz) {
+    public Integer saveClazz(Clazz clazz) {
         return clazz.getClazzId() != null ? clazzMapper.updateById(clazz) : clazzMapper.insert(clazz);
     }
 
     @Transactional
-    public int deleteClazz(Integer[] id) {
+    public Integer deleteClazz(Integer[] id) {
         List<Integer> ids = new ArrayList<>();
         for (int i = 0; i < id.length; i++) {
             ids.add(id[i]);

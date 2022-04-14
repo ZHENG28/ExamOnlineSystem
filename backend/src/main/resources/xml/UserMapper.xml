@@ -1,5 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.mapper.UserMapper">
+    <resultMap id="UserWithRoleAndClazz" type="com.zj.examsystem.entity.User">
+        <id column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+        <!-- extra property -->
+        <result column="description" property="roleName" jdbcType="VARCHAR"/>
+        <result column="clazz_id" property="clazzId" jdbcType="INTEGER"/>
+        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR"/>
+        <result column="major" property="major" jdbcType="VARCHAR"/>
+    </resultMap>
 
+    <insert id="insertUser">
+        INSERT INTO user(account, password, username, role_id)
+        VALUES (#{user.account}, #{user.password}, #{user.username}, #{user.roleId});
+    </insert>
+
+    <update id="updateUser">
+        UPDATE user
+        SET password= #{user.password},
+            username=#{user.username},
+            role_id=#{user.roleId}
+        WHERE user_id = #{user.userId}
+    </update>
+
+    <select id="selectPageWithRoleAndClazzName" resultMap="UserWithRoleAndClazz">
+        SELECT u.*, r.description, c.clazz_name
+        FROM user u
+                 JOIN role r on u.role_id = r.role_id
+                 JOIN user_clazz uc on u.user_id = uc.user_id
+                 JOIN clazz c on uc.clazz_id = c.clazz_id
+    </select>
+    <select id="selectOneWithRoleAndClazzName" resultMap="UserWithRoleAndClazz">
+        SELECT u.*, r.description, c.*
+        FROM user u
+                 JOIN role r on u.role_id = r.role_id
+                 JOIN user_clazz uc on u.user_id = uc.user_id
+                 JOIN clazz c on uc.clazz_id = c.clazz_id
+        WHERE u.account = #{account}
+    </select>
 </mapper>

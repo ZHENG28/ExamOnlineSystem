@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -33,9 +34,6 @@ public class UserController {
 
     @Autowired
     private JwtUtils jwtUtils;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     /**
      * 0. 校验验证码
@@ -76,5 +74,35 @@ public class UserController {
     public Object findUserByAccount(String account) {
         return userService.findUserByAccount(account);
     }
-}
 
+    @PostMapping("/findAll")
+    @ResponseBody
+    public Object findAll(Integer pageno, Integer size) {
+        return userService.findAll(pageno, size);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> save(User user) {
+        return user.getUserId() == null ? userService.saveUserWithClazzId(user) : userService.updateUser(user);
+    }
+
+    @PostMapping("/del")
+    public ModelAndView delete(String[] account, Integer pageno, Integer size) {
+        int result = userService.deleteUser(account);
+
+        ModelAndView mv = new ModelAndView();
+        if (result != 0) {
+            mv.addObject("pageno", pageno);
+            mv.addObject("size", size);
+            mv.setViewName("forward:/user/findAll");
+        }
+        return mv;
+    }
+
+    @PostMapping("/findByAccount")
+    @ResponseBody
+    public Object findByAccount(String account) {
+        return userService.findByAccount(account);
+    }
+
+}

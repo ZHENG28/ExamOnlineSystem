@@ -33,6 +33,18 @@ public class User implements Serializable, UserDetails {
     private Integer roleId;
 
     @TableField(select = false)
+    private String roleName;
+
+    @TableField(select = false)
+    private Integer clazzId;
+
+    @TableField(select = false)
+    private String clazzName;
+
+    @TableField(select = false)
+    private String major;
+
+    @TableField(select = false)
     private List<GrantedAuthority> authorities;
 
     public User(Integer userId, String account, String password, String username, Integer roleId) {

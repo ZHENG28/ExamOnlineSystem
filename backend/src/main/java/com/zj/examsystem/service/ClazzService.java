@@ -15,9 +15,9 @@ public interface ClazzService extends IService<Clazz> {
 
     public List<Map<String, Object>> findAllMajorClazz();
 
-    public int saveClazz(Clazz clazz);
+    public Integer saveClazz(Clazz clazz);
 
-    public int deleteClazz(Integer[] id);
+    public Integer deleteClazz(Integer[] id);
 
     public Clazz findById(Integer clazzId);
 }

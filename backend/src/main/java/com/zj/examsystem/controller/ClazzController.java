@@ -59,7 +59,7 @@ public class ClazzController {
         if (result != 0) {
             mv.addObject("pageno", pageno);
             mv.addObject("size", size);
-            mv.setViewName("forward:/auto/clazz/findAll");
+            mv.setViewName("forward:/clazz/findAll");
         }
         return mv;
     }
@@ -68,5 +68,5 @@ public class ClazzController {
     @ResponseBody
     public Object findById(Integer clazzId) {
         return clazzService.findById(clazzId);
-    }}
-
+    }
+}

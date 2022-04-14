@@ -8,49 +8,46 @@
             clearFormFields();
             isAdd = true;
             dialogFormVisible = true;
-            findDistinctRole();
             findAllMajorAndClazz();
           "
-          >添加</el-button
+          >新增</el-button
         >
-        <el-button
-          type="danger"
-          @click="del(this.multiSelection)"
-          :disabled="false"
+        <el-button type="danger" @click="del(this.multiSelection)"
           >删除</el-button
         >
       </div>
       <el-dialog
-        :title="(isAdd ? '添加' : '修改') + '用户信息'"
+        :title="(isAdd ? '新增' : '修改') + '用户信息'"
         v-model="dialogFormVisible"
         width="600px"
       >
         <el-form
-          :model="userForm"
+          :model="user"
           :rules="formRules"
-          ref="userForm"
+          ref="user"
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="角色" prop="roleName">
+          <el-form-item label="角色">
+            <!-- eslint-disable-next-line -->
             <template #default="scope">
               <div v-if="!isAdd">
-                <!-- <el-tag :type="scope.row.role == '学生' ? 'success' : 'danger'"> -->
-                <!-- {{ scope.row.roleName }} -->
-                <el-tag type="success"> 学生 </el-tag>
+                <el-tag :type="user.roleName == '学生' ? 'success' : 'danger'">
+                  {{ user.roleName }}
+                </el-tag>
               </div>
               <el-select
                 filterable
                 placeholder="请选择用户角色"
                 @change="valueToRoleId"
-                v-model="userForm.role"
+                v-model="user.roleId"
                 v-if="isAdd"
               >
                 <el-option
-                  v-for="role in roleListData"
-                  :key="role.roleId"
-                  :label="role.description"
-                  :value="role.roleId"
+                  v-for="roleData in roleListData"
+                  :key="roleData.roleId"
+                  :label="roleData.description"
+                  :value="roleData.roleId"
                 >
                 </el-option>
               </el-select>
@@ -60,35 +57,44 @@
             label="账号"
             prop="account"
             :rules="{
-              required: this.isAdd,
+              required: isAdd,
               message: '请填写账号',
               trigger: 'blur',
             }"
           >
-            <el-input
-              v-model="userForm.account"
-              v-bind:class="{ readonly: !isAdd }"
-            ></el-input>
+            <el-input v-model="user.account" :readonly="!isAdd"></el-input>
           </el-form-item>
           <el-form-item label="名字" prop="username">
-            <el-input v-model="userForm.username"></el-input>
+            <el-input v-model="user.username"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
-            <el-input
-              v-model="userForm.password"
-              v-bind:class="{ readonly: !isAdd }"
-            ></el-input>
+            <el-input v-model="user.password" type="password"></el-input>
           </el-form-item>
-          <el-form-item label="专业班级" prop="clazz.clazzId">
-            <el-cascader
-              @change="valueToCascade"
-              v-model="majorclazzName"
-              placeholder="请选择专业班级"
-              :options="majorclazzArr"
-              filterable
-              :show-all-levels="false"
-              :props="{ expandTrigger: 'hover' }"
-            ></el-cascader>
+          <el-form-item label="专业班级">
+            <!-- eslint-disable-next-line -->
+            <template #default="scope">
+              <span
+                :style="{
+                  color: 'red',
+                  display: user.roleName == '' ? '' : 'none',
+                }"
+                >请先选择用户角色</span
+              >
+              <el-cascader
+                @change="valueToCascade"
+                v-model="majorclazzName"
+                placeholder="请选择专业班级"
+                :options="majorclazzArr"
+                filterable1
+                :show-all-levels="false"
+                :props="{ expandTrigger: 'hover' }"
+                v-if="
+                  user.roleName != '' &&
+                  user.roleName != '1' &&
+                  user.roleName != '管理员'
+                "
+              ></el-cascader>
+            </template>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -115,14 +121,14 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="80"> </el-table-column>
       <el-table-column
-        prop="role"
+        prop="roleName"
         label="角色"
         :filters="roleFilterData"
         :filter-method="roleFilter"
       >
         <template #default="scope">
-          <el-tag :type="scope.row.role == '学生' ? 'success' : 'danger'">{{
-            scope.row.role
+          <el-tag :type="scope.row.roleName == '学生' ? 'success' : 'danger'">{{
+            scope.row.roleName
           }}</el-tag>
         </template>
       </el-table-column>
@@ -139,6 +145,7 @@
               clearFormFields();
               isAdd = false;
               dialogFormVisible = true;
+              findAllMajorAndClazz();
               loadInfo(scope.row.account);
             "
             >编辑</el-button
@@ -164,7 +171,6 @@
 <script>
 import authHeader from "@/services/auth-header";
 import User from "@/services/user.js";
-// import UserService from "@/services/user.service";
 export default {
   data() {
     return {
@@ -173,18 +179,17 @@ export default {
       dialogFormVisible: false,
       tchId: "",
       tchPwd: "",
-      // userForm: new Teacher("", "", "123", "", "", "", ""),
-      userForm: new User("", "", "", ""),
+      userId: "",
+      clazzId: "",
+      user: new User("", "", "", ""),
       majorclazzArr: [],
       majorclazzName: [],
       roleFilterData: [],
+      roleListData: [],
       formRules: {
-        roleName: [{ required: true, message: "请选择角色", trigger: "blur" }],
-        username: [{ required: true, message: "请填写姓名", trigger: "blur" }],
+        username: [{ required: true, message: "请填写名字", trigger: "blur" }],
         password: [{ required: true, message: "请填写密码", trigger: "blur" }],
-        major: [{ required: false, message: "请选择专业", trigger: "blur" }],
       },
-      majorFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -198,17 +203,22 @@ export default {
   methods: {
     loadData() {
       this.findAll();
-      this.findDistinctMajor();
+      this.findDistinctRole();
     },
     clearFormFields() {
-      // this.userForm = new Teacher("", "", "123", "", "", "", "");
-      this.userForm = "";
+      this.user = new User("", "", "", "");
+      this.$nextTick(() => {
+        this.$refs.user.clearValidate();
+      });
+      this.majorclazzName = [];
+      this.userId = "";
+      this.clazzId = "";
     },
 
     findAll() {
       this.$axios
         .post(
-          "/teacher/findAll",
+          "/user/findAll",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
@@ -231,73 +241,71 @@ export default {
     },
 
     roleFilter(value, row) {
-      return row.role === value;
+      return row.roleName === value;
     },
 
-    findDistinctMajor() {
-      this.$axios
-        .get("/clazz/getDistinctMajor", { headers: authHeader() })
-        .then((response) => {
-          this.majorFilterData = response.data;
-        });
-    },
-    majorFilter(value, row) {
-      return row.major === value;
-    },
-
-    findAllMajorAndClazz() {
-      this.$axios
-        .get(
-          "/clazz/findAllMajorAndClazz"
-          // { headers: authHeader(), }
-        )
-        .then((response) => {
-          this.majorclazzArr = response.data;
-        });
-    },
-    valueToCascade(row) {
-      this.stuForm.clazz.clazzId = row[1];
-    },
     findDistinctRole() {
       this.$axios
         .get("/role/getDistinctRole", { headers: authHeader() })
         .then((response) => {
           this.roleListData = response.data;
+          response.data.forEach((item) => {
+            this.roleFilterData.push({
+              text: item.description,
+              value: item.description,
+            });
+          });
         });
     },
     valueToRoleId(val) {
-      this.quesForm.subId = val;
+      this.user.roleName = val;
+      this.findAllMajorAndClazz();
+    },
+    findAllMajorAndClazz() {
+      this.$axios
+        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
+        .then((response) => {
+          this.majorclazzArr = response.data;
+        });
+    },
+    valueToCascade(row) {
+      console.log(row);
+      this.clazzId = row[1];
     },
 
     loadInfo(account) {
       this.$axios
-        .post(
-          "/teacher/findByAccount",
-          this.$qs.stringify({ account: account }),
-          { headers: authHeader() }
-        )
-        .then((res) => {
-          let tch = res.data;
-          let form = this.userForm;
-          this.tchId = tch.id;
-          this.tchPwd = tch.password;
-          form.account = tch.account;
-          form.tchName = tch.tchName;
-          form.password = "$2a$10$";
-          form.sex = tch.sex == null ? "" : tch.sex == 1 ? "男" : "女";
-          form.major = tch.major;
-          form.tel = tch.tel;
-          form.email = tch.email;
+        .post("/user/findByAccount", this.$qs.stringify({ account: account }), {
+          headers: authHeader(),
+        })
+        .then((response) => {
+          this.user = response.data;
+          console.log(this.user);
+          this.majorclazzName = [response.data.major, response.data.clazzId];
+          this.userId = response.data.userId;
+          this.clazzId = response.data.clazzId;
         });
     },
     save() {
-      this.$refs.userForm.validate((valid) => {
+      this.$refs.user.validate((valid) => {
         if (valid) {
-          UserService.addTch(this.userForm)
+          this.$axios
+            .post(
+              "/user/save",
+              this.$qs.stringify({
+                userId: this.userId,
+                account: this.user.account,
+                password: this.user.password,
+                username: this.user.username,
+                roleId: this.user.roleId,
+                clazzId: this.clazzId,
+              }),
+              { headers: authHeader() }
+            )
             .then(
               (response) => {
                 this.dialogFormVisible = false;
-                if (response.data.message == "OK") {
+                if (response.data) {
                   this.$message.success(
                     (this.isAdd ? "添加" : "修改") + "成功"
                   );
@@ -307,43 +315,39 @@ export default {
                 }
               },
               (error) => {
-                this.$message.error("账号重复，请重新填写");
-                console.log("error:" + error.message);
+                this.$message.error("账号已存在，请重新填写");
+                console.log(error);
               }
-            )
-            .catch(function (error) {
-              this.$message.info("数据出错");
-              console.log(error);
-            });
+            );
         }
       });
     },
     modify() {
-      //   if (this.userForm.tchName == "") {
+      //   if (this.user.tchName == "") {
       //     this.$message.warning("请填写姓名");
       //     return;
       //   }
-      //   if (this.userForm.password == "") {
+      //   if (this.user.password == "") {
       //     this.$message.warning("请填写密码");
       //     return;
       //   }
-      //   if (this.userForm.password == "$2a$10$") {
-      //     this.userForm.password = this.tchPwd;
+      //   if (this.user.password == "$2a$10$") {
+      //     this.user.password = this.tchPwd;
       //   }
-      //   let gender = this.userForm.sex;
-      //   this.userForm.sex = gender == "" ? null : gender == "男" ? 1 : 0;
+      //   let gender = this.user.sex;
+      //   this.user.sex = gender == "" ? null : gender == "男" ? 1 : 0;
       //   this.$axios
       //     .post(
       //       "/tch/modify",
       //       {
       //         id: this.tchId,
-      //         account: this.userForm.account,
-      //         tchName: this.userForm.tchName,
-      //         password: this.userForm.password,
-      //         sex: this.userForm.sex,
-      //         major: this.userForm.major,
-      //         tel: this.userForm.tel,
-      //         email: this.userForm.email,
+      //         account: this.user.account,
+      //         tchName: this.user.tchName,
+      //         password: this.user.password,
+      //         sex: this.user.sex,
+      //         major: this.user.major,
+      //         tel: this.user.tel,
+      //         email: this.user.email,
       //       },
       //       { headers: authHeader() }
       //     )
@@ -382,14 +386,14 @@ export default {
         .then(() => {
           let params = [];
           arr.forEach(function (item) {
-            params.push(item.id);
+            params.push(item.account);
           });
           this.$axios
             .post(
-              "/teacher/del",
+              "/user/del",
               this.$qs.stringify(
                 {
-                  teacherId: params,
+                  account: params,
                   pageno: this.pageno,
                   size: this.size,
                 },

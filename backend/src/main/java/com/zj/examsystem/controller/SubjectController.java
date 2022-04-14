@@ -48,7 +48,7 @@ public class SubjectController {
         if (result != 0) {
             mv.addObject("pageno", pageno);
             mv.addObject("size", size);
-            mv.setViewName("forward:/auto/subject/findAll");
+            mv.setViewName("forward:/subject/findAll");
         }
         return mv;
     }
