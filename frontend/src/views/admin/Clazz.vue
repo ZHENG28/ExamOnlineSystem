@@ -6,10 +6,10 @@
         <el-button
           @click="
             clearFormFields();
-            this.status = '添加';
+            this.status = '新增';
             dialogFormVisible = true;
           "
-          >添加</el-button
+          >新增</el-button
         >
         <el-button type="danger" @click="del(this.multiSelection)"
           >删除</el-button
@@ -138,13 +138,8 @@ import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
-      multiSelection: [],
       status: "",
       dialogFormVisible: false,
-      dialogTableTitle: "",
-      dialogTableVisible: false,
-      roleFilterData: [],
-      dialogTableData: [],
       clazzForm: {
         clazzId: "",
         major: "",
@@ -156,6 +151,13 @@ export default {
           { required: true, message: "请填写班级名称", trigger: "blur" },
         ],
       },
+
+      dialogTableTitle: "",
+      dialogTableVisible: false,
+      dialogTableData: [],
+      roleFilterData: [],
+
+      multiSelection: [],
       majorFilterData: [],
       search: "",
       tableData: [],
@@ -168,6 +170,7 @@ export default {
     this.loadData();
   },
   methods: {
+    // 初始化页面
     loadData() {
       this.findAll();
       this.findDistinctMajor();
@@ -215,6 +218,7 @@ export default {
       return row.major === value;
     },
 
+    // 新增&编辑
     loadInfo(id) {
       this.$axios
         .post("/clazz/findById", this.$qs.stringify({ clazzId: id }), {
@@ -253,6 +257,7 @@ export default {
       });
     },
 
+    // 删除
     handleSelectionChange(val) {
       this.multiSelection = val;
     },
@@ -298,6 +303,7 @@ export default {
       }
     },
 
+    // 查看用户
     loadUserByClazzId(id) {
       this.$axios
         .get(

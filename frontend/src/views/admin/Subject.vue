@@ -6,16 +6,13 @@
         <el-button
           @click="
             clearFormFields();
-            this.status = '添加';
+            this.status = '新增';
             dialogFormVisible = true;
             findAllTch();
           "
-          >添加</el-button
+          >新增</el-button
         >
-        <el-button
-          type="danger"
-          @click="del(this.multiSelection)"
-          :disabled="false"
+        <el-button type="danger" @click="del(this.multiSelection)"
           >删除</el-button
         >
       </div>
@@ -31,10 +28,21 @@
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="科目名称" prop="subName">
-            <el-input v-model="subForm.subName"></el-input>
+          <el-form-item label="科目名称" prop="subjectName">
+            <el-input v-model="subForm.subjectName"></el-input>
           </el-form-item>
-          <el-form-item label="授课教师" prop="tchId">
+          <el-form-item label="授课教师" prop="teacherId">
+            <el-cascader
+              @change="valueToCascade"
+              v-model="teacherName"
+              placeholder="请选择授课教师"
+              :options="tchArr"
+              filterable
+              :show-all-levels="false"
+              :props="{ expandTrigger: 'hover' }"
+            ></el-cascader>
+          </el-form-item>
+          <el-form-item label="授课班级" prop="clazzId">
             <el-cascader
               @change="valueToCascade"
               v-model="teacherName"
@@ -59,8 +67,8 @@
         tableData.filter(
           (data) =>
             !search ||
-            data.subName.toLowerCase().includes(search.toLowerCase()) ||
-            data.tchName.toLowerCase().includes(search.toLowerCase())
+            data.subjectName.toLowerCase().includes(search.toLowerCase()) ||
+            data.teacherName.toLowerCase().includes(search.toLowerCase())
         )
       "
       border
@@ -69,8 +77,18 @@
     >
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="80"> </el-table-column>
-      <el-table-column prop="subName" label="科目名称"> </el-table-column>
-      <el-table-column prop="tchName" label="授课教师"> </el-table-column>
+      <el-table-column prop="subjectName" label="科目名称"> </el-table-column>
+      <el-table-column prop="teacherName" label="授课教师"> </el-table-column>
+      <el-table-column
+        prop="clazzName"
+        label="授课班级"
+        :filters="clazzNameFilterData"
+        :filter-method="clazzNameFilter"
+      >
+        <template #default="scope">
+          {{ scope.row.clazzName }}
+        </template>
+      </el-table-column>
       <el-table-column width="300">
         <template #header>
           <el-input v-model="search" placeholder="输入科目或教师姓名进行搜索" />
@@ -81,7 +99,7 @@
               clearFormFields();
               this.status = '修改';
               dialogFormVisible = true;
-              loadInfo(scope.row.subId);
+              loadInfo(scope.row.subjectId);
             "
             >编辑</el-button
           >
@@ -104,7 +122,7 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
@@ -113,13 +131,15 @@ export default {
       dialogFormVisible: false,
       teacherName: [],
       subForm: {
-        subId: "",
-        subName: "",
+        subjectId: "",
+        subjectName: "",
         tchId: "",
         tchName: "",
       },
       formRules: {
-        subName: [{ required: true, message: "请填写科目", trigger: "blur" }],
+        subjectName: [
+          { required: true, message: "请填写科目", trigger: "blur" },
+        ],
         tchId: [
           { required: true, message: "请选择授课教师", trigger: "change" },
         ],
@@ -136,11 +156,16 @@ export default {
     this.loadData();
   },
   methods: {
+    // 初始化页面
     loadData() {
       this.findAll();
+      this.findDistinctClazzName();
     },
     clearFormFields() {
       this.subForm = {};
+      this.$nextTick(() => {
+        this.$refs.subForm.clearValidate();
+      });
       this.teacherName = [];
     },
 
@@ -151,8 +176,8 @@ export default {
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
-          })
-          // { headers: authHeader() }
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.tableData = response.data.records;
@@ -169,12 +194,20 @@ export default {
       this.findAll();
     },
 
+    findDistinctClazzName() {
+      this.$axios
+        .get("/clazz/findDistinctClazzName", { headers: authHeader() })
+        .then((response) => {
+          this.clazzNameFilterData = response.data;
+        });
+    },
+    clazzNameFilter(value, row) {
+      return row.clazzName === value;
+    },
+
     findAllTch() {
       this.$axios
-        .post(
-          "/teacher/findAllTch"
-          // { headers: authHeader() }
-        )
+        .post("/teacher/findAllTch", { headers: authHeader() })
         .then((response) => {
           this.tchArr = response.data;
         });
@@ -184,11 +217,9 @@ export default {
     },
     loadInfo(id) {
       this.$axios
-        .post(
-          "/subject/findById",
-          this.$qs.stringify({ subjectId: id })
-          // { headers: authHeader(),}
-        )
+        .post("/subject/findById", this.$qs.stringify({ subjectId: id }), {
+          headers: authHeader(),
+        })
         .then((response) => {
           this.subForm = response.data;
           this.teacherName = [response.data.tchMajor, response.data.tchId];
@@ -200,10 +231,10 @@ export default {
         if (valid) {
           this.$axios
             .get("/subject/save", {
-              // headers: authHeader(),
+              headers: authHeader(),
               params: {
-                subId: this.subForm.subId,
-                subName: this.subForm.subName,
+                subjectId: this.subForm.subjectId,
+                subjectName: this.subForm.subjectName,
                 teacherId: this.subForm.tchId,
               },
             })
@@ -224,45 +255,50 @@ export default {
       });
     },
 
+    // 删除
     handleSelectionChange(val) {
       this.multiSelection = val;
     },
     del(arr) {
-      this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = [];
-          arr.forEach(function (item) {
-            params.push(item.subId);
-          });
-          this.$axios
-            .post(
-              "/subject/del",
-              this.$qs.stringify(
-                {
-                  subjectId: params,
-                  pageno: this.pageno,
-                  size: this.size,
-                },
-                { indices: false }
-              )
-              // { headers: authHeader() }
-            )
-            .then((response) => {
-              this.tableData = response.data.records;
-              this.totalItems = response.data.total;
-              this.$message.success("删除成功！");
-            })
-            .catch(() => {
-              this.$message.error("删除失败");
-            });
+      if (arr.length) {
+        this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         })
-        .catch(() => {
-          this.$message.info("已取消删除");
-        });
+          .then(() => {
+            let params = [];
+            arr.forEach(function (item) {
+              params.push(item.subjectId);
+            });
+            this.$axios
+              .post(
+                "/subject/del",
+                this.$qs.stringify(
+                  {
+                    subjectId: params,
+                    pageno: this.pageno,
+                    size: this.size,
+                  },
+                  { indices: false }
+                ),
+                { headers: authHeader() }
+              )
+              .then((response) => {
+                this.tableData = response.data.records;
+                this.totalItems = response.data.total;
+                this.$message.success("删除成功！");
+              })
+              .catch(() => {
+                this.$message.error("删除失败");
+              });
+          })
+          .catch(() => {
+            this.$message.info("已取消删除");
+          });
+      } else {
+        this.$message.info("请选择要删除的信息");
+      }
     },
   },
 };
