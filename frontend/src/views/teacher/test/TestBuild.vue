@@ -274,7 +274,7 @@ export default {
     findAllSub() {
       this.$axios
         .post(
-          "/auto/subject/findAllSubId"
+          "/subject/findAllSubId"
           //  { headers: authHeader() }
         )
         .then((response) => {
@@ -284,7 +284,7 @@ export default {
     findAllMajorAndClazz() {
       this.$axios
         .get(
-          "/auto/clazz/findAllMajorAndClazz"
+          "/clazz/findAllMajorAndClazz"
           // { headers: authHeader(), }
         )
         .then((response) => {
@@ -302,7 +302,7 @@ export default {
     findQuesBySubId(id) {
       this.$axios
         .post(
-          "/auto/singleQuestion/findQuesBySubId",
+          "/singleQuestion/findQuesBySubId",
           this.$qs.stringify({
             subId: id,
           })
@@ -350,7 +350,7 @@ export default {
     loadInfo(id) {
       this.$axios
         .post(
-          "/auto/test/findById",
+          "/test/findById",
           this.$qs.stringify({ testId: id })
           // { headers: authHeader(), }
         )
@@ -367,7 +367,7 @@ export default {
       this.$refs.testForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/auto/test/save", {
+            .get("/test/save", {
               // headers: authHeader(),
               params: {
                 testId: this.testForm.testId,

@@ -147,7 +147,7 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/auto/subject/findAll",
+          "/subject/findAll",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
@@ -172,7 +172,7 @@ export default {
     findAllTch() {
       this.$axios
         .post(
-          "/auto/teacher/findAllTch"
+          "/teacher/findAllTch"
           // { headers: authHeader() }
         )
         .then((response) => {
@@ -185,7 +185,7 @@ export default {
     loadInfo(id) {
       this.$axios
         .post(
-          "/auto/subject/findById",
+          "/subject/findById",
           this.$qs.stringify({ subjectId: id })
           // { headers: authHeader(),}
         )
@@ -199,7 +199,7 @@ export default {
       this.$refs.subForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/auto/subject/save", {
+            .get("/subject/save", {
               // headers: authHeader(),
               params: {
                 subId: this.subForm.subId,
@@ -240,7 +240,7 @@ export default {
           });
           this.$axios
             .post(
-              "/auto/subject/del",
+              "/subject/del",
               this.$qs.stringify(
                 {
                   subjectId: params,

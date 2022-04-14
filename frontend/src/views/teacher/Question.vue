@@ -202,7 +202,7 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/auto/singleQuestion/findAll",
+          "/singleQuestion/findAll",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
@@ -230,7 +230,7 @@ export default {
     findAllSubId() {
       this.$axios
         .post(
-          "/auto/subject/findAllSubId"
+          "/subject/findAllSubId"
           //  { headers: authHeader() }
         )
         .then((response) => {
@@ -244,7 +244,7 @@ export default {
     loadInfo(id) {
       this.$axios
         .post(
-          "/auto/singleQuestion/findById",
+          "/singleQuestion/findById",
           this.$qs.stringify({ quesId: id })
           // { headers: authHeader(),}
         )
@@ -256,7 +256,7 @@ export default {
       this.$refs.quesForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/auto/singleQuestion/save", {
+            .get("/singleQuestion/save", {
               // headers: authHeader(),
               params: {
                 quesId: this.quesForm.quesId,
@@ -302,7 +302,7 @@ export default {
           });
           this.$axios
             .post(
-              "/auto/singleQuestion/del",
+              "/singleQuestion/del",
               this.$qs.stringify(
                 {
                   quesId: params,

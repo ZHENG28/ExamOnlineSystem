@@ -5,7 +5,7 @@
     </el-col>
     <el-col :span="20">
       <el-dropdown>
-        <el-avatar size="default" :src="avatarImg" />
+        <el-avatar>{{}}</el-avatar>
         <el-icon style="margin-left: 15px; float: right; margin-top: 15px">
           <arrow-down />
         </el-icon>
@@ -34,7 +34,7 @@
         <el-form-item label="账号" prop="account">
           <el-input v-model="form.account" readonly="readonly"></el-input>
         </el-form-item>
-        <el-form-item label="姓名" prop="username">
+        <el-form-item label="名字" prop="username">
           <el-input v-model="form.username"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
@@ -44,30 +44,27 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="updateInfo()">确 定</el-button>
+          <el-button type="primary" @click="updateUser()">确 定</el-button>
         </span>
       </template>
     </el-dialog>
   </el-row>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
-      avatarImg: "/src/assets/login/background.jpg",
       dialogFormVisible: false,
-      formLabelWidth: "200px",
       pswd: "",
       form: {
-        role: "",
         account: "",
         username: "",
         password: "",
       },
       FormRules: {
-        account: [{ required: true, message: "请填写学号", trigger: "blur" }],
-        username: [{ required: true, message: "请填写姓名", trigger: "blur" }],
+        account: [{ required: true, message: "请填写账号", trigger: "blur" }],
+        username: [{ required: true, message: "请填写名字", trigger: "blur" }],
         password: [{ required: true, message: "请填写密码", trigger: "blur" }],
       },
     };
@@ -79,53 +76,42 @@ export default {
     },
   },
   created() {
-    // let user = this.$store.state.auth.user;
-    // this.form.account = user.account;
-    // this.form.role = user.roles[0];
-    // this.findInfoByAccount();
+    let user = this.$store.state.initialState.user;
+    if (user == null) {
+      this.$router.replace("/");
+    } else {
+      this.form.account = user.account;
+      this.findInfoByAccount();
+    }
   },
   methods: {
     findInfoByAccount() {
-      //   switch (this.form.role) {
-      //     case "ROLE_MANAGER":
-      //       this.form.username = this.form.account;
-      //       this.getInfo(3);
-      //       break;
-      //     case "ROLE_TEACHER":
-      //       this.getInfo(2);
-      //       break;
-      //     case "ROLE_STUDENT":
-      //       this.getInfo(1);
-      //       break;
-      //   }
+      this.$axios
+        .get("/user/findUserByAccount", {
+          headers: authHeader(),
+          params: {
+            account: this.form.account,
+          },
+        })
+        .then((response) => {
+          this.pswd = response.data.password;
+          this.form = response.data;
+          // switch (role) {
+          //   case 3:
+          //     this.form.password = "$2a$10$";
+          //     break;
+          //   case 2:
+          //     this.form.username = res.data.tchName;
+          //     this.form.password = "$2a$10$";
+          //     break;
+          //   case 1:
+          //     this.form.username = res.data.stuName;
+          //     this.form.password = "$2a$10$";
+          //     break;
+          // }
+        });
     },
-    getInfo(role) {
-      //   this.$axios
-      //     .get("/sys/findInfo", {
-      //       headers: authHeader(),
-      //       params: {
-      //         role: role,
-      //         account: this.form.account,
-      //       },
-      //     })
-      //     .then((res) => {
-      //       this.pswd = res.data.password;
-      //       switch (role) {
-      //         case 3:
-      //           this.form.password = "$2a$10$";
-      //           break;
-      //         case 2:
-      //           this.form.username = res.data.tchName;
-      //           this.form.password = "$2a$10$";
-      //           break;
-      //         case 1:
-      //           this.form.username = res.data.stuName;
-      //           this.form.password = "$2a$10$";
-      //           break;
-      //       }
-      //     });
-    },
-    updateInfo() {
+    updateUser() {
       //   if (this.form.username == "") {
       //     this.$message.warning("请填写姓名");
       //     return;
@@ -139,7 +125,7 @@ export default {
       //   }
       //   this.$axios
       //     .post(
-      //       "/sys/updateInfo",
+      //       "/sys/updateUser",
       //       {
       //         role: this.form.role,
       //         account: this.form.account,
@@ -169,9 +155,8 @@ export default {
     },
 
     logOut() {
-      // this.$store.dispatch("auth/logout");
-      // this.$router.push("/");
-      console.log("logout");
+      localStorage.removeItem("user");
+      this.$router.replace("/");
     },
   },
 };

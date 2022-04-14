@@ -37,7 +37,7 @@
 // import LineChart from "@/components/Charts/LineChart";
 // import * as chartConfigs from "@/components/Charts/config";
 
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
 
 export default {
   components: {
@@ -67,7 +67,7 @@ export default {
   },
   computed: {
     // currentUser() {
-    //   let user = this.$store.state.auth.user;
+    //   let user = this.$store.state.auth.initialState.user;
     //   this.account = user.account;
     //   switch (user.roles[0]) {
     //     case "ROLE_MANAGER":

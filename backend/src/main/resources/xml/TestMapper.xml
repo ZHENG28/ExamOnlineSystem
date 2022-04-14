@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zj.examsystem.auto.mapper.TestMapper">
-    <resultMap id="TestWithClazzAndSubject" type="com.zj.examsystem.auto.entity.Test">
+<mapper namespace="com.zj.examsystem.mapper.TestMapper">
+    <resultMap id="TestWithClazzAndSubject" type="com.zj.examsystem.entity.Test">
         <id column="test_id" property="testId" jdbcType="INTEGER"/>
         <result column="test_name" property="testName" jdbcType="VARCHAR"/>
         <result column="description" property="description" jdbcType="VARCHAR"/>
@@ -9,8 +9,8 @@
         <result column="end_date" property="endDate" jdbcType="DATE"/>
         <result column="exam_dure" property="examDure" jdbcType="INTEGER"/>
         <result column="exam_time" property="examTime" jdbcType="INTEGER"/>
-        <result column="test_clazz" property="testClazz" jdbcType="INTEGER"/>
-        <result column="sub_id" property="subId" jdbcType="INTEGER"/>
+<!--        <result column="test_clazz" property="testClazz" jdbcType="INTEGER"/>-->
+<!--        <result column="sub_id" property="subId" jdbcType="INTEGER"/>-->
         <result column="total_score" property="totalScore" jdbcType="INTEGER"/>
         <result column="ques_arr" property="quesArr" jdbcType="VARCHAR"/>
         <!-- extra property -->

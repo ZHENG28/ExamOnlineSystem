@@ -104,9 +104,9 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/auto/testhistory/findAllByAccount",
+          "/testhistory/findAllByAccount",
           this.$qs.stringify({
-            // account: this.$store.state.auth.user.account,
+            // account: this.$store.state.auth.initialState.user.account,
             account: "111",
             pageno: this.pageno,
             size: this.size,
@@ -131,7 +131,7 @@ export default {
     findAllSubId() {
       this.$axios
         .post(
-          "/auto/subject/findAllSubId"
+          "/subject/findAllSubId"
           // { headers: authHeader() }
         )
         .then((response) => {

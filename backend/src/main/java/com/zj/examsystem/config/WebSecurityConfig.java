@@ -2,8 +2,8 @@ package com.zj.examsystem.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zj.examsystem.config.security.CustomUserDetailsService;
-import com.zj.examsystem.config.security.jwt.AuthEntryPointJwt;
-import com.zj.examsystem.config.security.jwt.AuthTokenFilter;
+import com.zj.examsystem.config.security.AuthEntryPointJwt;
+import com.zj.examsystem.config.security.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,9 +70,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/captcha/getCaptchaCode", "/captcha/checkCaptchaCode").permitAll()
 //                .anyRequest().authenticated(); // 任何请求都需要认证
 
-        // 使用的过滤器及其使用时间
-        // 将AuthTokenFilter放在UsernamePasswordAuthenticationFilter之前
-        // 即所有的 认证 过滤器之前
+        // 放在所有的认证过滤器之前
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 

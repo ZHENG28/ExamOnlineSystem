@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zj.examsystem.auto.mapper.SubjectMapper">
-    <resultMap id="SubjectWithTeacher" type="com.zj.examsystem.auto.entity.Subject">
-        <id column="sub_id" property="subId"/>
-        <result column="sub_name" property="subName" jdbcType="VARCHAR"/>
-        <result column="teacher_id" property="teacherId" jdbcType="INTEGER"/>
-        <!-- extra property -->
-        <result column="tch_name" property="tchName" jdbcType="VARCHAR"/>
-    </resultMap>
+<mapper namespace="com.zj.examsystem.mapper.SubjectMapper">
+<!--    <resultMap id="SubjectWithTeacher" type="com.zj.examsystem.auto.entity.Subject">-->
+<!--        <id column="sub_id" property="subId"/>-->
+<!--        <result column="sub_name" property="subName" jdbcType="VARCHAR"/>-->
+<!--        <result column="teacher_id" property="teacherId" jdbcType="INTEGER"/>-->
+<!--        &lt;!&ndash; extra property &ndash;&gt;-->
+<!--        <result column="tch_name" property="tchName" jdbcType="VARCHAR"/>-->
+<!--    </resultMap>-->
 
     <select id="selectDistinctSubject" resultType="map">
         SELECT sub_name, sub_id
@@ -15,9 +15,9 @@
         GROUP BY sub_name
     </select>
 
-    <select id="selectPageWithTeacher" resultMap="SubjectWithTeacher">
-        SELECT s.*, t.tch_name
-        FROM subject s
-                 JOIN teacher t on s.teacher_id = t.id
-    </select>
+<!--    <select id="selectPageWithTeacher" resultMap="SubjectWithTeacher">-->
+<!--        SELECT s.*, t.tch_name-->
+<!--        FROM subject s-->
+<!--                 JOIN teacher t on s.teacher_id = t.id-->
+<!--    </select>-->
 </mapper>

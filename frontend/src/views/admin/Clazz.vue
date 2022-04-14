@@ -11,10 +11,7 @@
           "
           >添加</el-button
         >
-        <el-button
-          type="danger"
-          @click="del(this.multiSelection)"
-          :disabled="false"
+        <el-button type="danger" @click="del(this.multiSelection)"
           >删除</el-button
         >
       </div>
@@ -86,9 +83,42 @@
             >编辑</el-button
           >
           <el-button type="danger" @click="del([scope.row])">删除</el-button>
+          <el-button
+            type="primary"
+            @click="
+              dialogTableVisible = true;
+              dialogTableTitle = scope.row.clazzName;
+              loadUserByClazzId(scope.row.clazzId);
+            "
+            >查看用户</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
+    <el-dialog
+      :title="'查看' + dialogTableTitle + '班的用户信息'"
+      v-model="dialogTableVisible"
+      width="1000px"
+      top="70px"
+    >
+      <el-table :data="dialogTableData" border height="540px">
+        <el-table-column type="index" label="序号" width="80">
+        </el-table-column>
+        <el-table-column
+          prop="role"
+          label="角色"
+          :filters="roleFilterData"
+          :filter-method="roleFilter"
+        >
+          <template #default="scope">
+            <el-tag :type="scope.row.role == '学生' ? 'success' : 'danger'">{{
+              scope.row.role
+            }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="username" label="名字"> </el-table-column>
+      </el-table>
+    </el-dialog>
     <div style="margin-top: 10px">
       <el-pagination
         @size-change="handleSizeChange"
@@ -104,13 +134,17 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
       multiSelection: [],
       status: "",
       dialogFormVisible: false,
+      dialogTableTitle: "",
+      dialogTableVisible: false,
+      roleFilterData: [],
+      dialogTableData: [],
       clazzForm: {
         clazzId: "",
         major: "",
@@ -140,17 +174,20 @@ export default {
     },
     clearFormFields() {
       this.clazzForm = {};
+      this.$nextTick(() => {
+        this.$refs.clazzForm.clearValidate();
+      });
     },
 
     findAll() {
       this.$axios
         .post(
-          "/auto/clazz/findAll",
+          "/clazz/findAll",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
-          })
-          // { headers: authHeader() }
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.tableData = response.data.records;
@@ -169,10 +206,7 @@ export default {
 
     findDistinctMajor() {
       this.$axios
-        .get(
-          "/auto/clazz/getDistinctMajor"
-          // { headers: authHeader() }
-        )
+        .get("/clazz/getDistinctMajor", { headers: authHeader() })
         .then((response) => {
           this.majorFilterData = response.data;
         });
@@ -183,11 +217,9 @@ export default {
 
     loadInfo(id) {
       this.$axios
-        .post(
-          "/auto/clazz/findById",
-          this.$qs.stringify({ clazzId: id })
-          // { headers: authHeader(),}
-        )
+        .post("/clazz/findById", this.$qs.stringify({ clazzId: id }), {
+          headers: authHeader(),
+        })
         .then((response) => {
           this.clazzForm = response.data;
         });
@@ -196,8 +228,8 @@ export default {
       this.$refs.clazzForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/auto/clazz/save", {
-              // headers: authHeader(),
+            .get("/clazz/save", {
+              headers: authHeader(),
               params: {
                 clazzId: this.clazzForm.clazzId,
                 major: this.clazzForm.major,
@@ -225,41 +257,75 @@ export default {
       this.multiSelection = val;
     },
     del(arr) {
-      this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = [];
-          arr.forEach(function (item) {
-            params.push(item.clazzId);
-          });
-          this.$axios
-            .post(
-              "/auto/clazz/del",
-              this.$qs.stringify(
-                {
-                  clazzId: params,
-                  pageno: this.pageno,
-                  size: this.size,
-                },
-                { indices: false }
-              )
-              // { headers: authHeader() }
-            )
-            .then((response) => {
-              this.tableData = response.data.records;
-              this.totalItems = response.data.total;
-              this.$message.success("删除成功！");
-            })
-            .catch(() => {
-              this.$message.error("删除失败");
-            });
+      if (arr.length) {
+        this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         })
-        .catch(() => {
-          this.$message.info("已取消删除");
+          .then(() => {
+            let params = [];
+            arr.forEach(function (item) {
+              params.push(item.clazzId);
+            });
+            this.$axios
+              .post(
+                "/clazz/del",
+                this.$qs.stringify(
+                  {
+                    clazzId: params,
+                    pageno: this.pageno,
+                    size: this.size,
+                  },
+                  { indices: false }
+                ),
+                { headers: authHeader() }
+              )
+              .then((response) => {
+                this.tableData = response.data.records;
+                this.totalItems = response.data.total;
+                this.$message.success("删除成功！");
+              })
+              .catch(() => {
+                this.$message.error("删除失败");
+              });
+          })
+          .catch(() => {
+            this.$message.info("已取消删除");
+          });
+      } else {
+        this.$message.info("请选择要删除的信息");
+      }
+    },
+
+    loadUserByClazzId(id) {
+      this.$axios
+        .get(
+          "/userClazz/findUserByClazzId",
+          this.$qs.stringify({ clazzId: id }),
+          {
+            headers: authHeader(),
+          }
+        )
+        .then((response) => {
+          this.dialogTableData = response.data.records;
         });
+      this.findDistinctRole();
+    },
+    findDistinctRole() {
+      this.$axios
+        .get("/role/getDistinctRole", { headers: authHeader() })
+        .then((response) => {
+          response.data.forEach((item) => {
+            this.roleFilterData.push({
+              text: item.description,
+              value: item.description,
+            });
+          });
+        });
+    },
+    roleFilter(value, row) {
+      return row.role === value;
     },
   },
 };

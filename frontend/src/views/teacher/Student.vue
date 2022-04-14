@@ -194,7 +194,7 @@
 </template>
 <script>
 // import authHeader from "@/services/auth-header";
-import Student from "@/models/student";
+// import Student from "@/models/student";
 // import UserService from "@/services/user.service";
 export default {
   data() {
@@ -205,7 +205,8 @@ export default {
       majorclazzArr: [],
       stuId: "",
       stuPwd: "",
-      stuForm: new Student("", "", "123", "", "", "", ""),
+      // stuForm: new Student("", "", "123", "", "", "", ""),
+      stuForm: "",
       majorclazzName: [],
       formRules: {
         account: [{ required: true, message: "请填写学号", trigger: "blur" }],
@@ -233,14 +234,15 @@ export default {
       this.findMajorAndClazzFilterData();
     },
     clearFormFields() {
-      this.stuForm = new Student("", "", "123", "", "", "", "");
+      // this.stuForm = new Student("", "", "123", "", "", "", "");
+      this.stuForm = "";
       this.majorclazzName = [];
     },
 
     findAll() {
       this.$axios
         .post(
-          "/auto/student/findAll",
+          "/student/findAll",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
@@ -265,7 +267,7 @@ export default {
     findMajorAndClazzFilterData() {
       this.$axios
         .get(
-          "/auto/clazz/getDistinctMajor"
+          "/clazz/getDistinctMajor"
           // { headers: authHeader(), }
         )
         .then((response) => {
@@ -273,7 +275,7 @@ export default {
         });
       this.$axios
         .get(
-          "/auto/clazz/getDistinctClazz"
+          "/clazz/getDistinctClazz"
           // { headers: authHeader(), }
         )
         .then((response) => {
@@ -290,7 +292,7 @@ export default {
     findAllMajorAndClazz() {
       this.$axios
         .get(
-          "/auto/clazz/findAllMajorAndClazz"
+          "/clazz/findAllMajorAndClazz"
           // { headers: authHeader(), }
         )
         .then((response) => {
@@ -304,7 +306,7 @@ export default {
     loadInfo(account) {
       this.$axios
         .post(
-          "/auto/student/findByAccount",
+          "/student/findByAccount",
           this.$qs.stringify({ account: account })
           // { headers: authHeader(), }
         )
@@ -367,7 +369,7 @@ export default {
       //   this.stuForm.sex = gender == "" ? null : gender;
       //   this.$axios
       //     .post(
-      //       "/auto/student/modify",
+      //       "/student/modify",
       //       {
       //         id: this.stuId,
       //         account: this.stuForm.account,
@@ -417,7 +419,7 @@ export default {
           });
           this.$axios
             .post(
-              "/auto/student/del",
+              "/student/del",
               this.$qs.stringify(
                 {
                   studentId: params,

@@ -8,6 +8,9 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^1.1.4",
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-regular-svg-icons": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "axios": "^0.26.1",
     "core-js": "^3.6.5",
     "element-plus": "^2.1.5",

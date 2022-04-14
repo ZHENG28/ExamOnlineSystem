@@ -90,9 +90,9 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/auto/test/findAllByStuIdOrNot",
+          "/test/findAllByStuIdOrNot",
           this.$qs.stringify({
-            // identity: this.$store.state.auth.user.identity,
+            // identity: this.$store.state.auth.initialState.user.identity,
             pageno: this.pageno,
             size: this.size,
           })
@@ -127,9 +127,9 @@ export default {
     toTestPaper(testId) {
       this.$axios
         .post(
-          "/auto/test/findExamTimeByTestId",
+          "/test/findExamTimeByTestId",
           this.$qs.stringify({
-            // account: this.$store.state.auth.user.account,
+            // account: this.$store.state.auth.initialState.user.account,
             account: "111",
             testId: testId,
           })

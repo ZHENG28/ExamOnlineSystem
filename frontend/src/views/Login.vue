@@ -1,277 +1,122 @@
-<!-- 用户登录界面 -->
 <template>
-  <div class="body">
-    <div
-      ref="container"
-      class="loginContainer"
-      v-bind:class="{ 'right-panel-active': isActive }"
-    >
-      <!-- 管理员入口 -->
-      <div class="container__form container--signup">
-        <el-form action="#" class="form" ref="mgrForm">
-          <div class="login">
-            <h2>管理员登录</h2>
-            <div class="login_box">
-              <!-- required不能为空 必须在css效果中有很大的作用 -->
-              <input type="text" required v-model="user.account" /><label
-                >账户</label
+  <div>
+    <img src="../assets/login/bg.png" alt="" class="wave" />
+    <div class="container">
+      <div class="img"></div>
+      <div class="login-box">
+        <form action="#">
+          <img src="../assets/login/welcome.png" alt="" class="avatar" />
+          <h2 style="letter-spacing: 10px">登录系统</h2>
+          <div class="radio-group">
+            <div>
+              <el-button
+                icon="checked"
+                round
+                size="large"
+                :type="isTch"
+                @click="changeIdentity(2)"
+                >教师</el-button
               >
             </div>
-            <div class="login_box">
-              <input
-                type="password"
-                required="required"
-                v-model="user.password"
-              /><label>密码</label>
-            </div>
-            <div class="login_box">
-              <input
-                type="text"
-                required="required"
-                v-model="user.captchaCode"
-                placeholder="请输入验证码"
-                style="width: 150px; float: left"
-                @blur="checkKaptcha()"
-              />
-              <el-image
-                :src="imgUrl"
-                width="80"
-                height="34"
-                alt="验证码"
-                @click="getKaptcha()"
-              >
-                <div slot="error" class="image-slot">
-                  <i class="el-icon-picture-outline"></i>
-                </div>
-              </el-image>
-            </div>
-          </div>
-          <span style="color: red">{{ errMsg }}</span>
-          <button class="button" @click.prevent="login(3)">登录系统</button>
-        </el-form>
-      </div>
-
-      <!-- 用户入口 -->
-      <div class="container__form container--signin">
-        <el-form action="#" class="form" ref="userForm">
-          <div class="login">
-            <h2>欢迎登录</h2>
-            <div class="identity" style="font-size: 18px">
-              身份：
-              <label style="margin: 0 20px 0 10px">
-                <input type="radio" v-model="user.identity" :value="2" />
-                教师
-              </label>
-              <label>
-                <input type="radio" v-model="user.identity" :value="1" />
-                学生
-              </label>
-            </div>
-            <div class="login_box">
-              <input type="text" required v-model="user.account" /><label
-                >账户</label
+            <div>
+              <el-button
+                icon="briefcase"
+                round
+                size="large"
+                :type="isStu"
+                @click="changeIdentity(1)"
+                >学生</el-button
               >
             </div>
-            <div class="login_box">
-              <input
-                type="password"
-                required="required"
-                v-model="user.password"
-              /><label>密码</label>
+          </div>
+          <div class="input-group">
+            <div class="icon">
+              <i class="fa fa-user"></i>
             </div>
-            <div class="login_box">
-              <input
-                type="text"
-                required="required"
-                v-model="user.captchaCode"
-                placeholder="请输入验证码"
-                style="width: 150px; float: left"
-                @blur="checkKaptcha()"
-              />
-              <el-image
-                :src="imgUrl"
-                width="80"
-                height="34"
-                alt="验证码"
-                @click="getKaptcha()"
-              >
-                <div slot="error" class="image-slot">
-                  <i class="el-icon-picture-outline"></i>
-                </div>
-              </el-image>
+            <div>
+              <input type="text" class="input" v-model="user.account" />
             </div>
           </div>
-          <span style="color: red">{{ errMsg }}</span>
-          <button class="button" @click.prevent="login(user.identity)">
-            点击登录
-          </button>
-        </el-form>
-      </div>
-
-      <!-- 叠加部分 -->
-      <div class="container__overlay">
-        <div class="overlay">
-          <div class="overlay__panel overlay--left">
-            <button
-              class="button"
-              ref="user"
-              @click="
-                isActive = false;
-                getKaptcha();
-                clearFormFields();
-              "
-            >
-              用户登录入口
-            </button>
+          <div class="input-group">
+            <div class="icon">
+              <i class="fa fa-lock"></i>
+            </div>
+            <div>
+              <input class="input" type="password" v-model="user.password" />
+            </div>
           </div>
-          <div class="overlay__panel overlay--right">
-            <button
-              class="button"
-              ref="manager"
-              @click="
-                isActive = true;
-                getKaptcha();
-                clearFormFields();
-              "
-            >
-              管理员登录入口
-            </button>
-          </div>
-        </div>
+          <input type="button" class="btn" value="登录" @click="login()" />
+        </form>
       </div>
     </div>
   </div>
 </template>
-
 <script>
-// import User from "@/models/user";
+import User from "@/services/user";
 export default {
-  name: "Login",
   data() {
     return {
-      // 用于叠加部分更替效果
-      isActive: true,
-      // 登录部分
-      user: "",
-      // user: new User("", "", "", ""),
-      loading: false,
-      errMsg: "",
-      imgUrl: "",
+      user: new User("", "", "", ""),
+      isTch: "",
+      isStu: "",
     };
   },
   computed: {
-    // loggedIn() {
-    //   return this.$store.state.auth.status.loggedIn;
-    // },
+    isLogin() {
+      return this.$store.state.initialState.status.isLogin;
+    },
   },
   created() {
-    if (this.loggedIn) {
+    if (this.isLogin) {
       this.$router.push("/home");
     }
-    this.getKaptcha();
   },
   methods: {
-    getKaptcha() {
-      //   axios
-      //     .get("/captcha/getCaptchaCode", {
-      //       responseType: "arraybuffer",
-      //     })
-      //     .then((response) => {
-      //       return (
-      //         "data:image/png;base64," +
-      //         btoa(
-      //           new Uint8Array(response.data).reduce(
-      //             (data, byte) => data + String.fromCharCode(byte),
-      //             ""
-      //           )
-      //         )
-      //       );
-      //     })
-      //     .then((data) => {
-      //       this.imgUrl = data;
-      //     });
-    },
-    checkKaptcha() {
-      //   axios
-      //     .get("/captcha/checkCaptchaCode", {
-      //       params: { captchaCode: this.user.captchaCode },
-      //     })
-      //     .then((res) => {
-      //       switch (res.data) {
-      //         case "输入为空":
-      //           this.errMsg = "请输入验证码";
-      //           return false;
-      //         case "输入错误":
-      //           this.errMsg = "验证码错误，请重试";
-      //           return false;
-      //         case "验证成功":
-      //           this.errMsg = "";
-      //       }
-      //     });
-      //   return true;
+    changeIdentity(id) {
+      this.user.role = id;
+      this.isTch = id == 2 ? "primary" : "";
+      this.isStu = id == 3 ? "primary" : "";
     },
 
-    clearFormFields() {
-      this.user = new User("", "", "", "");
-      this.errMsg = "";
+    isEmptyFields() {
+      if (this.user.role == "") {
+        this.$message.warning("请选择身份");
+      } else if (this.user.account == "") {
+        this.$message.warning("用户名不能为空");
+      } else if (this.user.password == "") {
+        this.$message.warning("密码不能为空");
+      } else {
+        return true;
+      }
+      return false;
     },
-    validFormData() {
-      this.errMsg = "";
-      // 验证是否为空
-      if (this.user.identity == "") {
-        // 如果管理员传入0，则输出为true
-        this.errMsg = "请选择身份";
-        return false;
+    login() {
+      if (this.isEmptyFields()) {
+        this.$axios
+          .post("/user/login", {
+            roleId: "1",
+            // roleId: this.user.role,
+            account: this.user.account,
+            password: this.user.password,
+          })
+          .then((response) => {
+            if (response.data.token) {
+              // 将该登录用户的令牌移入store
+              localStorage.setItem("user", JSON.stringify(response.data));
+              this.$router.replace("/home");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$message.error("存在错误，请检查！");
+          });
       }
-      if (this.user.account == "" || this.user.password == "") {
-        this.errMsg = "用户名或密码不能为空";
-        return false;
-      }
-      if (this.user.captchaCode == "") {
-        this.errMsg = "请输入验证码";
-        return false;
-      }
-      return true;
-    },
-    //用户登录请求后台处理
-    login(identity) {
-      this.user.identity = identity;
-      if (!this.validFormData()) {
-        this.loading = false;
-        return;
-      }
-      if (!this.checkKaptcha()) {
-        this.loading = false;
-        console.log("check error!");
-        return;
-      }
-
-      this.$store.dispatch("auth/login", this.user).then(
-        () => {
-          this.$router.push("/home");
-        },
-        (error) => {
-          this.loading = false;
-          this.errMsg =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString();
-          this.getKaptcha();
-        }
-      );
     },
   },
 };
 </script>
 
 <style scoped>
-@import url("../assets/login/formstyle.css");
-@import url("../assets/login/pagestyle.css");
-.body {
-  font-size: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-}
+@import url("../assets/login/style.css");
+@import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
 </style>

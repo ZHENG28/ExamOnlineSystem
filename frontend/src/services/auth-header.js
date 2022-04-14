@@ -1,10 +1,10 @@
 export default function authHeader() {
-  let user = JSON.parse(localStorage.getItem('user'));
+  let user = JSON.parse(localStorage.getItem('user'))
 
   if (user && user.token) {
-    // 返回用户已经经过验证的Token
-    return { Authorization: 'Bearer ' + user.token }; // for Spring Boot back-end
+    // 返回Authorized Token
+    return { Authorization: 'Bearer ' + user.token }
   } else {
-    return {};
+    return {}
   }
 }

@@ -174,7 +174,7 @@ export default {
     this.testForm.testId = this.$route.params.testId;
     this.loadTestInfo(this.testForm.testId);
     this.loadTestPaper(this.testForm.testId);
-    // this.loadStuInfo(this.$store.state.auth.user.account);
+    // this.loadStuInfo(this.$store.state.auth.initialState.user.account);
     this.loadStuInfo("111");
   },
   methods: {

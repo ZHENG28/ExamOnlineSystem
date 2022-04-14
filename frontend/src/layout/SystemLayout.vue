@@ -5,13 +5,12 @@
     </el-header>
     <el-container direction="horizontal">
       <el-aside width="260px">
-        <!-- 菜单栏减少时，高度会变 -->
         <el-menu
           router
           class="el-menu-vertical-demo"
-          background-color="#8c9885"
-          text-color="#292929"
-          active-text-color="#fff"
+          background-color="#00BFA6"
+          text-color="#fff"
+          active-text-color="#000"
           default-active="home"
         >
           <el-menu-item index="home" route="/home" class="nav-font">
@@ -65,21 +64,21 @@
             </el-menu-item-group>
           </el-sub-menu>
           <el-menu-item
-            index="teacher"
-            route="/admin/teacher"
+            index="user"
+            route="/admin/user"
             class="nav-font"
-            v-if="showMgr"
+            v-if="showAdmin"
           >
             <template #title>
               <el-icon><user-filled /></el-icon>
-              教师管理
+              用户管理
             </template>
           </el-menu-item>
           <el-menu-item
             index="clazz"
             route="/admin/clazz"
             class="nav-font"
-            v-if="showMgr"
+            v-if="showAdmin"
           >
             <template #title>
               <el-icon><files /></el-icon>
@@ -90,7 +89,7 @@
             index="subject"
             route="/admin/subject"
             class="nav-font"
-            v-if="showMgr"
+            v-if="showAdmin"
           >
             <template #title>
               <el-icon><help-filled /></el-icon>
@@ -137,7 +136,7 @@ export default {
   },
   computed: {
     currentUser() {
-      // return this.$store.state.auth.user;
+      // return this.$store.state.auth.initialState.user;
     },
     showTeacher() {
       // if (this.currentUser && this.currentUser.roles) {
@@ -146,9 +145,9 @@ export default {
 
       return true;
     },
-    showMgr() {
+    showAdmin() {
       // if (this.currentUser && this.currentUser.roles) {
-      //   return this.currentUser.roles.includes("ROLE_MANAGER");
+      //   return this.currentUser.roles.includes("ROLE_ADMIN");
       // }
 
       return true;

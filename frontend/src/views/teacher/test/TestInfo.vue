@@ -133,7 +133,7 @@ export default {
     findClazzAndSubIdFilterData() {
       this.$axios
         .post(
-          "/auto/subject/findAllSubId"
+          "/subject/findAllSubId"
           // { headers: authHeader() }
         )
         .then((response) => {
@@ -141,7 +141,7 @@ export default {
         });
       this.$axios
         .get(
-          "/auto/clazz/getDistinctClazz"
+          "/clazz/getDistinctClazz"
           //  { headers: authHeader() }
         )
         .then((response) => {
@@ -158,7 +158,7 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/auto/test/findAllByStuIdOrNot",
+          "/test/findAllByStuIdOrNot",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
@@ -207,7 +207,7 @@ export default {
           });
           this.$axios
             .post(
-              "/auto/test/del",
+              "/test/del",
               this.$qs.stringify(
                 {
                   testId: params,
@@ -235,7 +235,7 @@ export default {
     findScoreByTestId() {
       // this.$axios
       //   .post(
-      //     "/auto/testhistory/findScoreByTestId",
+      //     "/testhistory/findScoreByTestId",
       //     this.$qs.stringify({ testId: this.testForm.testId }),
       //     // { headers: authHeader() }
       //   )
