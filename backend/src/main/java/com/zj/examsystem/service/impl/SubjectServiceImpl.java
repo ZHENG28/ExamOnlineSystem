@@ -30,13 +30,10 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
         Page<Subject> page = new Page<>(pageno, size);
 
-        if (userId == null) {
-            return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
-        } else {
-            //            Student stu = studentMapper.selectById(id);
-            //            queryWrapper.eq("test_clazz", stu.getClazzId());
-            return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
+        if (userId != null) {
+            queryWrapper.eq("teacher_id", userId[0]);
         }
+        return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
     }
 
     public List<Map<String, Object>> findDistinctSubject() {
@@ -44,9 +41,9 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         List<Map<String, Object>> List = new ArrayList<>();
         for (Map<String, Object> resMap : tmp) {
             Map<String, Object> map = new HashMap<>();
-            map.put("text", resMap.get("sub_name"));
-            map.put("value", resMap.get("sub_name"));
-            map.put("subId", resMap.get("sub_id"));
+            map.put("text", resMap.get("subject_name"));
+            map.put("value", resMap.get("subject_name"));
+            map.put("subId", resMap.get("subject_id"));
             List.add(map);
         }
         return List;

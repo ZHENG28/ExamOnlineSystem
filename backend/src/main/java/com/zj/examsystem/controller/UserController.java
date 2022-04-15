@@ -65,17 +65,17 @@ public class UserController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
-        response.put("account", userDetails.getAccount());
+        response.put("id", userDetails.getUserId());
         response.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/findUserByAccount")
+    @GetMapping("/findInfoById")
     @ResponseBody
-    public Object findUserByAccount(String account) {
-        return userService.findUserByAccount(account);
+    public Object findInfoById(Integer userId) {
+        return userService.findInfoById(userId);
     }
 
     @PostMapping("/findAll")

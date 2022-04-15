@@ -32,10 +32,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public User findUserByAccount(String account) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("account", account);
-        return userMapper.selectOne(queryWrapper);
+    public User findInfoById(Integer userId) {
+        return userMapper.selectById(userId);
     }
 
     @Override

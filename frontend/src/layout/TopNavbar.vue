@@ -5,7 +5,9 @@
     </el-col>
     <el-col :span="20">
       <el-dropdown>
-        <el-avatar>{{}}</el-avatar>
+        <el-avatar :style="{ backgroundColor: color }">{{
+          form.username.substr(0, 1).toUpperCase()
+        }}</el-avatar>
         <el-icon style="margin-left: 15px; float: right; margin-top: 15px">
           <arrow-down />
         </el-icon>
@@ -63,10 +65,10 @@ export default {
         password: "",
       },
       FormRules: {
-        account: [{ required: true, message: "请填写账号", trigger: "blur" }],
         username: [{ required: true, message: "请填写名字", trigger: "blur" }],
         password: [{ required: true, message: "请填写密码", trigger: "blur" }],
       },
+      color: "",
     };
   },
   computed: {
@@ -80,21 +82,48 @@ export default {
     if (!state.status.isLogin) {
       this.$router.replace("/");
     } else {
-      this.form.account = state.user.account;
-      this.findInfoByAccount();
+      this.color = this.getColor();
+      this.findInfoById(state.user.id);
     }
   },
   methods: {
-    findInfoByAccount() {
+    getColor() {
+      let result = "#";
+      let arr = [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+      ];
+      for (let i = 0; i < 6; i++) {
+        let num = parseInt(Math.random() * 16);
+        result += arr[num];
+      }
+      return result;
+    },
+
+    findInfoById(id) {
       this.$axios
-        .get("/user/findUserByAccount", {
+        .get("/user/findInfoById", {
           headers: authHeader(),
           params: {
-            account: this.form.account,
+            userId: id,
           },
         })
         .then((response) => {
-          this.pswd = response.data.password;
+          // this.pswd = response.data.password;
           this.form = response.data;
           // switch (role) {
           //   case 3:

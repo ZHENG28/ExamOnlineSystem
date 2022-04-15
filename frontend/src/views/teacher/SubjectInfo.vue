@@ -8,7 +8,7 @@
             clearFormFields();
             this.status = '新增';
             dialogFormVisible = true;
-            findAllTch();
+            findAllMajorAndClazz();
           "
           >新增</el-button
         >
@@ -31,23 +31,12 @@
           <el-form-item label="科目名称" prop="subjectName">
             <el-input v-model="subForm.subjectName"></el-input>
           </el-form-item>
-          <el-form-item label="授课教师" prop="teacherId">
-            <el-cascader
-              @change="valueToCascade"
-              v-model="teacherName"
-              placeholder="请选择授课教师"
-              :options="tchArr"
-              filterable
-              :show-all-levels="false"
-              :props="{ expandTrigger: 'hover' }"
-            ></el-cascader>
-          </el-form-item>
           <el-form-item label="授课班级" prop="clazzId">
             <el-cascader
-              @change="valueToCascade"
-              v-model="teacherName"
-              placeholder="请选择授课教师"
-              :options="tchArr"
+              @change="valueToClazzId"
+              v-model="majorclazzName"
+              placeholder="请选择授课班级"
+              :options="clazzList"
               filterable
               :show-all-levels="false"
               :props="{ expandTrigger: 'hover' }"
@@ -67,8 +56,7 @@
         tableData.filter(
           (data) =>
             !search ||
-            data.subjectName.toLowerCase().includes(search.toLowerCase()) ||
-            data.teacherName.toLowerCase().includes(search.toLowerCase())
+            data.subjectName.toLowerCase().includes(search.toLowerCase())
         )
       "
       border
@@ -78,7 +66,6 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="80"> </el-table-column>
       <el-table-column prop="subjectName" label="科目名称"> </el-table-column>
-      <el-table-column prop="teacherName" label="授课教师"> </el-table-column>
       <el-table-column
         prop="clazzName"
         label="授课班级"
@@ -91,7 +78,7 @@
       </el-table-column>
       <el-table-column width="300">
         <template #header>
-          <el-input v-model="search" placeholder="输入科目或教师姓名进行搜索" />
+          <el-input v-model="search" placeholder="输入科目名进行搜索" />
         </template>
         <template #default="scope">
           <el-button
@@ -126,25 +113,28 @@ import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
-      multiSelection: [],
       status: "",
       dialogFormVisible: false,
-      teacherName: [],
+      clazzList: [],
+      majorclazzName: [],
+      userId: "",
       subForm: {
         subjectId: "",
         subjectName: "",
-        tchId: "",
-        tchName: "",
+        clazzId: "",
+        clazzName: "",
       },
       formRules: {
         subjectName: [
           { required: true, message: "请填写科目", trigger: "blur" },
         ],
-        tchId: [
-          { required: true, message: "请选择授课教师", trigger: "change" },
+        clazzId: [
+          { required: true, message: "请选择授课班级", trigger: "blur" },
         ],
       },
-      tchArr: [],
+
+      multiSelection: [],
+      clazzNameFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -154,6 +144,7 @@ export default {
   },
   created() {
     this.loadData();
+    this.userId = this.$store.state.initialState.user.id;
   },
   methods: {
     // 初始化页面
@@ -166,14 +157,16 @@ export default {
       this.$nextTick(() => {
         this.$refs.subForm.clearValidate();
       });
-      this.teacherName = [];
+      this.majorclazzName = [];
     },
 
     findAll() {
       this.$axios
         .post(
-          "/subject/findAll",
+          "/subject/findAllByTchIdOrNot",
           this.$qs.stringify({
+            // userId:  this.userId,
+            userId: "4",
             pageno: this.pageno,
             size: this.size,
           }),
@@ -202,19 +195,21 @@ export default {
         });
     },
     clazzNameFilter(value, row) {
-      return row.clazzName == value;
+      return row.clazzName === value;
     },
 
-    findAllTch() {
+    findAllMajorAndClazz() {
       this.$axios
-        .post("/teacher/findAllTch", { headers: authHeader() })
+        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
         .then((response) => {
-          this.tchArr = response.data;
+          this.clazzList = response.data;
         });
     },
-    valueToCascade(row) {
-      this.subForm.tchId = row[1];
+    valueToClazzId(row) {
+      this.subForm.clazzId = row[1];
     },
+
+    // 新增&编辑
     loadInfo(id) {
       this.$axios
         .post("/subject/findById", this.$qs.stringify({ subjectId: id }), {
@@ -222,8 +217,8 @@ export default {
         })
         .then((response) => {
           this.subForm = response.data;
-          this.teacherName = [response.data.tchMajor, response.data.tchId];
-          this.findAllTch();
+          this.findAllMajorAndClazz();
+          this.majorclazzName = [response.data.major, response.data.clazzId];
         });
     },
     save() {
@@ -235,7 +230,9 @@ export default {
               params: {
                 subjectId: this.subForm.subjectId,
                 subjectName: this.subForm.subjectName,
-                teacherId: this.subForm.tchId,
+                // teacherId: this.userId,
+                teacherId: "4",
+                clazzId: this.subForm.clazzId,
               },
             })
             .then((response) => {

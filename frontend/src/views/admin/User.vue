@@ -134,7 +134,16 @@
       </el-table-column>
       <el-table-column prop="account" label="账号"> </el-table-column>
       <el-table-column prop="username" label="名字"> </el-table-column>
-      <el-table-column prop="clazzName" label="专业班级"> </el-table-column>
+      <el-table-column
+        prop="clazzName"
+        label="专业班级"
+        :filters="clazzNameFilterData"
+        :filter-method="clazzNameFilter"
+      >
+        <template #default="scope">
+          {{ scope.row.clazzName }}
+        </template>
+      </el-table-column>
       <el-table-column width="300">
         <template #header>
           <el-input v-model="search" placeholder="输入账号或名字进行搜索" />
@@ -190,6 +199,7 @@ export default {
       roleFilterData: [],
 
       multiSelection: [],
+      clazzNameFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -205,6 +215,7 @@ export default {
     loadData() {
       this.findAll();
       this.findDistinctRole();
+      this.findDistinctClazzName();
     },
     clearFormFields() {
       this.user = new User("", "", "", "");
@@ -241,6 +252,16 @@ export default {
       this.findAll();
     },
 
+    findDistinctClazzName() {
+      this.$axios
+        .get("/clazz/getDistinctClazz", { headers: authHeader() })
+        .then((response) => {
+          this.clazzNameFilterData = response.data;
+        });
+    },
+    clazzNameFilter(value, row) {
+      return row.clazzName === value;
+    },
     roleFilter(value, row) {
       return row.roleName === value;
     },

@@ -37,28 +37,11 @@ public class Test implements Serializable {
     private Integer clazzId;
 
     @TableField(select = false)
-    private String subName;
+    private String subjectName;
 
     @TableField(select = false)
     private String major;
 
     @TableField(select = false)
     private String clazzName;
-
-    @Override
-    public String toString() {
-        return "Test{" +
-        "testId=" + testId +
-        ", beginDate=" + beginDate +
-        ", description=" + description +
-        ", endDate=" + endDate +
-        ", examDure=" + examDure +
-        ", examTime=" + examTime +
-        ", quesArr=" + quesArr +
-        ", testName=" + testName +
-        ", totalScore=" + totalScore +
-        ", subjectId=" + subjectId +
-        ", clazzId=" + clazzId +
-        "}";
-    }
 }
