@@ -7,6 +7,4 @@ import java.util.List;
 
 
 public interface RoleMapper extends BaseMapper<Role> {
-
-    public List<Role> selectDistinctRole();
 }

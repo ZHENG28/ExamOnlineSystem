@@ -247,7 +247,7 @@ export default {
 
     findDistinctRole() {
       this.$axios
-        .get("/role/getDistinctRole", { headers: authHeader() })
+        .get("/role/findAll", { headers: authHeader() })
         .then((response) => {
           this.roleListData = response.data;
           response.data.forEach((item) => {

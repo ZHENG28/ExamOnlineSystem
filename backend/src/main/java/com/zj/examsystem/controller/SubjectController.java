@@ -20,10 +20,10 @@ public class SubjectController {
     @Autowired
     private SubjectService subjectService;
 
-    @PostMapping("/findAll")
+    @PostMapping("/findAllByTchIdOrNot")
     @ResponseBody
-    public Object findAll(Integer pageno, Integer size) {
-        return subjectService.findAll(pageno, size);
+    public Object findAllByTchIdOrNot(Integer pageno, Integer size, Integer... userId) {
+        return subjectService.findAll(pageno, size, userId);
     }
 
     @PostMapping("/findAllSubId")

@@ -26,10 +26,17 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     //    @Autowired
     //    private TeacherMapper teacherMapper;
 
-    public IPage<Subject> findAll(Integer pageno, Integer size) {
+    public IPage<Subject> findAll(Integer pageno, Integer size, Integer... userId) {
         QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
         Page<Subject> page = new Page<>(pageno, size);
-        return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
+
+        if (userId == null) {
+            return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
+        } else {
+            //            Student stu = studentMapper.selectById(id);
+            //            queryWrapper.eq("test_clazz", stu.getClazzId());
+            return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
+        }
     }
 
     public List<Map<String, Object>> findDistinctSubject() {

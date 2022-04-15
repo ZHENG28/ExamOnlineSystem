@@ -21,7 +21,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private RoleMapper roleMapper;
 
     @Override
-    public List<Role> getDistinctRole() {
-        return roleMapper.selectDistinctRole();
+    public List<Role> findAll() {
+        QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
+        return roleMapper.selectList(queryWrapper);
     }
 }

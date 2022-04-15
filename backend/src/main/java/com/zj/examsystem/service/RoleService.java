@@ -9,5 +9,5 @@ import java.util.Map;
 
 public interface RoleService extends IService<Role> {
 
-    public List<Role> getDistinctRole();
+    public List<Role> findAll();
 }

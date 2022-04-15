@@ -16,10 +16,10 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
 
-    @GetMapping("/getDistinctRole")
+    @GetMapping("/findAll")
     @ResponseBody
-    public Object getDistinctRole() {
-        return roleService.getDistinctRole();
+    public Object findAll() {
+        return roleService.findAll();
     }
 }
 

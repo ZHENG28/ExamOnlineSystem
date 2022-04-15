@@ -9,7 +9,7 @@ import java.util.Map;
 
 
 public interface SubjectService extends IService<Subject> {
-    public IPage<Subject> findAll(Integer pageno, Integer size);
+    public IPage<Subject> findAll(Integer pageno, Integer size, Integer... userId);
 
     public List<Map<String, Object>> findDistinctSubject();
 
