@@ -320,7 +320,7 @@ export default {
     },
     findDistinctRole() {
       this.$axios
-        .get("/role/findAll", { headers: authHeader() })
+        .get("/role/getDistinctRole", { headers: authHeader() })
         .then((response) => {
           response.data.forEach((item) => {
             this.roleFilterData.push({

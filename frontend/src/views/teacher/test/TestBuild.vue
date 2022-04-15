@@ -46,18 +46,18 @@
       </el-row>
       <el-row>
         <el-col :span="6">
-          <el-form-item label="所属科目" prop="subName">
+          <el-form-item label="所属科目" prop="subjectName">
             <el-select
               filterable
               placeholder="请选择科目"
               @change="valueTosubId"
-              v-model="testForm.subName"
+              v-model="testForm.subjectName"
             >
               <el-option
                 v-for="sub in subIdFilterData"
-                :key="sub.subId"
+                :key="sub.subjectId"
                 :label="sub.text"
-                :value="sub.subId"
+                :value="sub.subjectId"
               >
               </el-option>
             </el-select>
@@ -67,23 +67,23 @@
           <el-form-item prop="quesArr">
             <el-button
               type="primary"
-              :disabled="testForm.subId == ''"
+              :disabled="testForm.subjectId == ''"
               @click="
-                findQuesBySubId(testForm.subId);
+                findQuesBySubId(testForm.subjectId);
                 dialogFormVisible = true;
               "
               style="margin-right: 30px"
               >选择考题</el-button
             >
-            <p
+            <span
               :style="{
                 display: 'inline',
                 color: 'red',
-                visibility: testForm.subId != '' ? 'hidden' : 'visible',
+                visibility: testForm.subjectId != '' ? 'hidden' : 'visible',
               }"
             >
               请先选择所属科目
-            </p>
+            </span>
             <div class="dialog-container">
               <el-dialog
                 title="添加考试题目"
@@ -146,7 +146,9 @@
           <el-form-item label="测验时长" prop="examDure">
             <el-input-number
               v-model="testForm.examDure"
-              :step="30"
+              step="30"
+              min="0"
+              placeholder="0"
             ></el-input-number>
             分钟
           </el-form-item>
@@ -155,14 +157,21 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="测验总分" prop="totalScore">
-            <el-input v-model="testForm.totalScore"></el-input>
+            <el-input-number
+              v-model="testForm.totalScore"
+              step="50"
+              min="0"
+              placeholder="100"
+            ></el-input-number>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="测验次数" prop="examTime">
             <el-input-number
               v-model="testForm.examTime"
-              :step="1"
+              step="1"
+              min="0"
+              placeholder="1"
             ></el-input-number>
           </el-form-item>
         </el-col>
@@ -175,45 +184,40 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
-// import echarts from "echarts";
+import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
       status: "",
-      randomCheck: [],
       dialogFormVisible: false,
-      quesList: [],
-      testQues: [],
-      subIdFilterData: [],
-      clazzArr: [],
-      majorclazzArr: [],
-      majorclazzName: [],
       testForm: {
         testId: "",
         testName: "",
+        clazzId: "",
+        major: "",
+        clazzName: "",
         description: "",
-        subId: "",
-        subName: "",
+        subjectId: "",
+        subjectName: "",
         quesArr: "",
+        date: [],
         beginDate: "",
         endDate: "",
-        date: [],
         examDure: 0,
-        testClazz: "",
-        clazzName: "",
-        major: "",
-        totalScore: "",
-        examTime: 0,
+        totalScore: 100,
+        examTime: 1,
       },
       formRules: {
         testName: [
           { required: true, message: "请填写本次测验标题", trigger: "blur" },
         ],
+        clazzId: [
+          { required: true, message: "请选择测验班级", trigger: "blur" },
+        ],
         description: [
           { required: false, message: "请填写本次测验简介", trigger: "blur" },
         ],
-        subName: [
+        subjectName: [
           { required: true, message: "请选择所属科目", trigger: "change" },
         ],
         quesArr: [{ required: true, message: "请选择题库", trigger: "blur" }],
@@ -226,24 +230,61 @@ export default {
             message: "请填写测验时长",
             trigger: "blur",
           },
-        ],
-        testClazz: [
-          { required: true, message: "请选择测验班级", trigger: "blur" },
+          {
+            type: "number",
+            asyncValidator: (rule, value) => {
+              return new Promise((resolve, reject) => {
+                if (value == 0) {
+                  reject("测验时长不能为0，请填写");
+                } else {
+                  resolve();
+                }
+              });
+            },
+          },
         ],
         totalScore: [
           { required: true, message: "请填写测验总分", trigger: "blur" },
+          {
+            type: "number",
+            asyncValidator: (rule, value) => {
+              return new Promise((resolve, reject) => {
+                if (value == 0) {
+                  reject("测验总分不能为0，请填写");
+                } else {
+                  resolve();
+                }
+              });
+            },
+          },
         ],
         examTime: [
           {
-            // type: "number",
             required: true,
             message: "请填写测验次数",
             trigger: "blur",
-            // inputPattern: /^[1-9]\d*$/,
-            // inputErrorMessage: "请填写测验次数",
+          },
+          {
+            type: "number",
+            asyncValidator: (rule, value) => {
+              return new Promise((resolve, reject) => {
+                if (value == 0) {
+                  reject("测验次数不能为0，请填写");
+                } else {
+                  resolve();
+                }
+              });
+            },
           },
         ],
       },
+
+      majorclazzArr: [],
+      majorclazzName: [],
+      subIdFilterData: [],
+      quesList: [],
+      testQues: [],
+      randomCheck: [],
     };
   },
   created() {
@@ -257,6 +298,7 @@ export default {
     this.loadData();
   },
   methods: {
+    // 初始化页面
     loadData() {
       this.findAllSub();
       this.findAllMajorAndClazz();
@@ -273,26 +315,20 @@ export default {
 
     findAllSub() {
       this.$axios
-        .post(
-          "/subject/findAllSubId"
-          //  { headers: authHeader() }
-        )
+        .post("/subject/findAllSubId", { headers: authHeader() })
         .then((response) => {
           this.subIdFilterData = response.data;
         });
     },
     findAllMajorAndClazz() {
       this.$axios
-        .get(
-          "/clazz/findAllMajorAndClazz"
-          // { headers: authHeader(), }
-        )
+        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
         .then((response) => {
           this.majorclazzArr = response.data;
         });
     },
     valueTosubId(val) {
-      this.testForm.subId = val;
+      this.testForm.subjectId = val;
       this.testQues = [];
     },
     valueToCascade(row) {
@@ -304,9 +340,9 @@ export default {
         .post(
           "/singleQuestion/findQuesBySubId",
           this.$qs.stringify({
-            subId: id,
-          })
-          // { headers: authHeader() }
+            subjectId: id,
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.quesList = [];
@@ -349,18 +385,16 @@ export default {
 
     loadInfo(id) {
       this.$axios
-        .post(
-          "/test/findById",
-          this.$qs.stringify({ testId: id })
-          // { headers: authHeader(), }
-        )
+        .post("/test/findById", this.$qs.stringify({ testId: id }), {
+          headers: authHeader(),
+        })
         .then((response) => {
           this.testForm = response.data;
           this.testForm.date = [
             this.formatDate(this.testForm.beginDate),
             this.formatDate(this.testForm.endDate),
           ];
-          this.majorclazzName = [this.testForm.major, this.testForm.testClazz];
+          this.majorclazzName = [this.testForm.major, this.testForm.clazzId];
         });
     },
     save() {
@@ -368,17 +402,17 @@ export default {
         if (valid) {
           this.$axios
             .get("/test/save", {
-              // headers: authHeader(),
+              headers: authHeader(),
               params: {
                 testId: this.testForm.testId,
                 testName: this.testForm.testName,
                 description: this.testForm.description,
-                subId: this.testForm.subId,
+                subjectId: this.testForm.subjectId,
                 quesArr: this.testForm.quesArr,
                 beginDate: this.testForm.date[0],
                 endDate: this.testForm.date[1],
                 examDure: this.testForm.examDure,
-                testClazz: this.testForm.clazzId,
+                clazzId: this.testForm.clazzId,
                 totalScore: this.testForm.totalScore,
                 examTime: this.testForm.examTime,
               },
@@ -417,7 +451,4 @@ export default {
 .transfer-container >>> .el-transfer-panel__body {
   height: 500px;
 }
-/* .transfer-container >>> .el-transfer-panel__list.is-filterable {
-  height: 389px;
-} */
 </style>

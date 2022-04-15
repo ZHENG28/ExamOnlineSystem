@@ -99,7 +99,8 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
+// import echarts from "echarts";
 export default {
   data() {
     return {

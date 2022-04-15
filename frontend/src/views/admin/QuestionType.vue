@@ -21,20 +21,20 @@
         width="600px"
       >
         <el-form
-          :model="typeForm"
+          :model="questionTypeForm"
           :rules="formRules"
-          ref="typeForm"
+          ref="questionTypeForm"
           label-width="200px"
           label-position="right"
         >
           <el-form-item label="名称" prop="typeName">
-            <el-input v-model="typeForm.typeName"></el-input>
+            <el-input v-model="questionTypeForm.typeName"></el-input>
           </el-form-item>
           <el-form-item label="描述" prop="description">
             <el-input
               type="textarea"
               :autosize="{ minRows: 2 }"
-              v-model="typeForm.description"
+              v-model="description"
               style="width: 250px"
               maxlength="100"
               show-word-limit
@@ -105,7 +105,7 @@ export default {
     return {
       status: "",
       dialogFormVisible: false,
-      typeForm: {
+      questionTypeForm: {
         typeId: "",
         typeName: "",
         description: "",
@@ -133,7 +133,7 @@ export default {
       this.findAll();
     },
     clearFormFields() {
-      this.typeForm = "";
+      this.questionTypeForm = "";
     },
 
     findAll() {
@@ -168,19 +168,19 @@ export default {
           headers: authHeader(),
         })
         .then((response) => {
-          this.typeForm = response.data;
+          this.questionTypeForm = response.data;
         });
     },
     save() {
-      this.$refs.typeForm.validate((valid) => {
+      this.$refs.questionTypeForm.validate((valid) => {
         if (valid) {
           this.$axios
             .post(
               "/questionType/save",
               {
-                typeId: this.typeForm.typeId,
-                typeName: this.typeForm.typeName,
-                description: this.typeForm.description,
+                typeId: this.questionTypeForm.typeId,
+                typeName: this.questionTypeForm.typeName,
+                description: this.questionTypeForm.description,
               },
               { headers: authHeader() }
             )

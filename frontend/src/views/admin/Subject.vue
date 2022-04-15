@@ -97,7 +97,10 @@
       </el-table-column>
       <el-table-column width="300">
         <template #header>
-          <el-input v-model="search" placeholder="输入科目或教师姓名进行搜索" />
+          <el-input
+            v-model="search"
+            placeholder="输入科目名或教师姓名进行搜索"
+          />
         </template>
         <template #default="scope">
           <el-button
@@ -188,7 +191,7 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/subject/findAll",
+          "/subject/findAllByTchIdOrNot",
           this.$qs.stringify({
             pageno: this.pageno,
             size: this.size,
@@ -253,6 +256,7 @@ export default {
           this.subForm = response.data;
           this.findAllTeacher();
           this.teacherName = response.data.teacherId;
+          this.subForm.userId = response.data.teacherId;
           this.findAllMajorAndClazz();
           this.majorclazzName = [response.data.major, response.data.clazzId];
         });

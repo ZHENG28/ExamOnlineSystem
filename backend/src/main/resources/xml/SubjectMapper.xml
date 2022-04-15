@@ -23,6 +23,7 @@
         FROM subject s
                  JOIN clazz c on s.clazz_id = c.clazz_id
                  JOIN user u on s.teacher_id = u.user_id
+            ${ew.customSqlSegment}
     </select>
     <select id="findByIdWithTeacherAndClazz" resultMap="SubjectWithTeacherAndClazz">
         SELECT s.*, c.*, u.user_id as teacher_id, u.username as teacher_name
