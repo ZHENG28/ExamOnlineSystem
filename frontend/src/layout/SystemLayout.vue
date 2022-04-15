@@ -12,6 +12,7 @@
           text-color="#fff"
           active-text-color="#000"
           default-active="home"
+          :style="{ height: menuHeight }"
         >
           <el-menu-item index="home" route="/home" class="nav-font">
             <template #title>
@@ -65,11 +66,12 @@
             </template>
           </el-menu-item>
 
+          <!-- teacher -->
           <el-menu-item
             index="subjectInfo"
             route="/teacher/subjectInfo"
             class="nav-font"
-            v-if="showAdmin"
+            v-if="showTeacher"
           >
             <template #title>
               <el-icon><help-filled /></el-icon>
@@ -90,7 +92,7 @@
           <el-sub-menu index="tch-test" v-if="showTeacher">
             <template #title>
               <el-icon><edit /></el-icon>
-              <span class="nav-font">测验</span>
+              <span class="nav-font">测验信息</span>
             </template>
             <el-menu-item-group>
               <el-menu-item
@@ -107,10 +109,12 @@
                 class="nav-font"
               >
                 <el-icon><document /></el-icon>
-                查看测验信息
+                管理测验信息
               </el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
+
+          <!-- student -->
           <el-menu-item
             index="stu-test"
             route="/student/test"
@@ -154,32 +158,12 @@ export default {
       showAdmin: true,
       showTeacher: true,
       showStudent: true,
+      menuHeight: "",
     };
   },
-  computed: {
-    // currentUser() {
-    //   // return this.$store.state.auth.initialState.user;
-    // },
-    // showTeacher() {
-    //   // if (this.currentUser && this.currentUser.roles) {
-    //   //   return this.currentUser.roles.includes("ROLE_TEACHER");
-    //   // }
-    //   return true;
-    // },
-    // showAdmin() {
-    //   // if (this.currentUser && this.currentUser.roles) {
-    //   //   return this.currentUser.roles.includes("ROLE_ADMIN");
-    //   // }
-    //   return true;
-    // },
-    // showStudent() {
-    //   // if (this.currentUser && this.currentUser.roles) {
-    //   //   return this.currentUser.roles.includes("ROLE_STUDENT");
-    //   // }
-    //   return true;
-    // },
-  },
   created() {
+    this.menuHeight = document.documentElement.clientHeight - 180 + "px";
+
     let user = this.$store.state.initialState.user;
     if (user && user.roles) {
       // this.showAdmin = user.roles.includes("ROLE_ADMIN");

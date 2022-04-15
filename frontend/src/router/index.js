@@ -49,14 +49,14 @@ const routes = [
         component: () => import('../views/teacher/Question.vue'),
       },
       {
-        path: '/teacher/testInfo',
-        name: '测验信息',
-        component: () => import('../views/teacher/test/TestInfo.vue'),
-      },
-      {
         path: '/teacher/testBuild/:testId',
         name: '发布测验',
         component: () => import('../views/teacher/test/TestBuild.vue'),
+      },
+      {
+        path: '/teacher/testInfo',
+        name: '管理测验信息',
+        component: () => import('../views/teacher/test/TestInfo.vue'),
       },
 
       // student
