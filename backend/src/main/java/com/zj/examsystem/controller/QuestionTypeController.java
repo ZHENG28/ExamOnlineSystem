@@ -31,7 +31,7 @@ public class QuestionTypeController {
 //        return questionTypeService.findDistinctQuestionType();
 //    }
 
-    @GetMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public Object save(QuestionType questionType) {
         int result = questionTypeService.saveQuestionType(questionType);
@@ -39,8 +39,8 @@ public class QuestionTypeController {
     }
 
     @PostMapping("/del")
-    public ModelAndView delete(Integer[] questionTypeId, Integer pageno, Integer size) {
-        int result = questionTypeService.deleteQuestionType(questionTypeId);
+    public ModelAndView delete(Integer[] typeId, Integer pageno, Integer size) {
+        int result = questionTypeService.deleteQuestionType(typeId);
 
         ModelAndView mv = new ModelAndView();
         if (result != 0) {
