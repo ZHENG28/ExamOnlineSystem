@@ -21,20 +21,20 @@
         width="600px"
       >
         <el-form
-          :model="questionTypeForm"
+          :model="typeForm"
           :rules="formRules"
-          ref="questionTypeForm"
+          ref="typeForm"
           label-width="200px"
           label-position="right"
         >
           <el-form-item label="名称" prop="typeName">
-            <el-input v-model="questionTypeForm.typeName"></el-input>
+            <el-input v-model="typeForm.typeName"></el-input>
           </el-form-item>
           <el-form-item label="描述" prop="description">
             <el-input
               type="textarea"
               :autosize="{ minRows: 2 }"
-              v-model="description"
+              v-model="typeForm.description"
               style="width: 250px"
               maxlength="100"
               show-word-limit
@@ -62,7 +62,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="40"> </el-table-column>
-      <el-table-column type="index" label="序号" width="80"></el-table-column>
+      <el-table-column type="index" label="序号" width="80"> </el-table-column>
       <el-table-column prop="typeName" label="名称" width="200">
       </el-table-column>
       <el-table-column prop="description" label="描述"> </el-table-column>
@@ -105,7 +105,7 @@ export default {
     return {
       status: "",
       dialogFormVisible: false,
-      questionTypeForm: {
+      typeForm: {
         typeId: "",
         typeName: "",
         description: "",
@@ -133,7 +133,10 @@ export default {
       this.findAll();
     },
     clearFormFields() {
-      this.questionTypeForm = "";
+      this.typeForm = {};
+      this.$nextTick(() => {
+        this.$refs.typeForm.clearValidate();
+      });
     },
 
     findAll() {
@@ -168,19 +171,19 @@ export default {
           headers: authHeader(),
         })
         .then((response) => {
-          this.questionTypeForm = response.data;
+          this.typeForm = response.data;
         });
     },
     save() {
-      this.$refs.questionTypeForm.validate((valid) => {
+      this.$refs.typeForm.validate((valid) => {
         if (valid) {
           this.$axios
             .post(
               "/questionType/save",
               {
-                typeId: this.questionTypeForm.typeId,
-                typeName: this.questionTypeForm.typeName,
-                description: this.questionTypeForm.description,
+                typeId: this.typeForm.typeId,
+                typeName: this.typeForm.typeName,
+                description: this.typeForm.description,
               },
               { headers: authHeader() }
             )
