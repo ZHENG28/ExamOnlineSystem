@@ -144,7 +144,7 @@ export default {
   },
   created() {
     this.loadData();
-    this.userId = this.$store.state.initialState.user.id;
+    this.userId = this.$storage.getStorageSync("user").id;
   },
   methods: {
     // 初始化页面

@@ -6,15 +6,12 @@
         <el-button
           @click="
             clearFormFields();
-            this.status = '添加';
+            this.status = '新增';
             dialogFormVisible = true;
           "
-          >添加</el-button
+          >新增</el-button
         >
-        <el-button
-          type="danger"
-          @click="del(this.multiSelection)"
-          :disabled="false"
+        <el-button type="danger" @click="del(this.multiSelection)"
           >删除</el-button
         >
       </div>
@@ -24,18 +21,18 @@
         width="600px"
       >
         <el-form
-          :model="quesForm"
+          :model="questionForm"
           :rules="formRules"
-          ref="quesForm"
+          ref="questionForm"
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="所属科目" prop="subName">
+          <el-form-item label="所属科目" prop="subjectName">
             <el-select
               filterable
-              placeholder="请选择科目"
+              placeholder="请选择所属科目"
               @change="valueTosubId"
-              v-model="quesForm.subName"
+              v-model="questionForm.subjectName"
             >
               <el-option
                 v-for="sub in subIdFilterData"
@@ -44,28 +41,101 @@
                 :value="sub.subId"
               >
               </el-option>
-            </el-select> </el-form-item
-          ><el-form-item label="题目信息" prop="quesTitle">
-            <el-input v-model="quesForm.quesTitle"></el-input> </el-form-item
-          ><el-form-item label="选项A" prop="opta">
-            <el-input v-model="quesForm.opta"></el-input> </el-form-item
-          ><el-form-item label="选项B" prop="optb">
-            <el-input v-model="quesForm.optb"></el-input> </el-form-item
-          ><el-form-item label="选项C" prop="optc">
-            <el-input v-model="quesForm.optc"></el-input> </el-form-item
-          ><el-form-item label="选项D" prop="optd">
-            <el-input v-model="quesForm.optd"></el-input> </el-form-item
-          ><el-form-item label="正确答案" prop="answer">
-            <el-select v-model="quesForm.answer" placeholder="请选择正确答案">
-              <el-option label="A" value="A"></el-option>
-              <el-option label="B" value="B"></el-option>
-              <el-option label="C" value="C"></el-option>
-              <el-option label="D" value="D"></el-option>
             </el-select>
+          </el-form-item>
+          <el-form-item label="题目类型" prop="typeName">
+            <el-select
+              filterable
+              placeholder="请选择题目类型"
+              @change="valueTotypeId"
+              v-model="questionForm.typeName"
+            >
+              <el-option
+                v-for="sub in typeIdFilterData"
+                :key="sub.typeId"
+                :label="sub.text"
+                :value="sub.typeId"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="题目信息" prop="questionTitle">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 2 }"
+              v-model="questionForm.questionTitle"
+              style="width: 250px"
+              maxlength="50"
+              show-word-limit
+            ></el-input>
+          </el-form-item>
+          <div v-if="questionForm.typeId == '1'">
+            <el-form-item
+              v-for="(option, index) in questionForm.answer"
+              :key="option.answerId"
+              :label="'选项' + number2Letter(index)"
+              :prop="'answer[' + index + '].content'"
+              :rules="{
+                required: true,
+                message: '请填写选项' + number2Letter(index) + '的内容',
+                trigger: 'blur',
+              }"
+            >
+              <el-input v-model="option.content" style="margin-right: 5px" />
+              <el-button type="info" @click.prevent="removeOptions(option)"
+                >-</el-button
+              >
+            </el-form-item>
+          </div>
+          <el-form-item
+            label="正确答案"
+            prop="correct"
+            :rules="{
+              required: questionForm.typeId != '3',
+              message: '请选择正确答案',
+              trigger: 'blur',
+            }"
+            v-if="questionForm.typeId != undefined"
+          >
+            <el-select
+              v-model="questionForm.correct"
+              placeholder="请选择正确答案"
+              v-if="questionForm.typeId == '1'"
+            >
+              <el-option
+                v-for="(option, index) in questionForm.answer"
+                :key="option.key"
+                :label="number2Letter(index)"
+                :value="number2Letter(index)"
+              ></el-option>
+            </el-select>
+            <el-button-group v-if="questionForm.typeId == '2'">
+              <el-button
+                icon="check"
+                round
+                :type="isTrue"
+                @click="changeJudge(true)"
+              ></el-button>
+              <el-button
+                icon="close"
+                round
+                :type="isFalse"
+                @click="changeJudge(false)"
+              ></el-button>
+            </el-button-group>
+            <span style="color: red" v-if="questionForm.typeId == '3'">
+              简答题默认无标准答案，并用相似度对比
+            </span>
           </el-form-item>
         </el-form>
         <template #footer>
           <span class="dialog-footer">
+            <el-button
+              type="danger"
+              v-if="questionForm.typeId == '1'"
+              @click="addOptions(questionForm.answer.length)"
+              >+ 选项</el-button
+            >
             <el-button @click="dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="save()">确 定</el-button>
           </span>
@@ -77,7 +147,7 @@
         tableData.filter(
           (data) =>
             !search ||
-            data.quesTitle.toLowerCase().includes(search.toLowerCase())
+            data.questionTitle.toLowerCase().includes(search.toLowerCase())
         )
       "
       border
@@ -87,24 +157,39 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="80"> </el-table-column>
       <el-table-column
-        prop="subName"
+        prop="subjectName"
         label="所属科目"
         :filters="subIdFilterData"
         :filter-method="subIdFilter"
+        width="150"
       >
       </el-table-column>
-      <el-table-column prop="quesTitle" label="题目"> </el-table-column>
-      <el-table-column prop="answer" label="正确答案">
+      <el-table-column
+        prop="typeName"
+        label="类型"
+        :filters="typeIdFilterData"
+        :filter-method="typeIdFilter"
+        width="100"
+      >
+      </el-table-column>
+      <el-table-column prop="questionTitle" label="题目"> </el-table-column>
+      <el-table-column prop="answer" label="正确答案" width="100">
         <template #default="scope">
-          <el-popover trigger="hover" placement="right">
-            <p>选项A: {{ scope.row.opta }}</p>
-            <p>选项B: {{ scope.row.optb }}</p>
-            <p>选项C: {{ scope.row.optc }}</p>
-            <p>选项D: {{ scope.row.optd }}</p>
+          <el-popover
+            trigger="hover"
+            placement="left"
+            v-if="scope.row.typeId == '1'"
+          >
+            <p v-for="option in scope.row.answer" :key="option.answerId">
+              <span>选项{{ option.answerSign }}: {{ option.content }}</span>
+            </p>
             <template #reference class="name-wrapper">
-              <el-tag>{{ scope.row.answer }}</el-tag>
+              <el-tag>{{ scope.row.correct }}</el-tag>
             </template>
           </el-popover>
+          <el-tag v-if="scope.row.typeId == '2'">
+            {{ scope.row.answer[0].answerSign == "1" ? "√" : "×" }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column width="300">
@@ -117,7 +202,7 @@
               clearFormFields();
               this.status = '修改';
               dialogFormVisible = true;
-              loadInfo(scope.row.quesId);
+              loadInfo(scope.row.questionId);
             "
             >编辑</el-button
           >
@@ -140,46 +225,46 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
-      multiSelection: [],
       status: "",
       dialogFormVisible: false,
-      quesForm: {
-        quesId: "",
-        subId: "",
-        subName: "",
-        quesTitle: "",
-        opta: "",
-        optb: "",
-        optc: "",
-        optd: "",
-        answer: "",
+      questionForm: {
+        questionId: "",
+        questionTitle: "",
+        subjectId: "",
+        subjectName: "",
+        typeId: "",
+        typeName: "",
+        answer: [
+          {
+            answerId: "",
+            answerSign: "",
+            content: "",
+            isCorrect: 0, // 1-是
+          },
+        ],
+        correct: "",
       },
       formRules: {
-        subName: [{ required: true, message: "请选择科目", trigger: "blur" }],
-        quesTitle: [
+        questionTitle: [
           { required: true, message: "请填写题目信息", trigger: "blur" },
         ],
-        opta: [
-          { required: true, message: "请填写选项A的内容", trigger: "blur" },
+        subjectName: [
+          { required: true, message: "请选择所属科目", trigger: "blur" },
         ],
-        optb: [
-          { required: true, message: "请填写选项B的内容", trigger: "blur" },
-        ],
-        optc: [
-          { required: true, message: "请填写选项C的内容", trigger: "blur" },
-        ],
-        optd: [
-          { required: true, message: "请填写选项D的内容", trigger: "blur" },
-        ],
-        answer: [
-          { required: true, message: "请选择正确答案", trigger: "blur" },
+        typeName: [
+          { required: true, message: "请选择题目类型", trigger: "blur" },
         ],
       },
+      isTrue: "",
+      isFalse: "",
+
+      multiSelection: [],
       subIdFilterData: [],
+      typeIdFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -191,23 +276,43 @@ export default {
     this.loadData();
   },
   methods: {
+    // 初始化页面
     loadData() {
       this.findAll();
       this.findAllSubId();
+      this.findAllTypeId();
     },
     clearFormFields() {
-      this.quesForm = {};
+      this.questionForm = {};
+      this.questionForm.answer = [
+        {
+          answerId: "",
+          answerSign: "A",
+          content: "",
+          isCorrect: 0,
+        },
+      ];
+      this.$nextTick(() => {
+        this.$refs.questionForm.clearValidate();
+      });
+      this.isTrue = "";
+      this.isFalse = "";
+    },
+    number2Letter(num) {
+      return String.fromCharCode("A".charCodeAt() + num);
     },
 
     findAll() {
       this.$axios
         .post(
-          "/singleQuestion/findAll",
+          "/question/findAllByTeacherId",
           this.$qs.stringify({
+            // userId: this.$storage.getStorageSync("user").id,
+            userId: "4",
             pageno: this.pageno,
             size: this.size,
-          })
-          // { headers: authHeader() }
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.tableData = response.data.records;
@@ -223,52 +328,120 @@ export default {
       this.pageno = pageno;
       this.findAll();
     },
-    valueTosubId(val) {
-      this.quesForm.subId = val;
+    subIdFilter(value, row) {
+      return row.subjectName === value;
+    },
+    typeIdFilter(value, row) {
+      return row.typeName === value;
     },
 
     findAllSubId() {
       this.$axios
         .post(
-          "/subject/findAllSubId"
-          //  { headers: authHeader() }
+          "/subject/findAllSubIdByUserId",
+          this.$qs.stringify({ userId: "4" }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.subIdFilterData = response.data;
         });
     },
-    subIdFilter(value, row) {
-      return row.subName == value;
+    valueTosubId(val) {
+      this.questionForm.subjectId = val;
+    },
+    findAllTypeId() {
+      this.$axios
+        .post("/questionType/findAllQuestionTypeId", { headers: authHeader() })
+        .then((response) => {
+          this.typeIdFilterData = response.data;
+        });
+    },
+    valueTotypeId(val) {
+      this.questionForm.typeId = val;
+      this.questionForm.answer = [
+        {
+          answerId: "",
+          answerSign: "A",
+          content: "",
+          isCorrect: 0,
+        },
+      ];
     },
 
+    addOptions(index) {
+      console.log(this.questionForm.answer);
+      this.questionForm.answer.push({
+        answerId: "",
+        answerSign: this.number2Letter(index),
+        content: "",
+        isCorrect: 0,
+      });
+    },
+    removeOptions(item) {
+      let index = this.questionForm.answer.indexOf(item);
+      if (index != -1) {
+        this.questionForm.answer.splice(index, 1);
+        this.questionForm.correct = "";
+      }
+      // 更新选项
+      this.questionForm.answer.forEach((item) => {
+        item.answerSign = this.number2Letter(
+          this.questionForm.answer.indexOf(item)
+        );
+      });
+    },
+    changeJudge(choose) {
+      this.questionForm.correct = choose;
+      this.isTrue = choose ? "primary" : "";
+      this.isFalse = !choose ? "primary" : "";
+    },
+
+    // 新增&编辑
     loadInfo(id) {
       this.$axios
         .post(
-          "/singleQuestion/findById",
-          this.$qs.stringify({ quesId: id })
-          // { headers: authHeader(),}
+          "/question/findById",
+          this.$qs.stringify({
+            questionId: id,
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
-          this.quesForm = response.data;
+          this.questionForm = response.data;
+          if (this.questionForm.typeId == "2") {
+            this.changeJudge(this.questionForm.correct == "1");
+          }
         });
     },
     save() {
-      this.$refs.quesForm.validate((valid) => {
+      this.$refs.questionForm.validate((valid) => {
         if (valid) {
+          let data = {
+            questionId: this.questionForm.questionId,
+            questionTitle: this.questionForm.questionTitle,
+            subjectId: this.questionForm.subjectId,
+            typeId: this.questionForm.typeId,
+            correct: this.questionForm.correct,
+          };
+          let option = [""];
+          if (this.questionForm.typeId == "1") {
+            // choice
+            this.questionForm.answer.forEach((item) => {
+              option.push(
+                (item.answerId != "" ? item.answerId + " " : "") +
+                  item.answerSign +
+                  " " +
+                  item.content
+              );
+            });
+          }
+          data.correct += option;
           this.$axios
-            .get("/singleQuestion/save", {
-              // headers: authHeader(),
-              params: {
-                quesId: this.quesForm.quesId,
-                subId: this.quesForm.subId,
-                quesTitle: this.quesForm.quesTitle,
-                opta: this.quesForm.opta,
-                optb: this.quesForm.optb,
-                optc: this.quesForm.optc,
-                optd: this.quesForm.optd,
-                answer: this.quesForm.answer,
-              },
-            })
+            .post(
+              "/question/save",
+              this.$qs.stringify(data, { indices: false }),
+              { headers: authHeader() }
+            )
             .then((response) => {
               this.dialogFormVisible = false;
               if (response.data) {
@@ -286,45 +459,52 @@ export default {
       });
     },
 
+    // 删除
     handleSelectionChange(val) {
       this.multiSelection = val;
     },
     del(arr) {
-      this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = [];
-          arr.forEach(function (item) {
-            params.push(item.quesId);
-          });
-          this.$axios
-            .post(
-              "/singleQuestion/del",
-              this.$qs.stringify(
-                {
-                  quesId: params,
-                  pageno: this.pageno,
-                  size: this.size,
-                },
-                { indices: false }
-              )
-              // { headers: authHeader() }
-            )
-            .then((response) => {
-              this.tableData = response.data.records;
-              this.totalItems = response.data.total;
-              this.$message.success("删除成功！");
-            })
-            .catch(() => {
-              this.$message.error("删除失败");
-            });
+      if (arr.length) {
+        this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         })
-        .catch(() => {
-          this.$message.info("已取消删除");
-        });
+          .then(() => {
+            let params = [];
+            arr.forEach(function (item) {
+              params.push(item.questionId);
+            });
+            this.$axios
+              .post(
+                "/question/del",
+                this.$qs.stringify(
+                  {
+                    // userId: this.$storage.getStorageSync("user").id,
+                    userId: "4",
+                    questionId: params,
+                    pageno: this.pageno,
+                    size: this.size,
+                  },
+                  { indices: false }
+                ),
+                { headers: authHeader() }
+              )
+              .then((response) => {
+                this.tableData = response.data.records;
+                this.totalItems = response.data.total;
+                this.$message.success("删除成功！");
+              })
+              .catch(() => {
+                this.$message.error("删除失败");
+              });
+          })
+          .catch(() => {
+            this.$message.info("已取消删除");
+          });
+      } else {
+        this.$message.info("请选择要删除的信息");
+      }
     },
   },
 };

@@ -164,7 +164,7 @@ export default {
   created() {
     this.menuHeight = document.documentElement.clientHeight - 180 + "px";
 
-    let user = this.$store.state.initialState.user;
+    let user = this.$storage.getStorageSync("user");
     if (user && user.roles) {
       // this.showAdmin = user.roles.includes("ROLE_ADMIN");
       // this.showTeacher = user.roles.includes("ROLE_TEACHER");

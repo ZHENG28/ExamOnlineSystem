@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class Question implements Serializable {
@@ -22,15 +23,14 @@ public class Question implements Serializable {
     private Integer typeId;
 
     @TableField(select = false)
-    private String subName;
+    private String subjectName;
 
-    @Override
-    public String toString() {
-        return "Question{" +
-        "questionId=" + questionId +
-        ", questionTitle=" + questionTitle +
-        ", subjectId=" + subjectId +
-        ", typeId=" + typeId +
-        "}";
-    }
+    @TableField(select = false)
+    private String typeName;
+
+    @TableField(select = false)
+    private List<Answer> answer;
+
+    @TableField(select = false)
+    private String correct;
 }

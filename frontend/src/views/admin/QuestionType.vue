@@ -180,11 +180,11 @@ export default {
           this.$axios
             .post(
               "/questionType/save",
-              {
+              this.$qs.stringify({
                 typeId: this.typeForm.typeId,
                 typeName: this.typeForm.typeName,
                 description: this.typeForm.description,
-              },
+              }),
               { headers: authHeader() }
             )
             .then((response) => {

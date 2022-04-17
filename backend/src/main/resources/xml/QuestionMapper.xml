@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.mapper.QuestionMapper">
-<!--    <resultMap id="SingleQuestionWithSubject" type="com.zj.examsystem.auto.entity.SingleQuestion">-->
-<!--        <id column="ques_id" property="quesId"/>-->
-<!--        <result column="answer" property="answer" jdbcType="VARCHAR"/>-->
-<!--        <result column="opta" property="opta" jdbcType="VARCHAR"/>-->
-<!--        <result column="optb" property="optb" jdbcType="VARCHAR"/>-->
-<!--        <result column="optc" property="optc" jdbcType="VARCHAR"/>-->
-<!--        <result column="optd" property="optd" jdbcType="VARCHAR"/>-->
-<!--        <result column="ques_title" property="quesTitle" jdbcType="VARCHAR"/>-->
-<!--        <result column="sub_id" property="subId" jdbcType="INTEGER"/>-->
-<!--        &lt;!&ndash; extra property &ndash;&gt;-->
-<!--        <result column="sub_name" property="subName" jdbcType="VARCHAR"/>-->
-<!--    </resultMap>-->
+    <resultMap id="SingleQuestionWithSubjectAndType" type="com.zj.examsystem.entity.Question">
+        <id column="question_id" property="questionId"/>
+        <result column="question_title" property="questionTitle" jdbcType="VARCHAR"/>
+        <result column="subject_id" property="subjectId" jdbcType="INTEGER"/>
+        <result column="type_id" property="typeId" jdbcType="INTEGER"/>
+        <!-- extra property -->
+        <result column="subject_name" property="subjectName" jdbcType="VARCHAR"/>
+        <result column="type_name" property="typeName" jdbcType="VARCHAR"/>
+    </resultMap>
 
-<!--    <select id="selectPageWithSubject" resultMap="SingleQuestionWithSubject">-->
-<!--        SELECT sq.*, s.sub_name-->
-<!--        FROM single_question sq-->
-<!--                 JOIN subject s on sq.sub_id = s.sub_id-->
-<!--    </select>-->
+    <select id="findAllByTeacherId" resultMap="SingleQuestionWithSubjectAndType">
+        SELECT q.*, s.subject_name, qt.type_name
+        FROM question q
+                 JOIN question_type qt on q.type_id = qt.type_id
+                 JOIN subject s on q.subject_id = s.subject_id
+                 JOIN user u on s.teacher_id = u.user_id
+        WHERE u.user_id = #{userId}
+    </select>
 
-<!--    <select id="selectById" resultMap="SingleQuestionWithSubject">-->
-<!--        SELECT sq.*, s.sub_name-->
-<!--        FROM single_question sq-->
-<!--                 JOIN subject s on sq.sub_id = s.sub_id-->
-<!--        WHERE sq.ques_id = #{quesId}-->
-<!--    </select>-->
+    <select id="selectById" resultMap="SingleQuestionWithSubjectAndType">
+        SELECT q.*, s.subject_name, qt.type_name
+        FROM question q
+                 JOIN question_type qt on q.type_id = qt.type_id
+                 JOIN subject s on q.subject_id = s.subject_id
+        WHERE q.question_id = #{questionId}
+    </select>
 </mapper>

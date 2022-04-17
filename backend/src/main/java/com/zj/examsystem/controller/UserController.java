@@ -86,6 +86,7 @@ public class UserController {
 
     @PostMapping("/save")
     public ResponseEntity<?> save(User user) {
+        System.out.println(user);
         return user.getUserId() == null ? userService.saveUserWithClazzId(user) : userService.updateUser(user);
     }
 

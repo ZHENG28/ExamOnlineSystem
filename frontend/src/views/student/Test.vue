@@ -74,12 +74,14 @@ export default {
   data() {
     return {
       tableData: [],
+      userId: "",
       pageno: 1,
       size: 4,
       totalItems: 0,
     };
   },
   created() {
+    this.userId = this.$storage.getStorageSync("user").id;
     this.loadData();
   },
   methods: {
@@ -92,7 +94,7 @@ export default {
         .post(
           "/test/findAllByStuIdOrNot",
           this.$qs.stringify({
-            // identity: this.$store.state.auth.initialState.user.identity,
+            // userId: this.userId,
             pageno: this.pageno,
             size: this.size,
           })
@@ -129,7 +131,7 @@ export default {
         .post(
           "/test/findExamTimeByTestId",
           this.$qs.stringify({
-            // account: this.$store.state.auth.initialState.user.account,
+            // userId: this.userId,
             account: "111",
             testId: testId,
           })

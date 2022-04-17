@@ -13,8 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class JwtUtils
-{
+public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     @Value("${examsystem.app.jwtSecret}")
@@ -24,8 +23,7 @@ public class JwtUtils
     @Value("${examsystem.app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-    public String generateJwtToken(Authentication authentication, Integer identity)
-    {
+    public String generateJwtToken(Authentication authentication, Integer identity) {
         User userPrincipal = (User) authentication.getPrincipal();
         Map<String, Object> claims = new HashMap<>();
         claims.put("identity", identity);
@@ -34,7 +32,7 @@ public class JwtUtils
         return Jwts.builder()
                 // Payload
                 .setClaims(claims)
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(userPrincipal.getAccount())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 // Signature: 算法名称 + 密钥
@@ -42,18 +40,15 @@ public class JwtUtils
                 .compact();
     }
 
-    public String getUserNameFromJwtToken(String token)
-    {
+    public String getUserNameFromJwtToken(String token) {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public Object getIdentityFromJwtToken(String token)
-    {
+    public Object getIdentityFromJwtToken(String token) {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().get("identity");
     }
 
-    public boolean validateJwtToken(String authToken)
-    {
+    public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;

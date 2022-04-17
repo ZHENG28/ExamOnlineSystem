@@ -56,30 +56,25 @@ import User from "@/services/user";
 export default {
   data() {
     return {
-      user: new User("", "", "", ""),
+      user: new User("", "", "", "", ""),
       isTch: "",
       isStu: "",
     };
   },
-  computed: {
-    isLogin() {
-      return this.$store.state.initialState.status.isLogin;
-    },
-  },
   created() {
-    if (this.isLogin) {
+    if (this.$storage.getStorageSync("isLogin")) {
       this.$router.push("/home");
     }
   },
   methods: {
     changeIdentity(id) {
-      this.user.role = id;
+      this.user.roleName = id;
       this.isTch = id == 2 ? "primary" : "";
       this.isStu = id == 3 ? "primary" : "";
     },
 
     isEmptyFields() {
-      if (this.user.role == "") {
+      if (this.user.roleName == "") {
         this.$message.warning("请选择身份");
       } else if (this.user.account == "") {
         this.$message.warning("用户名不能为空");
@@ -95,15 +90,15 @@ export default {
         this.$axios
           .post("/user/login", {
             roleId: "1",
-            // roleId: this.user.role,
+            // roleId: this.user.roleName,
             account: this.user.account,
             password: this.user.password,
           })
           .then((response) => {
             if (response.data.token) {
               // 将该登录用户的令牌移入store
-              localStorage.setItem("user", JSON.stringify(response.data));
-              localStorage.setItem("isLogin", true);
+              this.$storage.setStorageSync("user", response.data, 10800000);
+              this.$storage.setStorageSync("isLogin", true, 10800000);
               this.$router.push("/home");
             }
           })
@@ -111,7 +106,6 @@ export default {
             console.log(error);
             this.$message.error("存在错误，请检查！");
           });
-        this.user = new User("", "", "", "");
       }
     },
   },

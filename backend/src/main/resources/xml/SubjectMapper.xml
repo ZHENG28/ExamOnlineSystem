@@ -14,7 +14,9 @@
 
     <select id="selectDistinctSubject" resultType="map">
         SELECT subject_name, subject_id
-        FROM subject
+        FROM subject s
+                 JOIN user u on s.teacher_id = u.user_id
+            ${ew.customSqlSegment}
         GROUP BY subject_name
     </select>
 

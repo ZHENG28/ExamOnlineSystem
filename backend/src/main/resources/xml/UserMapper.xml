@@ -19,14 +19,6 @@
         VALUES (#{user.account}, #{user.password}, #{user.username}, #{user.roleId});
     </insert>
 
-    <update id="updateUser">
-        UPDATE user
-        SET password= #{user.password},
-            username=#{user.username},
-            role_id=#{user.roleId}
-        WHERE user_id = #{user.userId}
-    </update>
-
     <select id="selectPageWithRoleAndClazzName" resultMap="UserWithRoleAndClazz">
         SELECT u.*, r.description, c.clazz_name
         FROM user u

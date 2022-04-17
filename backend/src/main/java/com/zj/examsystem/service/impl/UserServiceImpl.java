@@ -58,7 +58,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public ResponseEntity<?> updateUser(User user) {
-        if (userMapper.updateUser(user) == 1) {
+        if (user.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        if (userMapper.updateById(user) == 1 && user.getClazzId() != null) {
             UserClazz userClazz = new UserClazz(user.getUserId(), user.getClazzId());
             QueryWrapper<UserClazz> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_id", user.getUserId());
@@ -66,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     .ok(userClazzMapper.update(userClazz, queryWrapper) != 0);
         } else {
             return ResponseEntity
-                    .ok(false);
+                    .ok(user.getClazzId() == null);
         }
     }
 
@@ -91,9 +94,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User findByAccount(String account) {
-        User user = userMapper.selectOneWithRoleAndClazzName(account);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return user;
+        return userMapper.selectOneWithRoleAndClazzName(account);
     }
 
     @Override

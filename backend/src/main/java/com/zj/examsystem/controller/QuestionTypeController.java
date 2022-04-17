@@ -25,15 +25,16 @@ public class QuestionTypeController {
         return questionTypeService.findAll(pageno, size, userId);
     }
 
-//    @PostMapping("/findAllQuestionTypeId")
-//    @ResponseBody
-//    public Object findAllQuestionTypeId() {
-//        return questionTypeService.findDistinctQuestionType();
-//    }
+    @PostMapping("/findAllQuestionTypeId")
+    @ResponseBody
+    public Object findAllQuestionTypeId() {
+        return questionTypeService.findDistinctQuestionType();
+    }
 
     @PostMapping("/save")
     @ResponseBody
     public Object save(QuestionType questionType) {
+        System.out.println(questionType);
         int result = questionTypeService.saveQuestionType(questionType);
         return result != 0;
     }
@@ -53,8 +54,8 @@ public class QuestionTypeController {
 
     @PostMapping("/findById")
     @ResponseBody
-    public Object findById(Integer questionTypeId) {
-        return questionTypeService.findById(questionTypeId);
+    public Object findById(Integer typeId) {
+        return questionTypeService.findById(typeId);
     }
 
 }

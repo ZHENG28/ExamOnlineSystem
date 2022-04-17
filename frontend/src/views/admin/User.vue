@@ -187,7 +187,7 @@ export default {
       dialogFormVisible: false,
       userId: "",
       clazzId: "",
-      user: new User("", "", "", ""),
+      user: new User("", "", "", "", ""),
       formRules: {
         username: [{ required: true, message: "请填写名字", trigger: "blur" }],
         password: [{ required: true, message: "请填写密码", trigger: "blur" }],
@@ -218,7 +218,7 @@ export default {
       this.findDistinctClazzName();
     },
     clearFormFields() {
-      this.user = new User("", "", "", "");
+      this.user = new User("", "", "", "", "");
       this.$nextTick(() => {
         this.$refs.user.clearValidate();
       });

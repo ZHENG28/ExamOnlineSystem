@@ -106,7 +106,7 @@ export default {
         .post(
           "/testhistory/findAllByAccount",
           this.$qs.stringify({
-            // account: this.$store.state.auth.initialState.user.account,
+            // account: this.$storage.getStorageSync("user").id,
             account: "111",
             pageno: this.pageno,
             size: this.size,

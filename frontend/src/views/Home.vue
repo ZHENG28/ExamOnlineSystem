@@ -67,7 +67,7 @@ export default {
   },
   computed: {
     // currentUser() {
-    //   let user = this.$store.state.auth.initialState.user;
+    //   let user = this.$storage.getStorageSync("user");
     //   this.account = user.account;
     //   switch (user.roles[0]) {
     //     case "ROLE_MANAGER":
@@ -179,11 +179,6 @@ export default {
       this.bigLineChart.chartData = chartData;
       this.bigLineChart.activeIndex = index;
     },
-  },
-  mounted() {
-    // if (!this.currentUser) {
-    //   this.$router.push("/login");
-    // }
   },
 };
 </script>

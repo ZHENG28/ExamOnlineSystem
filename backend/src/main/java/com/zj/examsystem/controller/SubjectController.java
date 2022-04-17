@@ -32,6 +32,12 @@ public class SubjectController {
         return subjectService.findDistinctSubject();
     }
 
+    @PostMapping("/findAllSubIdByUserId")
+    @ResponseBody
+    public Object findAllSubIdByUserId(Integer userId) {
+        return subjectService.findDistinctSubjectByUserId(userId);
+    }
+
     @GetMapping("/save")
     @ResponseBody
     public Object save(Subject subject) {

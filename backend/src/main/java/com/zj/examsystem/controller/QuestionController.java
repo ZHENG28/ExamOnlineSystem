@@ -1,16 +1,18 @@
 package com.zj.examsystem.controller;
 
 
+import com.zj.examsystem.entity.Answer;
 import com.zj.examsystem.entity.Question;
 import com.zj.examsystem.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Arrays;
 
 
 @Controller
@@ -19,42 +21,41 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
-    @PostMapping("/findAll")
+    @PostMapping("/findAllByTeacherId")
     @ResponseBody
-    public Object findAll(Integer pageno, Integer size) {
-        return questionService.findAll(pageno, size);
+    public Object findAllByTeacherId(Integer pageno, Integer size, Integer userId) {
+        return questionService.findAllByTeacherId(pageno, size, userId);
     }
 
-    @GetMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public Object save(Question question) {
-        int result = questionService.saveQuestion(question);
-        return result != 0;
+        return questionService.saveQuestion(question);
     }
 
     @PostMapping("/del")
-    public ModelAndView delete(Integer[] quesId, Integer pageno, Integer size) {
+    public ModelAndView delete(Integer[] quesId, Integer pageno, Integer size, Integer userId) {
         int result = questionService.deleteQuestion(quesId);
 
         ModelAndView mv = new ModelAndView();
         if (result != 0) {
             mv.addObject("pageno", pageno);
             mv.addObject("size", size);
-            mv.setViewName("forward:/question/findAll");
+            mv.addObject("userId", userId);
+            mv.setViewName("forward:/question/findAllByTeacherId");
         }
         return mv;
     }
 
     @PostMapping("/findById")
     @ResponseBody
-    public Object findById(Integer quesId) {
-        return questionService.findById(quesId);
+    public Object findById(Integer questionId) {
+        return questionService.findById(questionId);
     }
 
     @PostMapping("/findQuesBySubId")
     @ResponseBody
-    public Object findQuesBySubId(Integer subId)
-    {
+    public Object findQuesBySubId(Integer subId) {
         return questionService.findQuesBySubId(subId);
     }
 

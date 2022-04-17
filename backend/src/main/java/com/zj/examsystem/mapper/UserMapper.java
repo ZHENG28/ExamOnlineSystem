@@ -12,8 +12,6 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<User> {
     public Integer insertUser(@Param("user") User user);
 
-    public Integer updateUser(@Param("user") User user);
-
     public IPage<User> selectPageWithRoleAndClazzName(IPage<User> page, QueryWrapper<User> queryWrapper);
 
     public User selectOneWithRoleAndClazzName(String account);

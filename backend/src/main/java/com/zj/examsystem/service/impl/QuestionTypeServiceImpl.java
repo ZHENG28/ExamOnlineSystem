@@ -43,7 +43,7 @@ public class QuestionTypeServiceImpl extends ServiceImpl<QuestionTypeMapper, Que
         List<Map<String, Object>> List = new ArrayList<>();
         for (Map<String, Object> resMap : tmp) {
             Map<String, Object> map = new HashMap<>();
-            map.put("text", resMap.get("description"));
+            map.put("text", resMap.get("type_name"));
             map.put("value", resMap.get("type_name"));
             map.put("typeId", resMap.get("type_id"));
             List.add(map);

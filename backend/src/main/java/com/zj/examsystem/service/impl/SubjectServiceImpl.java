@@ -37,7 +37,23 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     }
 
     public List<Map<String, Object>> findDistinctSubject() {
-        List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject();
+        QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
+        List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject(queryWrapper);
+        List<Map<String, Object>> List = new ArrayList<>();
+        for (Map<String, Object> resMap : tmp) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("text", resMap.get("subject_name"));
+            map.put("value", resMap.get("subject_name"));
+            map.put("subId", resMap.get("subject_id"));
+            List.add(map);
+        }
+        return List;
+    }
+
+    public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId) {
+        QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("u.user_id", userId);
+        List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject(queryWrapper);
         List<Map<String, Object>> List = new ArrayList<>();
         for (Map<String, Object> resMap : tmp) {
             Map<String, Object> map = new HashMap<>();

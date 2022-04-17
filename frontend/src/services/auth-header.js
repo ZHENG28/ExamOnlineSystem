@@ -1,10 +1,6 @@
-export default function authHeader() {
-  let user = JSON.parse(localStorage.getItem('user'))
+import { useStorage } from 'vue3-storage'
 
-  if (user && user.token) {
-    // 返回Authorized Token
-    return { Authorization: 'Bearer ' + user.token }
-  } else {
-    return {}
-  }
+export default function authHeader() {
+  let user = useStorage().getStorageSync('user')
+  return user && user.token ? { Authorization: 'Bearer ' + user.token } : {}
 }
