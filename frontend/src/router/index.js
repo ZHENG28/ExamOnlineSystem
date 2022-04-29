@@ -1,9 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
+  // 用户登录入口
   {
     path: '/',
     component: () => import('../views/Login.vue'),
+  },
+  // 管理员登录入口
+  {
+    path: '/admin/login',
+    component: () => import('../views/admin/Login.vue'),
   },
   {
     path: '/',
@@ -54,6 +60,11 @@ const routes = [
         component: () => import('../views/teacher/test/TestBuild.vue'),
       },
       {
+        path: '/teacher/testResult/:testId',
+        name: '查看测验结果',
+        component: () => import('../views/teacher/test/TestResult.vue'),
+      },
+      {
         path: '/teacher/testInfo',
         name: '管理测验信息',
         component: () => import('../views/teacher/test/TestInfo.vue'),
@@ -74,7 +85,6 @@ const routes = [
   },
   {
     path: '/student/testPaper/:testId',
-    // name: "测验记录",
     component: () => import('../views/student/TestPaper.vue'),
   },
 

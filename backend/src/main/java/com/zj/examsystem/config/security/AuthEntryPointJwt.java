@@ -10,25 +10,29 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @Component
-public class AuthEntryPointJwt implements AuthenticationEntryPoint
-{
+public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
 
     // 在未受到权限验证的用户访问受保护的资源时触发，抛出AuthenticationException异常
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException,
-            ServletException
-    {
+            ServletException {
         String errMsg = authException.getMessage();
         logger.error("Unauthorized error: {}", errMsg);
-        // SC_UNAUTHORIZED -> state code 401
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
+
         if ("Bad credentials".equals(errMsg)) {
             errMsg = "密码错误，请重试";
         }
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, errMsg);
+        PrintWriter printWriter = response.getWriter();
+        printWriter.print(errMsg);
+        printWriter.flush();
+        printWriter.close();
     }
 }

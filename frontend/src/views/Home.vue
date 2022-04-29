@@ -2,7 +2,7 @@
   <div>
     <div>
       <h1 style="padding: 20px">
-        {{ this.username }} {{ this.identity }}，欢迎您！
+        {{ user.username }} {{ roleName }}，欢迎您！
       </h1>
     </div>
     <div class="row">
@@ -11,7 +11,7 @@
           <template slot="header">
             <div class="row">
               <div class="col-sm-6">
-                <h3 class="card-title">{{ this.cardTitle }}</h3>
+                <h3 class="card-title">{{ cardTitle }}</h3>
               </div>
             </div>
           </template>
@@ -33,21 +33,14 @@
   </div>
 </template>
 <script>
-// import config from "@/config";
-// import LineChart from "@/components/Charts/LineChart";
-// import * as chartConfigs from "@/components/Charts/config";
-
 import authHeader from "@/services/auth-header";
+import User from "@/services/user";
 
 export default {
-  components: {
-    // LineChart,
-  },
   data() {
     return {
-      identity: "",
-      account: "",
-      username: "",
+      user: new User("", "", "", "", ""),
+      roleName: "",
       cardTitle: "",
 
       bigLineChart: {
@@ -65,52 +58,40 @@ export default {
       },
     };
   },
-  computed: {
-    // currentUser() {
-    //   let user = this.$storage.getStorageSync("user");
-    //   this.account = user.account;
-    //   switch (user.roles[0]) {
-    //     case "ROLE_MANAGER":
-    //       this.identity = "管理员";
-    //       this.username = user.account;
-    //       // this.cardTitle = "近七天登录系统的人数";
-    //       this.cardTitle = "近七天完成测验的学生人数";
-    //       this.getFinishStuNum();
-    //       break;
-    //     case "ROLE_TEACHER":
-    //       this.identity = "教师";
-    //       this.cardTitle = "近七天完成测验的学生人数";
-    //       this.getUsername(2);
-    //       break;
-    //     case "ROLE_STUDENT":
-    //       this.identity = "同学";
-    //       this.cardTitle = "近七天完成测验的次数";
-    //       this.getUsername(1);
-    //       break;
-    //   }
-    //   return user;
-    // },
+  created() {
+    this.loadData();
+    // 设置身份称呼
+    switch (this.$storage.getStorageSync("user").roles[0]) {
+      case "ROLE_ADMIN":
+        this.roleName = "管理员";
+        // this.cardTitle = "近七天登录系统的人数";
+        this.cardTitle = "近七天完成测验的学生人数";
+        this.getFinishStuNum();
+        break;
+      case "ROLE_TEACHER":
+        this.roleName = "教师";
+        this.cardTitle = "近七天完成测验的学生人数";
+        break;
+      case "ROLE_STUDENT":
+        this.roleName = "同学";
+        this.cardTitle = "近七天完成测验的次数";
+        break;
+    }
   },
   methods: {
-    getUsername(role) {
-      //   this.$axios
-      //     .get("/sys/findUsername", {
-      //       headers: authHeader(),
-      //       params: {
-      //         role: role,
-      //         account: this.account,
-      //       },
-      //     })
-      //     .then((res) => {
-      //       if (role == 2) {
-      //         this.username = res.data.tchName;
-      //         this.getFinishStuNum();
-      //       } else if (role == 1) {
-      //         this.username = res.data.stuName;
-      //         this.getFinishTime(this.account);
-      //       }
-      //     });
+    loadData() {
+      this.$axios
+        .get("/user/findInfoById", {
+          headers: authHeader(),
+          params: {
+            userId: this.$storage.getStorageSync("user").id,
+          },
+        })
+        .then((response) => {
+          this.user = response.data;
+        });
     },
+
     // 学生首页图表
     getFinishTime(account) {
       //   this.$axios

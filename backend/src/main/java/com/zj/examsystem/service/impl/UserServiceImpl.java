@@ -61,16 +61,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        if (userMapper.updateById(user) == 1 && user.getClazzId() != null) {
+        if (user.getClazzId() != null) {
             UserClazz userClazz = new UserClazz(user.getUserId(), user.getClazzId());
-            QueryWrapper<UserClazz> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("user_id", user.getUserId());
-            return ResponseEntity
-                    .ok(userClazzMapper.update(userClazz, queryWrapper) != 0);
-        } else {
-            return ResponseEntity
-                    .ok(user.getClazzId() == null);
+            user.setClazzId(null);
+            if (userMapper.updateById(user) == 1) {
+                QueryWrapper<UserClazz> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("user_id", user.getUserId());
+                return ResponseEntity
+                        .ok(userClazzMapper.update(userClazz, queryWrapper) != 0);
+            }
         }
+        return ResponseEntity.ok(user.getClazzId() == null);
     }
 
     @Override

@@ -31,6 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (StringUtils.hasText(account)) {
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("account", account);
+            queryWrapper.eq("role_id", identity);
             User user = userMapper.selectOne(queryWrapper);
             if (user != null) {
                 switch (identity) {
@@ -46,10 +47,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 }
                 user.setAuthorities(authList);
                 return user;
-            } else {
-                throw new RuntimeException("com.zj.examsystem.config.security.CustomUserDetailsService -> account is null");
             }
         }
-        return null;
+        throw new UsernameNotFoundException("查找失败，不存在与身份相匹配的用户名");
     }
 }

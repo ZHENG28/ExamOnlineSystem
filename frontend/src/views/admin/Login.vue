@@ -1,38 +1,29 @@
 <template>
   <div>
-    <img src="../assets/login/user_login_bg.png" alt="" class="wave" />
-    <div class="container">
-      <div class="img"></div>
-      <div class="login-box">
-        <form action="#">
-          <img
-            src="../assets/login/user_login_icon.png"
-            alt=""
-            class="avatar"
-          />
-          <h2 style="letter-spacing: 10px">登录系统</h2>
-          <div class="radio-group">
-            <div>
-              <el-button
-                icon="checked"
-                round
-                size="large"
-                :type="isTch"
-                @click="changeIdentity(2)"
-                >教师</el-button
-              >
-            </div>
-            <div>
-              <el-button
-                icon="briefcase"
-                round
-                size="large"
-                :type="isStu"
-                @click="changeIdentity(3)"
-                >学生</el-button
-              >
-            </div>
-          </div>
+    <img
+      src="@/assets/login/admin_login_bg.png"
+      alt=""
+      style="width: 100%; position: fixed; z-index: -1"
+    />
+    <div style="width: 50%; text-align: center; padding: 0 2rem">
+      <img
+        src="@/assets/login/user_login_icon.png"
+        alt=""
+        style="width: 120px; margin-top: 15%"
+      />
+      <h2
+        style="
+          letter-spacing: 10px;
+          font-size: 2.9rem;
+          text-transform: uppercase;
+          margin: 15px 0;
+          color: #999;
+        "
+      >
+        登录系统
+      </h2>
+      <el-form :model="user" ref="user" label-position="right">
+        <el-form-item prop="account">
           <div class="input-group">
             <div class="icon">
               <i class="fa fa-user"></i>
@@ -41,6 +32,8 @@
               <input type="text" class="input" v-model="user.account" />
             </div>
           </div>
+        </el-form-item>
+        <el-form-item prop="password">
           <div class="input-group">
             <div class="icon">
               <i class="fa fa-lock"></i>
@@ -49,9 +42,9 @@
               <input class="input" type="password" v-model="user.password" />
             </div>
           </div>
-          <input type="button" class="btn" value="登录" @click="login()" />
-        </form>
-      </div>
+        </el-form-item>
+      </el-form>
+      <button @click="login()">登录</button>
     </div>
   </div>
 </template>
@@ -61,8 +54,6 @@ export default {
   data() {
     return {
       user: new User("", "", "", "", ""),
-      isTch: "",
-      isStu: "",
     };
   },
   created() {
@@ -71,16 +62,8 @@ export default {
     }
   },
   methods: {
-    changeIdentity(id) {
-      this.user.roleName = id;
-      this.isTch = id == 2 ? "primary" : "";
-      this.isStu = id == 3 ? "primary" : "";
-    },
-
     isEmptyFields() {
-      if (this.user.roleName == "") {
-        this.$message.warning("请选择身份");
-      } else if (this.user.account == "") {
+      if (this.user.account == "") {
         this.$message.warning("用户名不能为空");
       } else if (this.user.password == "") {
         this.$message.warning("密码不能为空");
@@ -93,7 +76,7 @@ export default {
       if (this.isEmptyFields()) {
         this.$axios
           .post("/user/login", {
-            roleId: this.user.roleName,
+            roleId: "1",
             account: this.user.account,
             password: this.user.password,
           })
@@ -106,7 +89,7 @@ export default {
             }
           })
           .catch((response) => {
-            console.log(response);
+            console.log("response: " + response);
             this.$message.error("存在错误，请检查！");
           });
       }
@@ -114,8 +97,7 @@ export default {
   },
 };
 </script>
-
+<style scoped src="@/assets/login/admin_login_style.css"></style>
 <style scoped>
-@import url("../assets/login/user_login_style.css");
 @import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
 </style>

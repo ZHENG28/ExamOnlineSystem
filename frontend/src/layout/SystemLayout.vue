@@ -20,6 +20,7 @@
               首页
             </template>
           </el-menu-item>
+
           <!-- admin -->
           <el-menu-item
             index="clazz"
@@ -166,9 +167,9 @@ export default {
 
     let user = this.$storage.getStorageSync("user");
     if (user && user.roles) {
-      // this.showAdmin = user.roles.includes("ROLE_ADMIN");
-      // this.showTeacher = user.roles.includes("ROLE_TEACHER");
-      // this.showStudent = user.roles.includes("ROLE_STUDENT");
+      this.showAdmin = user.roles.includes("ROLE_ADMIN");
+      this.showTeacher = user.roles.includes("ROLE_TEACHER");
+      this.showStudent = user.roles.includes("ROLE_STUDENT");
     }
   },
 };
