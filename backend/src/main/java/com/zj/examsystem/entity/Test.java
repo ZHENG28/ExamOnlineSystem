@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class Test implements Serializable {
@@ -16,21 +17,21 @@ public class Test implements Serializable {
     @TableId(value = "test_id", type = IdType.AUTO)
     private Integer testId;
 
-    private LocalDateTime beginDate;
+    private String testName;
 
     private String description;
 
+    private LocalDateTime beginDate;
+
     private LocalDateTime endDate;
 
-    private Integer examDure;
+    private Integer examDuration;
 
     private Integer examTime;
 
-    private String quesArr;
+    private String questionList;
 
-    private String testName;
-
-    private Integer totalScore;
+    private Integer questionTotal;
 
     private Integer subjectId;
 
@@ -44,4 +45,7 @@ public class Test implements Serializable {
 
     @TableField(select = false)
     private String clazzName;
+
+    @TableField(select = false)
+    private String shortAnswer;
 }

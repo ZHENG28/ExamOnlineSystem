@@ -1,6 +1,7 @@
 package com.zj.examsystem.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+
 import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -14,14 +15,23 @@ public class TestHistory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "student_id", type = IdType.AUTO)
-    private Integer studentId;
+    @TableId(value = "history_id", type = IdType.AUTO)
+    private Integer historyId;
 
-    private Integer testId;
+    private Integer correct;
 
     private LocalDateTime finishTime;
 
-    private Integer score;
+    private Integer takeTime;
+
+    private String reply;
+
+    private Integer studentId;
+
+    @TableField(select = false)
+    private String studentName;
+
+    private Integer testId;
 
     @TableField(select = false)
     private String testName;
@@ -30,15 +40,5 @@ public class TestHistory implements Serializable {
     private String description;
 
     @TableField(select = false)
-    private String subName;
-
-    @Override
-    public String toString() {
-        return "TestHistory{" +
-        "studentId=" + studentId +
-        ", testId=" + testId +
-        ", finishTime=" + finishTime +
-        ", score=" + score +
-        "}";
-    }
+    private String subjectName;
 }

@@ -16,6 +16,9 @@ public class Answer implements Serializable {
     @TableId(value = "answer_id", type = IdType.AUTO)
     private Integer answerId;
 
+    /**
+     * ABC或者1-对
+     */
     private String answerSign;
 
     private String content;

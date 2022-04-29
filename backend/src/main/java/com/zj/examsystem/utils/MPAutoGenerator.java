@@ -34,7 +34,7 @@ public class MPAutoGenerator {
         // 设置Package信息
         PackageConfig pack = new PackageConfig();
         // 设置包名，该package下有mapper、service、controller等文件夹及代码
-        pack.setModuleName("eos");
+        pack.setModuleName("auto");
         // 设置父包名
         pack.setParent("com.zj.examsystem");
         autoGenerator.setPackageInfo(pack);

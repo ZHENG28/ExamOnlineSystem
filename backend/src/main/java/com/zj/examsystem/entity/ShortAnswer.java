@@ -7,14 +7,16 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class Clazz implements Serializable {
+public class ShortAnswer implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "clazz_id", type = IdType.AUTO)
-    private Integer clazzId;
+    @TableId(value = "short_answer_id", type = IdType.AUTO)
+    private Integer shortAnswerId;
 
-    private String clazzName;
+    private Integer threshold;
 
-    private String major;
+    private Integer questionId;
+
+    private Integer testId;
 }

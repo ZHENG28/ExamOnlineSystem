@@ -17,6 +17,16 @@
         <java.version>11</java.version>
     </properties>
     <dependencies>
+        <!-- frontend -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <!--验证码-->
         <dependency>
             <groupId>com.github.penggle</groupId>
@@ -41,17 +51,17 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.2.0</version>
         </dependency>
-        <!-- generator -->
+        <!-- mybatis-plus generator -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-generator</artifactId>
             <version>3.4.1</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.velocity</groupId>-->
-        <!--            <artifactId>velocity-engine-core</artifactId>-->
-        <!--            <version>2.0</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.0</version>
+        </dependency>
 
         <!-- security -->
         <dependency>
@@ -74,23 +84,12 @@
             <version>2.3.0</version>
         </dependency>
 
-        <!-- frontend -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
         <!-- python -->
         <dependency>
             <groupId>org.python</groupId>
             <artifactId>jython-standalone</artifactId>
             <version>2.7.2</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
