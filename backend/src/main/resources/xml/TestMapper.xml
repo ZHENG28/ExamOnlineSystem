@@ -7,29 +7,24 @@
         <result column="description" property="description" jdbcType="VARCHAR"/>
         <result column="begin_date" property="beginDate" jdbcType="DATE"/>
         <result column="end_date" property="endDate" jdbcType="DATE"/>
-        <result column="exam_dure" property="examDure" jdbcType="INTEGER"/>
+        <result column="exam_duration" property="examDuration" jdbcType="INTEGER"/>
         <result column="exam_time" property="examTime" jdbcType="INTEGER"/>
-<!--        <result column="test_clazz" property="testClazz" jdbcType="INTEGER"/>-->
-<!--        <result column="sub_id" property="subId" jdbcType="INTEGER"/>-->
-        <result column="total_score" property="totalScore" jdbcType="INTEGER"/>
-        <result column="ques_arr" property="quesArr" jdbcType="VARCHAR"/>
+        <result column="question_list" property="questionList" jdbcType="VARCHAR"/>
+        <result column="question_total" property="questionTotal" jdbcType="INTEGER"/>
+        <result column="clazz_id" property="clazzId" jdbcType="INTEGER"/>
+        <result column="subject_id" property="subjectId" jdbcType="INTEGER"/>
         <!-- extra property -->
-        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR"/>
-        <result column="sub_name" property="subName" jdbcType="VARCHAR"/>
         <result column="major" property="major" jdbcType="VARCHAR"/>
+        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR"/>
+        <result column="subject_name" property="subjectName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <select id="selectPageWithClazzAndSubject" resultMap="TestWithClazzAndSubject">
-        SELECT t.*, c.clazz_name, s.sub_name, c.major
+        SELECT t.*, c.clazz_name, s.subject_name, c.major
         FROM test t
-                 JOIN clazz c on t.test_clazz = c.clazz_id
-                 JOIN subject s on t.sub_id = s.sub_id
-    </select>
-    <select id="selectWithClazzAndSubjectById" resultMap="TestWithClazzAndSubject">
-        SELECT t.*, c.clazz_name, s.sub_name, c.major
-        FROM test t
-                 JOIN clazz c on t.test_clazz = c.clazz_id
-                 JOIN subject s on t.sub_id = s.sub_id
-        WHERE t.test_id = #{testId}
+                 JOIN clazz c on t.clazz_id = c.clazz_id
+                 JOIN subject s on t.subject_id = s.subject_id
+                 JOIN user u on s.teacher_id = u.user_id
+            ${ew.customSqlSegment}
     </select>
 </mapper>

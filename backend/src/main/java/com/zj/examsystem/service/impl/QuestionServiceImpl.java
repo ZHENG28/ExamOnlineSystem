@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.examsystem.entity.Answer;
 import com.zj.examsystem.entity.Question;
+import com.zj.examsystem.entity.Test;
 import com.zj.examsystem.mapper.AnswerMapper;
 import com.zj.examsystem.mapper.SubjectMapper;
 import com.zj.examsystem.mapper.QuestionMapper;
+import com.zj.examsystem.mapper.TestMapper;
 import com.zj.examsystem.service.QuestionService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import static com.zj.examsystem.utils.Const.TEST_QUESTION_LIST_SPLIT;
 
 
 @Service
@@ -34,6 +38,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Autowired
     private SubjectMapper subjectMapper;
 
+    @Autowired
+    private TestMapper testMapper;
+
+    @Override
     public IPage<Question> findAllByTeacherId(Integer pageno, Integer size, Integer userId) {
         Page<Question> page = new Page<>(pageno, size);
         IPage<Question> questionIPage = questionMapper.findAllByTeacherId(userId, page);
@@ -49,10 +57,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         return questionIPage;
     }
 
+    @Override
     @Transactional
     public Boolean saveQuestion(Question question) {
         if (question.getQuestionId() != null) {
-            String[] answers = question.getCorrect().split(",");
+            String[] answers = question.getCorrect().split(TEST_QUESTION_LIST_SPLIT);
             question.setCorrect(null);
             int result = questionMapper.updateById(question);
             if (result == 1 && question.getTypeId() != 3) {
@@ -87,7 +96,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 return result == 1 && question.getTypeId() == 3;
             }
         } else {
-            String[] answers = question.getCorrect().split(",");
+            String[] answers = question.getCorrect().split(TEST_QUESTION_LIST_SPLIT);
             question.setCorrect(null);
             int result = questionMapper.insert(question);
             if (result == 1 && question.getTypeId() != 3) {
@@ -115,6 +124,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         return false;
     }
 
+    @Override
     @Transactional
     public int deleteQuestion(Integer[] id) {
         List<Integer> ids = new ArrayList<>();
@@ -124,6 +134,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         return questionMapper.deleteBatchIds(ids);
     }
 
+    @Override
     public Question findById(Integer questionId) {
         Question question = questionMapper.selectById(questionId);
 
@@ -138,10 +149,36 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     }
 
     @Override
-    public List<Question> findQuesBySubId(Integer subId) {
-        QueryWrapper<Question> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("sub_id", subId);
+    public List<Question> findQuesBySubId(Integer subjectId) {
+        return questionMapper.findBySubIdWithType(subjectId);
+    }
 
-        return questionMapper.selectList(queryWrapper);
+    @Override
+    public List<Question> findQuestionListByTestId(Integer testId) {
+        Test test = testMapper.selectById(testId);
+        String[] arr = test.getQuestionList().split(TEST_QUESTION_LIST_SPLIT);
+        List<Question> questionList = new ArrayList<>();
+        for (String s : arr) {
+            Integer questionId = Integer.valueOf(s);
+            Question question = questionMapper.selectById(questionId);
+            QueryWrapper<Answer> answerQueryWrapper = new QueryWrapper<>();
+            answerQueryWrapper.eq("question_id", questionId);
+            List<Answer> answerList = answerMapper.selectList(answerQueryWrapper);
+            switch (question.getTypeId()) {
+                case 1:
+                    for (Answer answer : answerList) {
+                        if (answer.getIsCorrect() == 1) {
+                            question.setCorrect(answer.getAnswerSign());
+                        }
+                    }
+                    break;
+                case 2:
+                    question.setCorrect("1".equals(answerList.get(0).getAnswerSign()) ? "true" : "false");
+                    break;
+            }
+            question.setAnswer(answerList);
+            questionList.add(question);
+        }
+        return questionList;
     }
 }

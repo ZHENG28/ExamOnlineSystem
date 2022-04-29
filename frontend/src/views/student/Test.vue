@@ -2,12 +2,7 @@
   <div>
     <div v-for="testArr in tableData" :key="testArr.testForm">
       <el-row :gutter="30">
-        <el-col
-          :span="12"
-          class="cust-col"
-          v-for="testForm in testArr"
-          :key="testForm.testId"
-        >
+        <el-col :span="12" v-for="testForm in testArr" :key="testForm.testId">
           <el-card
             :header="testForm.testName"
             shadow="hover"
@@ -21,9 +16,9 @@
                   align-items: center;
                 "
               >
-                <span style="font-size: larger; font-weight: bold">{{
-                  testForm.testName
-                }}</span>
+                <span style="font-size: larger; font-weight: bold">
+                  {{ testForm.testName }}
+                </span>
                 <el-button
                   style="float: right; padding: 3px 0"
                   type="text"
@@ -44,11 +39,11 @@
                 }}</span
               >
               <br />
-              <span>测验时长：{{ testForm.examDure }} 分钟</span>
+              <span>测验时长：{{ testForm.examDuration }} 分钟</span>
               <br />
-              <span>重测次数：{{ testForm.examTime }} 次</span>
+              <span>测验次数：{{ testForm.examTime }} 次</span>
               <br />
-              <span>测验总分：{{ testForm.totalScore }} 分</span>
+              <span>测验题数：{{ testForm.questionTotal }} 道</span>
             </div>
           </el-card>
         </el-col>
@@ -69,7 +64,7 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import authHeader from "@/services/auth-header";
 export default {
   data() {
     return {
@@ -92,13 +87,14 @@ export default {
     findAll() {
       this.$axios
         .post(
-          "/test/findAllByStuIdOrNot",
+          "/test/findAllByUserId",
           this.$qs.stringify({
-            // userId: this.userId,
+            userId: this.userId,
+            // userId: "4",
             pageno: this.pageno,
             size: this.size,
-          })
-          // { headers: authHeader() }
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.totalItems = response.data.total;
@@ -131,15 +127,15 @@ export default {
         .post(
           "/test/findExamTimeByTestId",
           this.$qs.stringify({
-            // userId: this.userId,
-            account: "111",
+            userId: this.userId,
+            // userId: "8",
             testId: testId,
-          })
-          // { headers: authHeader() }
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           if (response.data) {
-            this.$message.error("重测次数已达上限");
+            this.$message.error("测验次数已达上限");
             return;
           } else {
             this.$router.push({

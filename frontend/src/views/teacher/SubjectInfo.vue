@@ -143,8 +143,8 @@ export default {
     };
   },
   created() {
-    this.loadData();
     this.userId = this.$storage.getStorageSync("user").id;
+    this.loadData();
   },
   methods: {
     // 初始化页面
@@ -165,8 +165,8 @@ export default {
         .post(
           "/subject/findAllByTchIdOrNot",
           this.$qs.stringify({
-            // userId:  this.userId,
-            userId: "4",
+            userId: this.userId,
+            // userId: "4",
             pageno: this.pageno,
             size: this.size,
           }),
@@ -230,8 +230,8 @@ export default {
               params: {
                 subjectId: this.subForm.subjectId,
                 subjectName: this.subForm.subjectName,
-                // teacherId: this.userId,
-                teacherId: "4",
+                teacherId: this.userId,
+                // teacherId: "4",
                 clazzId: this.subForm.clazzId,
               },
             })

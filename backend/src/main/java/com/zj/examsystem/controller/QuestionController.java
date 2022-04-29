@@ -34,8 +34,8 @@ public class QuestionController {
     }
 
     @PostMapping("/del")
-    public ModelAndView delete(Integer[] quesId, Integer pageno, Integer size, Integer userId) {
-        int result = questionService.deleteQuestion(quesId);
+    public ModelAndView delete(Integer[] questionId, Integer pageno, Integer size, Integer userId) {
+        int result = questionService.deleteQuestion(questionId);
 
         ModelAndView mv = new ModelAndView();
         if (result != 0) {
@@ -55,9 +55,14 @@ public class QuestionController {
 
     @PostMapping("/findQuesBySubId")
     @ResponseBody
-    public Object findQuesBySubId(Integer subId) {
-        return questionService.findQuesBySubId(subId);
+    public Object findQuesBySubId(Integer subjectId) {
+        return questionService.findQuesBySubId(subjectId);
     }
 
+    @PostMapping("/findQuestionListByTestId")
+    @ResponseBody
+    public Object findQuestionListByTestId(Integer testId) {
+        return questionService.findQuestionListByTestId(testId);
+    }
 }
 

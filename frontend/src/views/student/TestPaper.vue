@@ -1,591 +1,479 @@
 <!-- 考生答题界面 -->
 <template>
-  <div id="answer">
-    <div class="flexarea">
-      <!-- 左边题目编号区 -->
-      <transition>
-        <div class="left">
-          <div class="l-top">
-            {{ testForm.testName }}
-          </div>
-          <ul class="l-top">
-            <li>
-              <a href="javascript:;"></a>
-              <span>当前</span>
-            </li>
-            <li>
-              <a href="javascript:;"></a>
-              <span>未答</span>
-            </li>
-            <li>
-              <a href="javascript:;"></a>
-              <span>已答</span>
-            </li>
-          </ul>
-          <div class="l-bottom">
-            <div class="item">
-              <p>选择题部分</p>
-              <ul class="cust-ul">
-                <li v-for="(list, i) in testPaper.quesNum" :key="i">
-                  <a
-                    style="text-decoration: none"
-                    href="javascript:;"
-                    @click="change(i)"
-                    :class="{
-                      border: index == i,
-                      bg: bg_flag && radio[i] != undefined,
-                    }"
-                  >
-                    {{ i + 1 }}
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div style="display: block; text-align: center">
-              <el-button type="primary" @click="finish()">结束考试</el-button>
-            </div>
-          </div>
-        </div>
-      </transition>
-      <!--右边选择答题区-->
-      <transition>
-        <div class="right">
-          <div class="title">
-            <p style="color: red">请选择正确的选项</p>
-            <span class="auto-right">
-              <i class="iconf ont el-icon-s-claim icon20"></i>
-              全卷共{{ testPaper.quesNum }}题
-              <i
-                class="iconfont el-icon-time icon20"
-                style="margin-left: 20px"
-              ></i>
-              <span>
-                倒计时：{{
-                  hour
-                    ? formatNum(hour) +
-                      " : " +
-                      formatNum(minute) +
-                      " : " +
-                      formatNum(second)
-                    : formatNum(minute) + " : " + formatNum(second)
-                }}</span
+  <el-container direction="horizontal">
+    <!-- 左侧-题目索引 -->
+    <el-aside width="260px">
+      <el-card shadow="never" style="margin-bottom: 20px">
+        <template #header>
+          <span> {{ testForm.testName }} </span>
+        </template>
+        <el-row>
+          <el-col
+            :span="8"
+            v-for="(item, i) in ['当前', '未答', '已答']"
+            :key="i"
+          >
+            <div style="text-align: center">
+              <el-button
+                size="small"
+                circle
+                disabled
+                :id="'logo-' + i"
+                style="cursor: auto; margin-bottom: 5px"
+              ></el-button>
+              <span
+                style="
+                  flex-direction: column;
+                  display: flex;
+                  align-items: center;
+                "
+                >{{ item }}</span
               >
-            </span>
-          </div>
-          <div class="content">
-            <p class="topic">
-              <span class="number">{{ number }}</span>
-              {{ currQues.quesTitle }}
-            </p>
-            <div>
-              <el-radio-group v-model="radio[index]" @change="getChangeLabel">
-                <el-radio :label="1">{{ currQues.optA }}</el-radio>
-                <el-radio :label="2">{{ currQues.optB }}</el-radio>
-                <el-radio :label="3">{{ currQues.optC }}</el-radio>
-                <el-radio :label="4">{{ currQues.optD }}</el-radio>
-              </el-radio-group>
             </div>
-          </div>
-          <div class="operation">
-            <ul class="end">
-              <li>
-                <button
-                  :disabled="index == 0"
-                  v-bind:class="{ 'btn-hover': isabled }"
-                  @click="previous()"
-                >
-                  <i class="iconfont el-icon-arrow-left"></i><span>上一题</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  :disabled="index + 1 == testPaper.quesNum"
-                  v-bind:class="{ 'btn-hover': isabled }"
-                  @click="next()"
-                >
-                  <span>下一题</span
-                  ><i class="iconfont el-icon-arrow-right"></i>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </transition>
-    </div>
-  </div>
+          </el-col>
+        </el-row>
+      </el-card>
+      <el-card
+        shadow="hover"
+        style="margin-bottom: 10px"
+        v-for="(type, index) in testForm.questionList"
+        :key="index"
+      >
+        <template #header>
+          <span style="font-weight: bold">{{ type.name }}</span>
+        </template>
+        <el-row
+          v-for="(list, i) in type.list"
+          :key="i"
+          :style="{ marginBottom: i + 1 == list.length ? '' : '5px' }"
+        >
+          <el-col
+            :span="Math.floor(24 / CARD_COL_NUMBER)"
+            v-for="(item, j) in list"
+            :key="j"
+          >
+            <div style="text-align: center">
+              <el-button
+                circle
+                size="large"
+                :class="{
+                  'index-btn-border':
+                    sequence ==
+                    j +
+                      1 +
+                      i * CARD_COL_NUMBER +
+                      (0 +
+                        (index > 0 ? testForm.questionList[0].length : 0) +
+                        (index > 1 ? testForm.questionList[1].length : 0)),
+                  'index-btn-style':
+                    reply[
+                      j +
+                        i * CARD_COL_NUMBER +
+                        (0 +
+                          (index > 0 ? testForm.questionList[0].length : 0) +
+                          (index > 1 ? testForm.questionList[1].length : 0))
+                    ] != undefined,
+                }"
+                style="
+                  cursor: auto;
+                  margin-bottom: 5px;
+                  font-weight: bold;
+                  font-size: 16px;
+                "
+                @click="
+                  jumpTo(
+                    j +
+                      1 +
+                      i * CARD_COL_NUMBER +
+                      (0 +
+                        (index > 0 ? testForm.questionList[0].length : 0) +
+                        (index > 1 ? testForm.questionList[1].length : 0))
+                  )
+                "
+              >
+                {{
+                  j +
+                  1 +
+                  i * CARD_COL_NUMBER +
+                  (0 +
+                    (index > 0 ? testForm.questionList[0].length : 0) +
+                    (index > 1 ? testForm.questionList[1].length : 0))
+                }}
+              </el-button>
+            </div>
+          </el-col>
+        </el-row>
+      </el-card>
+      <div style="display: block; text-align: center">
+        <el-button type="primary" @click="finish()">结束考试</el-button>
+      </div>
+    </el-aside>
+    <!-- 右侧-答题区域 -->
+    <el-main>
+      <div
+        style="display: flex; line-height: 50px; margin: 0 20px"
+        v-if="testInfoFlag"
+      >
+        <span> 全卷共{{ testForm.questionTotal }}题 </span>
+        <span style="margin-left: auto">
+          <count-down
+            :key="countDownKey"
+            :flag="timekeep"
+            :remainTime="remainSecond"
+            @returnTakeTime="getTime"
+          ></count-down>
+        </span>
+      </div>
+      <div style="padding: 0px 20px" v-if="testPaperFlag">
+        <choice-question
+          :key="questionRefreshKey"
+          v-if="
+            sequence > 0 && sequence <= testForm.questionList[CHOICE_NO].length
+          "
+          :number="sequence"
+          :title="
+            testForm.questionList[CHOICE_NO].list[
+              questionRowCol[CHOICE_NO * 2]
+            ][questionRowCol[CHOICE_NO * 2 + 1]].questionTitle
+          "
+          :answers="
+            testForm.questionList[CHOICE_NO].list[
+              questionRowCol[CHOICE_NO * 2]
+            ][questionRowCol[CHOICE_NO * 2 + 1]].answer
+          "
+          :choose="reply[sequence - 1]"
+          @returnAnswer="getReply"
+        ></choice-question>
+        <judge-question
+          :key="questionRefreshKey"
+          v-if="
+            sequence > testForm.questionList[CHOICE_NO].length &&
+            sequence <=
+              testForm.questionList[CHOICE_NO].length +
+                testForm.questionList[JUDGE_NO].length
+          "
+          :number="sequence"
+          :questionId="
+            testForm.questionList[JUDGE_NO].list[questionRowCol[JUDGE_NO * 2]][
+              questionRowCol[JUDGE_NO * 2 + 1]
+            ].questionId
+          "
+          :title="
+            testForm.questionList[JUDGE_NO].list[questionRowCol[JUDGE_NO * 2]][
+              questionRowCol[JUDGE_NO * 2 + 1]
+            ].questionTitle
+          "
+          :choose="reply[sequence - 1]"
+          @returnAnswer="getReply"
+        ></judge-question>
+        <short-answer-question
+          :key="questionRefreshKey"
+          v-if="
+            sequence >
+              testForm.questionList[CHOICE_NO].length +
+                testForm.questionList[JUDGE_NO].length &&
+            sequence <= testForm.questionTotal
+          "
+          :number="sequence"
+          :questionId="
+            testForm.questionList[SHORT_ANSWER_NO].list[
+              questionRowCol[SHORT_ANSWER_NO * 2]
+            ][questionRowCol[SHORT_ANSWER_NO * 2 + 1]].questionId
+          "
+          :title="
+            testForm.questionList[SHORT_ANSWER_NO].list[
+              questionRowCol[SHORT_ANSWER_NO * 2]
+            ][questionRowCol[SHORT_ANSWER_NO * 2 + 1]].questionTitle
+          "
+          :content="reply[sequence - 1]"
+          @returnAnswer="getReply"
+        ></short-answer-question>
+      </div>
+      <div class="operation">
+        <ul class="end">
+          <li>
+            <el-button
+              :disabled="sequence == 1"
+              @click="this.jumpTo(--this.sequence)"
+            >
+              <el-icon style="margin-right: 10px"><arrow-left-bold /></el-icon>
+              <span>上一题</span>
+            </el-button>
+          </li>
+          <li>
+            <el-button
+              :disabled="sequence == testForm.questionTotal"
+              @click="this.jumpTo(++this.sequence)"
+            >
+              <span>下一题</span>
+              <el-icon style="margin-left: 10px"><arrow-right-bold /></el-icon>
+            </el-button>
+          </li>
+        </ul>
+      </div>
+    </el-main>
+  </el-container>
 </template>
 
 <script>
-// import authHeader from "@/services/auth-header";
-// import moment from "moment";
+import authHeader from "@/services/auth-header";
+import countDown from "@/components/CountDown.vue";
+import choiceQuestion from "@/components/ChoiceQuestion.vue";
+import judgeQuestion from "@/components/JudgeQuestion.vue";
+import shortAnswerQuestion from "@/components/ShortAnswerQuestion.vue";
+import moment from "moment";
 export default {
+  components: {
+    countDown,
+    choiceQuestion,
+    judgeQuestion,
+    shortAnswerQuestion,
+  },
   data() {
     return {
-      startTime: null, // 考试开始时间
-      endTime: null, // 考试结束时间
+      // 常量
+      CARD_COL_NUMBER: 4,
+      CHOICE_NO: 0, // index = typeId - 1
+      JUDGE_NO: 1,
+      SHORT_ANSWER_NO: 2,
+
+      // 解决axios获取数据的异步问题
+      testInfoFlag: false,
+      testPaperFlag: false,
+
       // 倒计时
-      hour: "",
-      minute: "",
-      second: "",
-      promiseTimer: "",
-      remainSecond: "",
+      remainSecond: 0,
+      countDownKey: 0,
+      takeTime: 0,
+      timekeep: false,
 
-      index: 0, // 全局index
-      number: 1, // 题号
-      radio: [], // 保存所有选择题的所选选项
-      bg_flag: false, // 是否已答题目，已答则改变背景色
-      isabled: true, // 按钮可用时的样式
-
-      score: [], //每种类型分数的总数
-      topic: {
-        //试卷信息
-      },
-      rightAnswer: "",
-
-      // 考生信息
-      stuForm: {
-        stuId: "",
-        account: "",
-      },
+      userId: "",
       // 考试信息
       testForm: {
         testId: "",
         testName: "",
-        totalScore: "",
+        questionTotal: 0,
+        questionList: [],
       },
-      // 试卷题目信息集合
-      testPaper: {
-        quesNum: "",
-        quesArr: [],
-      },
-      // 当前题目信息
-      currQues: {
-        quesId: "",
-        quesTitle: "",
-        optA: "",
-        optB: "",
-        optC: "",
-        optD: "",
-        answer: "",
-      },
+
+      sequence: 1, // 全局
+      questionRowCol: [0, 0, 0, 0, 0, 0],
+      questionRefreshKey: 0, // 给自定义component加上key -> 刷新component
+      reply: [],
     };
   },
   created() {
+    // this.userId = this.$storage.getStorageSync("user").id;
+    this.userId = "8";
     this.testForm.testId = this.$route.params.testId;
-    this.loadTestInfo(this.testForm.testId);
-    this.loadTestPaper(this.testForm.testId);
-    // this.loadStuInfo(this.$storage.getStorageSync("user").id);
-    this.loadStuInfo("111");
+    this.loadData();
   },
   methods: {
-    countDowm() {
-      var self = this;
-      clearInterval(this.promiseTimer);
-      this.promiseTimer = setInterval(function () {
-        if (self.hour === 0) {
-          if (self.minute !== 0 && self.second === 0) {
-            self.second = 59;
-            self.minute -= 1;
-          } else if (self.minute === 0 && self.second === 0) {
-            self.second = 0;
-            self.$emit("countDowmEnd", true);
-            clearInterval(self.promiseTimer);
-          } else {
-            self.second -= 1;
-          }
-        } else {
-          if (self.minute !== 0 && self.second === 0) {
-            self.second = 59;
-            self.minute -= 1;
-          } else if (self.minute === 0 && self.second === 0) {
-            self.hour -= 1;
-            self.minute = 59;
-            self.second = 59;
-          } else {
-            self.second -= 1;
-          }
-        }
-      }, 1000);
+    loadData() {
+      this.loadTestInfo().then((response) => {
+        this.testInfoFlag = true;
+        this.countDownKey = new Date();
+        this.timekeep = true;
+      });
+      this.loadTestPaper().then((response) => {
+        this.testPaperFlag = true;
+      });
     },
-    formatNum(num) {
-      return num < 10 ? "0" + num : "" + num;
+    loadTestInfo() {
+      return this.$axios
+        .post(
+          "/test/findById",
+          this.$qs.stringify({ testId: this.testForm.testId }),
+          { headers: authHeader() }
+        )
+        .then((response) => {
+          this.testForm = response.data;
+          this.remainSecond = response.data.examDuration * 60;
+        });
     },
-    loadTestInfo(testId) {
-      //   this.$axios
-      //     .post("/test/findById", this.$qs.stringify({ testId: testId }), {
-      //       headers: authHeader(),
-      //     })
-      //     .then((res) => {
-      //       let test = res.data;
-      //       let testForm = this.testForm;
-      //       testForm.testId = test.testId;
-      //       testForm.testName = test.testName;
-      //       testForm.totalScore = test.totalScore;
-      //       this.remainSecond = test.examDure * 60;
-      //       if (this.remainSecond > 0) {
-      //         this.hour = Math.floor((this.remainSecond / 3600) % 24);
-      //         this.minute = Math.floor((this.remainSecond / 60) % 60);
-      //         this.second = Math.floor(this.remainSecond % 60);
-      //         this.countDowm();
-      //       }
-      //     });
-    },
-    loadTestPaper(testId) {
-      //   this.$axios
-      //     .post(
-      //       "/test/findQuesArrByTestId",
-      //       this.$qs.stringify({ testId: testId }),
-      //       {
-      //         headers: authHeader(),
-      //       }
-      //     )
-      //     .then((res) => {
-      //       this.testPaper.quesNum = res.data.length;
-      //       this.testPaper.quesArr = res.data;
-      //       this.currQues = this.testPaper.quesArr[this.number - 1];
-      //     });
-    },
-    loadStuInfo(account) {
-      //   this.$axios
-      //     .post("/stu/findByAccount", this.$qs.stringify({ account: account }), {
-      //       headers: authHeader(),
-      //     })
-      //     .then((res) => {
-      //       this.stuForm.stuId = res.data.id;
-      //       this.stuForm.account = account;
-      //     });
+    loadTestPaper() {
+      return this.$axios
+        .post(
+          "/question/findQuestionListByTestId",
+          this.$qs.stringify({ testId: this.testForm.testId }),
+          { headers: authHeader() }
+        )
+        .then((response) => {
+          this.testForm.questionTotal = response.data.length;
+          this.testForm.questionList = [
+            {
+              name: "选择题",
+              length: 0,
+              list: [],
+            },
+            {
+              name: "判断题",
+              length: 0,
+              list: [],
+            },
+            {
+              name: "简答题",
+              length: 0,
+              list: [],
+            },
+          ];
+          let quesList = [[], [], []];
+          let quesNum = [0, 0, 0];
+          response.data.forEach((item, index) => {
+            quesList[item.typeId - 1].push(item);
+            quesNum[item.typeId - 1]++;
+            if (quesNum[item.typeId - 1] % this.CARD_COL_NUMBER == 0) {
+              this.testForm.questionList[item.typeId - 1].list.push(
+                quesList[item.typeId - 1]
+              );
+              quesList[item.typeId - 1] = [];
+            }
+            if (index + 1 == this.testForm.questionTotal) {
+              for (let i = 0; i < this.testForm.questionList.length; i++) {
+                this.testForm.questionList[i].list.push(quesList[i]);
+                this.testForm.questionList[i].length = quesNum[i];
+              }
+            }
+          });
+        });
     },
 
-    change(index) {
-      this.index = index;
-      this.number = this.index + 1;
-      this.currQues = this.testPaper.quesArr[this.index];
+    jumpTo(i) {
+      this.sequence = i;
+      if (i > 0 && i <= this.testForm.questionList[this.CHOICE_NO].length) {
+        let order = this.sequence;
+        this.questionRowCol[this.CHOICE_NO * 2] = Math.floor(
+          (order - 1) / this.CARD_COL_NUMBER
+        );
+        this.questionRowCol[this.CHOICE_NO * 2 + 1] =
+          (order - 1) % this.CARD_COL_NUMBER;
+      } else if (
+        i <=
+        this.testForm.questionList[this.CHOICE_NO].length +
+          this.testForm.questionList[this.JUDGE_NO].length
+      ) {
+        let order =
+          this.sequence - this.testForm.questionList[this.CHOICE_NO].length;
+        this.questionRowCol[this.JUDGE_NO * 2] = Math.floor(
+          (order - 1) / this.CARD_COL_NUMBER
+        );
+        this.questionRowCol[this.JUDGE_NO * 2 + 1] =
+          (order - 1) % this.CARD_COL_NUMBER;
+      } else if (i <= this.testForm.questionTotal) {
+        let order =
+          this.sequence -
+          (this.testForm.questionTotal -
+            this.testForm.questionList[this.SHORT_ANSWER_NO].length);
+        this.questionRowCol[this.SHORT_ANSWER_NO * 2] = Math.floor(
+          (order - 1) / this.CARD_COL_NUMBER
+        );
+        this.questionRowCol[this.SHORT_ANSWER_NO * 2 + 1] =
+          (order - 1) % this.CARD_COL_NUMBER;
+      } else {
+        console.log("function jumpTo(i):something error, please check out!");
+      }
+      this.questionRefreshKey = new Date();
+      console.log(this.testForm.questionList);
     },
-    // 获取选择题作答选项
-    getChangeLabel(val) {
-      this.radio[this.number - 1] = val;
-      this.bg_flag = val != "";
-    },
-    // 上一题
-    previous() {
-      this.index--;
-      this.isabled = this.index != 0;
-      this.change(this.index);
-    },
-    // 下一题
-    next() {
-      this.index++;
-      this.isabled = this.index + 1 != this.testPaper.quesNum;
-      this.change(this.index);
+    getReply(data) {
+      this.reply[this.sequence - 1] = data;
     },
 
-    // 结束考试
+    getTime(data) {
+      this.takeTime = data;
+    },
     finish() {
-      // let radioSize = 0;
-      // let rightSize = 0;
-      // for (let i = 0; i < this.radio.length; i++) {
-      //   let answer = this.radio[i];
-      //   let right = this.testPaper.quesArr[i].answer;
-      //   if (answer != undefined) {
-      //     radioSize++;
-      //     switch (answer) {
-      //       case 1: // A
-      //         if (right == "A") {
-      //           rightSize++;
-      //         }
-      //         break;
-      //       case 2: // B
-      //         if (right == "B") {
-      //           rightSize++;
-      //         }
-      //         break;
-      //       case 3: // C
-      //         if (right == "C") {
-      //           rightSize++;
-      //         }
-      //         break;
-      //       case 4: // D
-      //         if (right == "D") {
-      //           rightSize++;
-      //         }
-      //         break;
-      //     }
-      //   }
-      // }
-      // if (radioSize < this.testPaper.quesNum) {
-      //   this.$confirm("你还有题目未完成，是否继续提交？", "提示", {
-      //     confirmButtonText: "确定",
-      //     cancelButtonText: "取消",
-      //     type: "warning",
-      //   })
-      //     .then(() => {
-      //       this.commit(rightSize);
-      //     })
-      //     .catch(() => {
-      //       return;
-      //     });
-      // } else {
-      //   this.commit(rightSize);
-      // }
+      let time = this.takeTime;
+      this.timekeep = false;
+      this.remainSecond -= time;
+      this.countDownKey = new Date();
+      let notEmptyReply = 0;
+      this.reply.forEach((item) => {
+        notEmptyReply += item != undefined;
+      });
+      let isCommit = false;
+      if (notEmptyReply < this.testForm.questionTotal) {
+        this.$confirm("你还有题目未完成，是否继续？", "提示", {
+          distinguishCancelAndClose: true,
+          confirmButtonText: "提交",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+          .then(() => {
+            isCommit = true;
+            this.commit(time);
+          })
+          .catch(() => {
+            // 点击提交后会先then()再catch()，设置isCommit防止提交后计时仍继续
+            if (!isCommit) {
+              // 计时继续
+              this.countDownKey = new Date();
+              this.timekeep = true;
+            }
+          });
+      } else {
+        this.commit(time);
+      }
     },
-    // 提交试卷
-    commit(rightSize) {
-      //   this.$axios.post(
-      //     "/testHistory/commit",
-      //     this.$qs.stringify({
-      //       stu: this.stuForm.stuId,
-      //       test: this.testForm.testId,
-      //       score:
-      //         rightSize *
-      //         Math.floor(this.testForm.totalScore / this.testPaper.quesNum),
-      //       finishDate: moment(new Date()).format("yyyy-MM-D HH:mm:ss"),
-      //     }),
-      //     {
-      //       headers: authHeader(),
-      //     }
-      //   );
-      //   this.$router.push("/student/testHistory");
-      //   // let radio = this.radio;
-      //   // let finalScore = 0;
-      //   // if (this.testForm.examDure != 0) {
-      //   //   this.$confirm("考试结束时间未到,是否提前交卷", "友情提示", {
-      //   //     confirmButtonText: "立即交卷",
-      //   //     cancelButtonText: "再检查一下",
-      //   //     type: "warning",
-      //   //   })
-      //   //     .then(() => {
-      //   //       let date = new Date();
-      //   //       this.endTime = this.getTime(date);
-      //   //       let answerDate = this.endTime.substr(0, 10);
-      //   //       //提交成绩信息
-      //   //       this.$axios({
-      //   //         url: "/api/score",
-      //   //         method: "post",
-      //   //         data: {
-      //   //           examCode: this.examData.examCode, //考试编号
-      //   //           subject: this.examData.source, //课程名称
-      //   //           etScore: finalScore, //答题成绩
-      //   //           answerDate: answerDate, //答题日期
-      //   //         },
-      //   //       }).then((res) => {
-      //   //         if (res.data.code == 200) {
-      //   //           this.$router.push({
-      //   //             path: "/studentScore",
-      //   //             query: {
-      //   //               score: finalScore,
-      //   //               startTime: this.startTime,
-      //   //               endTime: this.endTime,
-      //   //             },
-      //   //           });
-      //   //         }
-      //   //       });
-      //   //     })
-      //   //     .catch(() => {
-      //   //       console.log("继续答题");
-      //   //     });
-      //   // }
+    commit(time) {
+      let arr = "";
+      for (let i = 0; i < this.testForm.questionTotal; i++) {
+        arr += (this.reply[i] == undefined ? " " : this.reply[i]) + ",";
+      }
+      this.$axios.post(
+        "/testHistory/commit",
+        this.$qs.stringify({
+          studentId: this.userId,
+          testId: this.testForm.testId,
+          finishTime: moment().format("YYYY-MM-DD HH:mm:ss"),
+          takeTime: time,
+          reply: arr.substring(0, arr.length - 1),
+        }),
+        { headers: authHeader() }
+      );
+      // this.$router.push("/student/testHistory");
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-// 页面容器
-#answer {
-  padding-bottom: 30px;
-}
-#answer .item {
-  color: #fff;
-  display: flex;
-  padding: 20px;
-  font-size: 20px;
-}
-// 右侧答题区布局
-.flexarea {
-  display: flex;
-}
-.flexarea .right {
-  flex: 1;
-}
-// 题目索引
-#answer .left .item {
-  padding: 0px;
-  font-size: 16px;
-}
-// 左侧索引指示信息
-.left {
-  width: 260px;
-  height: 100%;
-  margin: 10px 10px 0px 10px;
-}
-.left .l-top {
-  display: flex;
-  justify-content: space-around;
-  padding: 16px 0px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  background-color: #fff;
-}
-.left .l-top li a {
-  display: inline-block;
-  padding: 10px;
-  border-radius: 50%;
-  background-color: #fff;
-  border: 1.5px solid red;
-}
-.left .l-top li:nth-child(2) a {
-  border: 1px solid #eee;
-}
-.left .l-top li:nth-child(3) a {
-  background-color: #409eff;
-  border: none;
-}
-.left .l-top li {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-// 题目是否已答背景
-.bg {
-  background-color: #409eff !important;
-}
-.border {
-  position: relative;
-  border: 1.5px solid red !important;
-}
-// 题目索引
-.cust-ul {
-  padding-left: 0px !important;
-  margin-bottom: 10px !important;
-  list-style: none;
-}
-.l-bottom {
-  border-radius: 4px;
-  background-color: #fff;
-}
-.l-bottom .item p {
-  margin-bottom: 15px;
-  margin-top: 10px;
-  color: #000;
-  margin-left: 10px;
-  letter-spacing: 2px;
-}
-.l-bottom .item li {
-  width: 15%;
-  margin-left: 5px;
-  margin-bottom: 10px;
-}
-.l-bottom .item {
-  display: flex;
-  flex-direction: column;
-}
-.l-bottom .item ul {
-  width: 100%;
-  margin-bottom: -8px;
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-.l-bottom .item ul li a {
-  position: relative;
-  justify-content: center;
-  display: inline-flex;
-  align-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: #fff;
-  border: 1px solid #eee;
+<style scoped>
+.el-card {
+  height: fit-content;
   text-align: center;
-  color: #000;
-  font-size: 16px;
 }
-// 上下页按钮
+/* 左侧索引指示信息 */
+#logo-0 {
+  border: 2px solid red;
+}
+#logo-1 {
+  border: 1px solid #eee;
+}
+#logo-2 {
+  background-color: #38d39f;
+}
+/* 题目是否已答背景 */
+.index-btn-style {
+  background-color: #38d39f !important;
+  color: #fff;
+}
+.index-btn-border {
+  position: relative;
+  border: 2px solid red !important;
+}
+/* 上下页按钮 */
 .operation .end li button {
   border: none;
   font-size: 17px;
   background-color: #fff;
 }
-.btn-hover:hover {
-  color: #409eff;
-}
 .operation .end li {
   margin: 0 75px;
 }
-.operation {
-  background-color: #fff;
-  border-radius: 4px;
-  padding: 10px 0px;
-  margin-right: 10px;
-}
 .operation .end {
-  margin-bottom: 0px;
   list-style: none;
   display: flex;
   justify-content: center;
   align-items: center;
-  // color: rgb(39, 118, 223);
-}
-// 右侧上方
-.auto-right {
-  margin-left: auto;
-  margin-right: 10px;
-}
-.icon20 {
-  font-size: 20px;
-  color: #409eff;
-}
-.right .title p {
-  margin-left: 20px;
-}
-.right .title {
-  margin-right: 10px;
-  padding-right: 30px;
-  display: flex;
-  margin-top: 10px;
-  background-color: #fff;
-  height: 50px;
-  line-height: 50px;
-}
-// 题目区域
-.right .content {
-  background-color: #fff;
-  margin: 10px;
-  margin-left: 0px;
-  height: 470px;
-}
-.content {
-  padding: 0px 20px;
-}
-.content .topic {
-  padding: 20px 0px;
-  padding-top: 30px;
-  font-size: 17px;
-  font-weight: normal;
-}
-// 题号
-.content .number {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 25px;
-  height: 25px;
-  background-color: #409eff;
-  color: #fff;
-  border-radius: 4px;
-  margin-right: 4px;
-  font-weight: bold;
-}
-// 题目选项
-.content .el-radio-group label {
-  color: #000;
-  margin: 7px 0px;
-  font-size: 15px;
-}
-.content .el-radio-group {
-  display: flex;
-  flex-direction: column;
 }
 </style>

@@ -171,6 +171,18 @@
         :filter-method="typeIdFilter"
         width="100"
       >
+        <template #default="scope">
+          <el-tag
+            :type="
+              scope.row.typeName == '判断题'
+                ? 'success'
+                : scope.row.typeName == '简答题'
+                ? 'danger'
+                : ''
+            "
+            >{{ scope.row.typeName }}</el-tag
+          >
+        </template>
       </el-table-column>
       <el-table-column prop="questionTitle" label="题目"> </el-table-column>
       <el-table-column prop="answer" label="正确答案" width="100">
@@ -339,7 +351,9 @@ export default {
       this.$axios
         .post(
           "/subject/findAllSubIdByUserId",
-          this.$qs.stringify({ userId: "4" }),
+          this.$qs.stringify({
+            userId: this.$storage.getStorageSync("user").id,
+          }),
           { headers: authHeader() }
         )
         .then((response) => {
@@ -480,8 +494,8 @@ export default {
                 "/question/del",
                 this.$qs.stringify(
                   {
-                    // userId: this.$storage.getStorageSync("user").id,
-                    userId: "4",
+                    userId: this.$storage.getStorageSync("user").id,
+                    // userId: "4",
                     questionId: params,
                     pageno: this.pageno,
                     size: this.size,

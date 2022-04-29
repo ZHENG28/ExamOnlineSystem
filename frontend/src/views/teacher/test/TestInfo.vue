@@ -3,11 +3,8 @@
     <div style="margin-bottom: 10px">
       <h2 style="display: inline">测验信息</h2>
       <div style="float: right">
-        <el-button @click="toTestBuild(0)">添加</el-button>
-        <el-button
-          type="danger"
-          @click="del(this.multiSelection)"
-          :disabled="false"
+        <el-button @click="toTestBuild(0)">新增</el-button>
+        <el-button type="danger" @click="del(this.multiSelection)"
           >删除</el-button
         >
       </div>
@@ -16,7 +13,8 @@
       :data="
         tableData.filter(
           (data) =>
-            !search || data.testId.toLowerCase().includes(search.toLowerCase())
+            !search ||
+            data.testName.toLowerCase().includes(search.toLowerCase())
         )
       "
       border
@@ -36,7 +34,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="subName"
+        prop="subjectName"
         label="所属科目"
         :filters="subIdFilterData"
         :filter-method="subIdFilter"
@@ -70,20 +68,12 @@
         <template #default="scope">
           <el-button @click="toTestBuild(scope.row.testId)">编辑</el-button>
           <el-button type="danger" @click="del([scope.row])">删除</el-button>
-          <el-button
-            type="primary"
-            @click="
-              testResultVisible = true;
-              openChart();
-            "
+          <el-button type="primary" @click="toTestResult(scope.row.testId)"
             >查看测验结果</el-button
           >
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="本次测验结果" v-model="testResultVisible">
-      <div id="chartBox" style="width: 600px; height: 400px"></div>
-    </el-dialog>
     <div style="margin-top: 10px">
       <el-pagination
         @size-change="handleSizeChange"
@@ -100,22 +90,13 @@
 </template>
 <script>
 import authHeader from "@/services/auth-header";
-// import echarts from "echarts";
 export default {
   data() {
     return {
       multiSelection: [],
-      multiSelectionFlag: true,
       subIdFilterData: [],
       clazzFilterData: [],
       search: "",
-
-      isShowDialog: false,
-      testResultVisible: false,
-      charts: "",
-      opinion: ["90-100", "80-89", "70-79", "60-69", "60以下"],
-      opinionData: [],
-
       tableData: [],
       pageno: 1,
       size: 10,
@@ -126,45 +107,22 @@ export default {
     this.loadData();
   },
   methods: {
+    // 初始化页面
     loadData() {
       this.findAll();
       this.findClazzAndSubIdFilterData();
     },
 
-    findClazzAndSubIdFilterData() {
-      this.$axios
-        .post(
-          "/subject/findAllSubId"
-          // { headers: authHeader() }
-        )
-        .then((response) => {
-          this.subIdFilterData = response.data;
-        });
-      this.$axios
-        .get(
-          "/clazz/getDistinctClazz"
-          //  { headers: authHeader() }
-        )
-        .then((response) => {
-          this.clazzFilterData = response.data;
-        });
-    },
-    clazzFilter(value, row) {
-      return row.clazzName == value;
-    },
-    subIdFilter(value, row) {
-      return row.subName == value;
-    },
-
     findAll() {
       this.$axios
         .post(
-          "/test/findAllByStuIdOrNot",
+          "/test/findAllByUserId",
           this.$qs.stringify({
+            userId: this.$storage.getStorageSync("user").id,
             pageno: this.pageno,
             size: this.size,
-          })
-          // { headers: authHeader() }
+          }),
+          { headers: authHeader() }
         )
         .then((response) => {
           this.tableData = response.data.records;
@@ -181,102 +139,88 @@ export default {
       this.findAll();
     },
 
+    findClazzAndSubIdFilterData() {
+      this.$axios
+        .post(
+          "/subject/findAllSubIdByUserId",
+          this.$qs.stringify({
+            userId: this.$storage.getStorageSync("user").id,
+          }),
+          { headers: authHeader() }
+        )
+        .then((response) => {
+          this.subIdFilterData = response.data;
+        });
+      this.$axios
+        .get("/clazz/getDistinctClazz", { headers: authHeader() })
+        .then((response) => {
+          this.clazzFilterData = response.data;
+        });
+    },
+    clazzFilter(value, row) {
+      return row.clazzName == value;
+    },
+    subIdFilter(value, row) {
+      return row.subName == value;
+    },
+
+    // 新增&编辑
     toTestBuild(testId) {
       this.$router.push({
         path: `/teacher/testBuild/${testId}`,
       });
     },
+    // 查看测验结果
+    toTestResult(testId) {
+      this.$router.push({
+        path: `/teacher/testResult/${testId}`,
+      });
+    },
 
+    // 删除
     handleSelectionChange(val) {
       this.multiSelection = val;
-      if (this.multiSelection.length == 0) {
-        // this.multiSelectionFlag = true;
-      } else {
-        // this.multiSelectionFlag = false;
-      }
     },
     del(arr) {
-      this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          let params = [];
-          arr.forEach(function (item) {
-            params.push(item.testId);
-          });
-          this.$axios
-            .post(
-              "/test/del",
-              this.$qs.stringify(
-                {
-                  testId: params,
-                  pageno: this.pageno,
-                  size: this.size,
-                },
-                { indices: false }
-              )
-              // { headers: authHeader() }
-            )
-            .then((response) => {
-              this.tableData = response.data.records;
-              this.totalItems = response.data.total;
-              this.$message.success("删除成功！");
-            })
-            .catch(() => {
-              this.$message.error("删除失败");
-            });
+      if (arr.length) {
+        this.$confirm("此操作将永久删除信息, 是否继续？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         })
-        .catch(() => {
-          this.$message.info("已取消删除");
-        });
-    },
-
-    findScoreByTestId() {
-      // this.$axios
-      //   .post(
-      //     "/testhistory/findScoreByTestId",
-      //     this.$qs.stringify({ testId: this.testForm.testId }),
-      //     // { headers: authHeader() }
-      //   )
-      //   .then((res) => {
-      //     this.opinionData = res.data;
-      //   });
-    },
-    drawPie(id) {
-      console.log("12");
-      //   this.charts = echarts.init(document.getElementById(id));
-      //   this.charts.setOption({
-      //     tooltip: {
-      //       trigger: "item",
-      //     },
-      //     legend: {
-      //       orient: "vertical",
-      //       x: "left",
-      //       data: this.opinion,
-      //     },
-      //     series: [
-      //       {
-      //         type: "pie",
-      //         radius: "55%",
-      //         center: ["50%", "60%"],
-      //         data: this.opinionData,
-      //         itemStyle: {
-      //           emphasis: {
-      //             shadowBlur: 10,
-      //             shadowOffsetX: 0,
-      //             shadowColor: "rgba(0, 0, 0, 0.5)",
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   });
-    },
-    openChart() {
-      // setTimeout(() => {
-      this.drawPie("chartBox");
-      // }, 0);
+          .then(() => {
+            let params = [];
+            arr.forEach(function (item) {
+              params.push(item.testId);
+            });
+            this.$axios
+              .post(
+                "/test/del",
+                this.$qs.stringify(
+                  {
+                    testId: params,
+                    pageno: this.pageno,
+                    size: this.size,
+                  },
+                  { indices: false }
+                ),
+                { headers: authHeader() }
+              )
+              .then((response) => {
+                this.tableData = response.data.records;
+                this.totalItems = response.data.total;
+                this.$message.success("删除成功！");
+              })
+              .catch(() => {
+                this.$message.error("删除失败");
+              });
+          })
+          .catch(() => {
+            this.$message.info("已取消删除");
+          });
+      } else {
+        this.$message.info("请选择要删除的信息");
+      }
     },
   },
 };

@@ -33,7 +33,7 @@
         filter-placement="bottom-end"
       >
       </el-table-column>
-      <el-table-column prop="score" label="成绩"> </el-table-column>
+      <el-table-column prop="correct" label="成绩"> </el-table-column>
       <el-table-column prop="finishDate" label="完成时间">
         <template #default="scope">
           {{
@@ -81,7 +81,7 @@ export default {
         testId: "",
         testName: "",
         description: "",
-        score: "",
+        right: "",
         finishDate: "",
       },
       subNameFilterData: [],
@@ -106,8 +106,7 @@ export default {
         .post(
           "/testhistory/findAllByAccount",
           this.$qs.stringify({
-            // account: this.$storage.getStorageSync("user").id,
-            account: "111",
+            userId: this.$storage.getStorageSync("user").id,
             pageno: this.pageno,
             size: this.size,
           })

@@ -23,6 +23,7 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
     @Autowired
     private ClazzMapper clazzMapper;
 
+    @Override
     public IPage<Clazz> findAll(Integer pageno, Integer size) {
         QueryWrapper<Clazz> queryWrapper = new QueryWrapper<>();
         IPage<Clazz> page = new Page<>(pageno, size);
@@ -49,6 +50,7 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
         return results;
     }
 
+    @Override
     public List<Map<String, Object>> findAllMajorClazz() {
         QueryWrapper<Clazz> clazzQueryWrapper = new QueryWrapper<>();
 
@@ -74,10 +76,12 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
         return result;
     }
 
+    @Override
     public Integer saveClazz(Clazz clazz) {
         return clazz.getClazzId() != null ? clazzMapper.updateById(clazz) : clazzMapper.insert(clazz);
     }
 
+    @Override
     @Transactional
     public Integer deleteClazz(Integer[] id) {
         List<Integer> ids = new ArrayList<>();
@@ -87,8 +91,8 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
         return clazzMapper.deleteBatchIds(ids);
     }
 
+    @Override
     public Clazz findById(Integer clazzId) {
         return clazzMapper.selectById(clazzId);
     }
-
 }

@@ -24,20 +24,22 @@ public class QuestionTypeServiceImpl extends ServiceImpl<QuestionTypeMapper, Que
     @Autowired
     private QuestionTypeMapper questionTypeMapper;
 
+    @Override
     public IPage<QuestionType> findAll(Integer pageno, Integer size, Integer... userId) {
         QueryWrapper<QuestionType> queryWrapper = new QueryWrapper<>();
         Page<QuestionType> page = new Page<>(pageno, size);
 
-//        if (userId == null) {
-//            return questionTypeMapper.selectPageWithQuestionType(page, queryWrapper);
-//        } else {
-//            //            Student stu = studentMapper.selectById(id);
-//            //            queryWrapper.eq("test_clazz", stu.getClazzId());
-//            return questionTypeMapper.selectPageWithQuestionType(page, queryWrapper);
-//        }
+        //        if (userId == null) {
+        //            return questionTypeMapper.selectPageWithQuestionType(page, queryWrapper);
+        //        } else {
+        //            //            Student stu = studentMapper.selectById(id);
+        //            //            queryWrapper.eq("test_clazz", stu.getClazzId());
+        //            return questionTypeMapper.selectPageWithQuestionType(page, queryWrapper);
+        //        }
         return questionTypeMapper.selectPage(page, queryWrapper);
     }
 
+    @Override
     public List<Map<String, Object>> findDistinctQuestionType() {
         List<Map<String, Object>> tmp = questionTypeMapper.selectDistinctQuestionType();
         List<Map<String, Object>> List = new ArrayList<>();
@@ -51,10 +53,12 @@ public class QuestionTypeServiceImpl extends ServiceImpl<QuestionTypeMapper, Que
         return List;
     }
 
+    @Override
     public int saveQuestionType(QuestionType questionType) {
         return questionType.getTypeId() != null ? questionTypeMapper.updateById(questionType) : questionTypeMapper.insert(questionType);
     }
 
+    @Override
     @Transactional
     public int deleteQuestionType(Integer[] id) {
         List<Integer> ids = new ArrayList<>();
@@ -64,6 +68,7 @@ public class QuestionTypeServiceImpl extends ServiceImpl<QuestionTypeMapper, Que
         return questionTypeMapper.deleteBatchIds(ids);
     }
 
+    @Override
     public QuestionType findById(Integer questionTypeId) {
         return questionTypeMapper.selectById(questionTypeId);
     }

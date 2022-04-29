@@ -23,9 +23,7 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     @Autowired
     private SubjectMapper subjectMapper;
 
-    //    @Autowired
-    //    private TeacherMapper teacherMapper;
-
+    @Override
     public IPage<Subject> findAll(Integer pageno, Integer size, Integer... userId) {
         QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
         Page<Subject> page = new Page<>(pageno, size);
@@ -36,6 +34,7 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
     }
 
+    @Override
     public List<Map<String, Object>> findDistinctSubject() {
         QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
         List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject(queryWrapper);
@@ -50,6 +49,7 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         return List;
     }
 
+    @Override
     public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId) {
         QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("u.user_id", userId);
@@ -65,10 +65,12 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         return List;
     }
 
+    @Override
     public int saveSubject(Subject subject) {
         return subject.getSubjectId() != null ? subjectMapper.updateById(subject) : subjectMapper.insert(subject);
     }
 
+    @Override
     @Transactional
     public int deleteSubject(Integer[] id) {
         List<Integer> ids = new ArrayList<>();
@@ -78,6 +80,7 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
         return subjectMapper.deleteBatchIds(ids);
     }
 
+    @Override
     public Subject findById(Integer subjectId) {
         return subjectMapper.findByIdWithTeacherAndClazz(subjectId);
     }

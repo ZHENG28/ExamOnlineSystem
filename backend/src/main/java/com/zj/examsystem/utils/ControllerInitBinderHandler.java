@@ -12,25 +12,11 @@ import java.time.format.DateTimeFormatter;
 public class ControllerInitBinderHandler {
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
-        //        binder.registerCustomEditor(LocalDate.class, new PropertyEditorSupport() {
-        //            @Override
-        //            public void setAsText(String text) throws IllegalArgumentException {
-        //                setValue(LocalDate.parse(text, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        //            }
-        //        });
-
         binder.registerCustomEditor(LocalDateTime.class, new PropertyEditorSupport() {
             @Override
             public void setAsText(String text) throws IllegalArgumentException {
                 setValue(LocalDateTime.parse(text, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             }
         });
-
-        //        binder.registerCustomEditor(LocalTime.class, new PropertyEditorSupport() {
-        //            @Override
-        //            public void setAsText(String text) throws IllegalArgumentException {
-        //                setValue(LocalTime.parse(text, DateTimeFormatter.ofPattern("HH:mm:ss")));
-        //            }
-        //        });
     }
 }

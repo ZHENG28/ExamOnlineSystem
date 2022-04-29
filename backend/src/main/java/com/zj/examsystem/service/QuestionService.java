@@ -18,5 +18,7 @@ public interface QuestionService extends IService<Question> {
 
     public Question findById(Integer questionId);
 
-    public List<Question> findQuesBySubId(Integer subId);
+    public List<Question> findQuesBySubId(Integer subjectId);
+
+    public List<Question> findQuestionListByTestId(Integer testId);
 }

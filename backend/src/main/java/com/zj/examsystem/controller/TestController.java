@@ -19,17 +19,16 @@ public class TestController {
     @Autowired
     private TestService testService;
 
-    @PostMapping("/findAllByStuIdOrNot")
+    @PostMapping("/findAllByUserId")
     @ResponseBody
-    public Object findAllByStuId(Integer pageno, Integer size, Integer... id) {
-        return testService.findAll(pageno, size, id);
+    public Object findAllByUserId(Integer pageno, Integer size, Integer userId) {
+        return testService.findAll(pageno, size, userId);
     }
 
     @GetMapping("/save")
     @ResponseBody
     public Object save(Test test) {
-        int result = testService.saveTest(test);
-        return result != 0;
+        return testService.saveTest(test);
     }
 
     @PostMapping("/del")
@@ -40,7 +39,7 @@ public class TestController {
         if (result != 0) {
             mv.addObject("pageno", pageno);
             mv.addObject("size", size);
-            mv.setViewName("forward:/test/findAllByStuIdOrNot");
+            mv.setViewName("forward:/test/findAllByUserId");
         }
         return mv;
     }
@@ -53,9 +52,8 @@ public class TestController {
 
     @PostMapping("/findExamTimeByTestId")
     @ResponseBody
-    public Object findExamTimeByTestId(String account, Integer testId)
-    {
-        return testService.findExamTimeByTestId(account, testId);
+    public Object findExamTimeByTestId(Integer userId, Integer testId) {
+        return testService.findExamTimeByTestId(userId, testId);
     }
 }
 

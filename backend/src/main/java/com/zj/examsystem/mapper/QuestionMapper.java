@@ -16,4 +16,6 @@ public interface QuestionMapper extends BaseMapper<Question> {
     IPage<Question> findAllByTeacherId(@Param("userId") Integer userId, Page<Question> page);
 
     Question selectById(Integer questionId);
+
+    List<Question> findBySubIdWithType(Integer subjectId);
 }

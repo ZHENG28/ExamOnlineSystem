@@ -3,7 +3,7 @@
     <h2>{{ status }}测验信息</h2>
     <el-form
       :model="testForm"
-      :rules="formRules"
+      :rules="testFormRules"
       ref="testForm"
       label-width="100px"
       label-position="right"
@@ -21,7 +21,7 @@
         <el-col :span="12">
           <el-form-item label="测验班级" prop="clazzId">
             <el-cascader
-              @change="valueToCascade"
+              @change="valueToClazzId"
               v-model="majorclazzName"
               placeholder="请选择专业班级"
               :options="majorclazzArr"
@@ -46,7 +46,7 @@
       </el-row>
       <el-row>
         <el-col :span="6">
-          <el-form-item label="所属科目" prop="subjectName">
+          <el-form-item label="所属科目" prop="subjectId">
             <el-select
               filterable
               placeholder="请选择科目"
@@ -55,22 +55,22 @@
             >
               <el-option
                 v-for="sub in subIdFilterData"
-                :key="sub.subjectId"
+                :key="sub.subId"
                 :label="sub.text"
-                :value="sub.subjectId"
+                :value="sub.subId"
               >
               </el-option>
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="18">
-          <el-form-item prop="quesArr">
+        <el-col :span="7">
+          <el-form-item prop="questionList">
             <el-button
               type="primary"
               :disabled="testForm.subjectId == ''"
               @click="
                 findQuesBySubId(testForm.subjectId);
-                dialogFormVisible = true;
+                questionListVisible = true;
               "
               style="margin-right: 30px"
               >选择考题</el-button
@@ -87,7 +87,7 @@
             <div class="dialog-container">
               <el-dialog
                 title="添加考试题目"
-                v-model="dialogFormVisible"
+                v-model="questionListVisible"
                 width="1200px"
                 top="20px"
               >
@@ -101,7 +101,17 @@
                     :left-default-checked="randomCheck"
                   >
                     <template #default="{ option }">
-                      <span>{{ option.label }}</span>
+                      <el-tag
+                        :type="
+                          option.type == '判断题'
+                            ? 'success'
+                            : option.type == '简答题'
+                            ? 'danger'
+                            : ''
+                        "
+                        >{{ option.type }}</el-tag
+                      >
+                      <span style="margin-left: 10px">{{ option.label }}</span>
                     </template>
                   </el-transfer>
                 </div>
@@ -113,13 +123,60 @@
                       >
                     </div>
                     <div style="display: inline">
-                      <el-button @click="dialogFormVisible = false"
+                      <el-button @click="questionListVisible = false"
                         >取 消</el-button
                       >
-                      <el-button type="primary" @click="testQuesToQuesArr()"
+                      <el-button
+                        type="primary"
+                        @click="testQuesToquestionList()"
                         >确 定</el-button
                       >
                     </div>
+                  </span>
+                </template>
+              </el-dialog>
+            </div>
+          </el-form-item>
+        </el-col>
+        <el-col :span="11">
+          <el-form-item>
+            <el-button
+              type="primary"
+              @click="shortAnswerVisible = true"
+              :style="{
+                marginRight: '30px',
+                visibility: shortAnswerBtnVisible ? 'hidden' : 'visible',
+              }"
+              >设置简答题阈值</el-button
+            >
+            <div class="dialog-container">
+              <el-dialog
+                title="设置简答题阈值"
+                v-model="shortAnswerVisible"
+                width="600px"
+              >
+                <span>阈值即</span>
+                <el-form
+                  :model="shortAnswerList"
+                  :rules="shortAnswerFormRules"
+                  ref="shortAnswerList"
+                  label-width="200px"
+                  label-position="left"
+                >
+                  <el-form-item
+                    v-for="(shortAnswer, index) in shortAnswerList"
+                    :key="index"
+                    :label="shortAnswer.questionTitle"
+                    prop="threshold"
+                  >
+                    <el-slider v-model="shortAnswer.threshold" size="small" />
+                  </el-form-item>
+                </el-form>
+                <template #footer>
+                  <span class="dialog-footer">
+                    <el-button @click="shortAnswerVisible = false"
+                      >关 闭</el-button
+                    >
                   </span>
                 </template>
               </el-dialog>
@@ -143,11 +200,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="测验时长" prop="examDure">
+          <el-form-item label="测验时长" prop="examDuration">
             <el-input-number
-              v-model="testForm.examDure"
-              step="30"
-              min="0"
+              v-model="testForm.examDuration"
+              :step="30"
+              :min="0"
               placeholder="0"
             ></el-input-number>
             分钟
@@ -156,11 +213,11 @@
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="测验总分" prop="totalScore">
+          <el-form-item label="测验总分" prop="questionTotal">
             <el-input-number
-              v-model="testForm.totalScore"
-              step="50"
-              min="0"
+              v-model="testForm.questionTotal"
+              :step="50"
+              :min="0"
               placeholder="100"
             ></el-input-number>
           </el-form-item>
@@ -169,8 +226,8 @@
           <el-form-item label="测验次数" prop="examTime">
             <el-input-number
               v-model="testForm.examTime"
-              step="1"
-              min="0"
+              :step="1"
+              :min="0"
               placeholder="1"
             ></el-input-number>
           </el-form-item>
@@ -189,7 +246,7 @@ export default {
   data() {
     return {
       status: "",
-      dialogFormVisible: false,
+      questionListVisible: false,
       testForm: {
         testId: "",
         testName: "",
@@ -199,15 +256,16 @@ export default {
         description: "",
         subjectId: "",
         subjectName: "",
-        quesArr: "",
+        questionList: "",
         date: [],
         beginDate: "",
         endDate: "",
-        examDure: 0,
-        totalScore: 100,
+        examDuration: 0,
+        questionTotal: 100,
         examTime: 1,
+        shortAnswer: "",
       },
-      formRules: {
+      testFormRules: {
         testName: [
           { required: true, message: "请填写本次测验标题", trigger: "blur" },
         ],
@@ -217,14 +275,16 @@ export default {
         description: [
           { required: false, message: "请填写本次测验简介", trigger: "blur" },
         ],
-        subjectName: [
-          { required: true, message: "请选择所属科目", trigger: "change" },
+        subjectId: [
+          { required: true, message: "请选择所属科目", trigger: "blur" },
         ],
-        quesArr: [{ required: true, message: "请选择题库", trigger: "blur" }],
+        questionList: [
+          { required: true, message: "请选择题库", trigger: "blur" },
+        ],
         date: [
           { required: true, message: "请填写开始-结束时间", trigger: "blur" },
         ],
-        examDure: [
+        examDuration: [
           {
             required: true,
             message: "请填写测验时长",
@@ -243,7 +303,7 @@ export default {
             },
           },
         ],
-        totalScore: [
+        questionTotal: [
           { required: true, message: "请填写测验总分", trigger: "blur" },
           {
             type: "number",
@@ -277,6 +337,13 @@ export default {
             },
           },
         ],
+      },
+
+      shortAnswerVisible: false,
+      shortAnswerBtnVisible: true,
+      shortAnswerList: [],
+      shortAnswerFormRules: {
+        threshold: [{ required: true, message: "请填写阈值", trigger: "blur" }],
       },
 
       majorclazzArr: [],
@@ -315,7 +382,13 @@ export default {
 
     findAllSub() {
       this.$axios
-        .post("/subject/findAllSubId", { headers: authHeader() })
+        .post(
+          "/subject/findAllSubIdByUserId",
+          this.$qs.stringify({
+            userId: this.$storage.getStorageSync("user").id,
+          }),
+          { headers: authHeader() }
+        )
         .then((response) => {
           this.subIdFilterData = response.data;
         });
@@ -331,14 +404,14 @@ export default {
       this.testForm.subjectId = val;
       this.testQues = [];
     },
-    valueToCascade(row) {
+    valueToClazzId(row) {
       this.testForm.clazzId = row[1];
     },
 
     findQuesBySubId(id) {
       this.$axios
         .post(
-          "/singleQuestion/findQuesBySubId",
+          "/question/findQuesBySubId",
           this.$qs.stringify({
             subjectId: id,
           }),
@@ -348,8 +421,9 @@ export default {
           this.quesList = [];
           response.data.forEach((elem) => {
             this.quesList.push({
-              key: elem.quesId,
-              label: elem.quesTitle,
+              key: elem.questionId,
+              label: elem.questionTitle,
+              type: elem.typeName,
             });
           });
         });
@@ -374,13 +448,30 @@ export default {
       }
       this.randomCheck = result;
     },
-    testQuesToQuesArr() {
+    testQuesToquestionList() {
       let arr = [];
       this.testQues.forEach((elem) => {
         arr += elem + ",";
       });
-      this.testForm.quesArr = arr.substring(0, arr.length - 1);
-      this.dialogFormVisible = false;
+      this.testForm.questionList = arr.substring(0, arr.length - 1);
+      this.questionListVisible = false;
+      this.shortAnswerBtnVisible = this.haveShortAnswer();
+    },
+
+    haveShortAnswer() {
+      this.shortAnswerList = [];
+      this.testQues.forEach((elem) => {
+        this.quesList.forEach((item) => {
+          if (elem == item.key && item.type == "简答题") {
+            this.shortAnswerList.push({
+              questionId: item.key,
+              questionTitle: item.label,
+              threshold: 50,
+            });
+          }
+        });
+      });
+      return this.shortAnswerList.length == 0;
     },
 
     loadInfo(id) {
@@ -395,42 +486,60 @@ export default {
             this.formatDate(this.testForm.endDate),
           ];
           this.majorclazzName = [this.testForm.major, this.testForm.clazzId];
+          // 简答题阈值（quesList为空 异步问题）
+          this.findQuesBySubId(this.testForm.subjectId);
+          console.log(this.quesList);
+          let str = this.testForm.shortAnswer.split(",");
+          str.forEach((item) => {
+            let s = item.split(" ");
+            this.shortAnswerList.push({
+              questionId: s[0],
+              // questionTitle: item.label,
+              threshold: parseInt(s[1]),
+            });
+          });
+          this.shortAnswerBtnVisible = this.shortAnswerList.length == 0;
         });
     },
     save() {
-      this.$refs.testForm.validate((valid) => {
-        if (valid) {
-          this.$axios
-            .get("/test/save", {
-              headers: authHeader(),
-              params: {
-                testId: this.testForm.testId,
-                testName: this.testForm.testName,
-                description: this.testForm.description,
-                subjectId: this.testForm.subjectId,
-                quesArr: this.testForm.quesArr,
-                beginDate: this.testForm.date[0],
-                endDate: this.testForm.date[1],
-                examDure: this.testForm.examDure,
-                clazzId: this.testForm.clazzId,
-                totalScore: this.testForm.totalScore,
-                examTime: this.testForm.examTime,
-              },
-            })
-            .then((response) => {
-              if (response.data) {
-                this.$message.success(this.status + "成功");
-                this.$router.push("/teacher/testInfo");
-              } else {
-                this.$message.error(this.status + "失败");
-              }
-            })
-            .catch(function (error) {
-              this.$message.info("数据出错");
-              console.log(error);
-            });
-        }
+      // this.$refs.testForm.validate((valid) => {
+      //   if (valid) {
+      let shortAnswer = [];
+      this.shortAnswerList.forEach((item) => {
+        shortAnswer += item.questionId + " " + item.threshold + ",";
       });
+      this.$axios
+        .get("/test/save", {
+          headers: authHeader(),
+          params: {
+            testId: this.testForm.testId,
+            testName: this.testForm.testName,
+            description: this.testForm.description,
+            subjectId: this.testForm.subjectId,
+            questionList: this.testForm.questionList,
+            beginDate: this.testForm.date[0],
+            endDate: this.testForm.date[1],
+            examDuration: this.testForm.examDuration,
+            clazzId: this.testForm.clazzId,
+            questionTotal: this.testForm.questionTotal,
+            examTime: this.testForm.examTime,
+            shortAnswer: shortAnswer.substring(0, shortAnswer.length - 1),
+          },
+        })
+        .then((response) => {
+          if (response.data) {
+            this.$message.success(this.status + "成功");
+            this.$router.push("/teacher/testInfo");
+          } else {
+            this.$message.error(this.status + "失败");
+          }
+        })
+        .catch(function (error) {
+          this.$message.info("数据出错");
+          console.log(error);
+        });
+      //   }
+      // });
     },
   },
 };
@@ -441,6 +550,9 @@ export default {
 }
 .el-row {
   margin: 20px 0;
+}
+.el-form-item {
+  margin-bottom: 20px;
 }
 .dialog-container >>> .el-dialog {
   margin-bottom: 0px;

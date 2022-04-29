@@ -8,6 +8,7 @@ import 'element-plus/dist/index.css'
 import locale from 'element-plus/lib/locale/lang/zh-cn'
 import * as icons from '@element-plus/icons-vue'
 import Vue3Storage from 'vue3-storage'
+import * as echarts from 'echarts'
 
 const app = createApp(App)
 app.config.globalProperties.$qs = qs
@@ -19,6 +20,7 @@ app.use(elementPlus, { locale })
 Object.keys(icons).forEach((key) => {
   app.component(key, icons[key])
 })
+app.config.globalProperties.$echarts = echarts
 
 app.use(Vue3Storage)
 app.use(router)
