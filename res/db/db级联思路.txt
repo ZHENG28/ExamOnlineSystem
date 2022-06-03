@@ -1,0 +1,37 @@
+user：删除时不影响role，设为RESTRICT
+user_clazz：
+	user_id：删除时一起删除，设为CASCADE
+	clazz_id：删除时不一起删除（报错），设为RESTRICT
+user_major：
+	user：删除时一起删除，设为CASCADE
+	major：删除时不一起删除（报错），设为RESTRICT
+clazz：
+	major：删除时一起删除，设为CASCADE
+
+answer：question删除时一起删除，设为CASCADE
+question：
+	type：删除时不影响，设为RESTRICT
+	subject：删除时不影响，设为RESTRICT
+short_answer：
+	question：删除时一起删除，设为CASCADE
+	test：删除时一起删除，设为CASCADE
+compare_short_answer：
+	short_answer：删除时一起删除，设为CASCADE
+	user1：删除时一起删除，设为CASCADE
+	user2：删除时一起删除，设为CASCADE
+
+subject：
+	clazz：删除时不一起删除（报错），设为RESTRICT
+	user：删除时不一起删除（报错），设为RESTRICT
+
+test：
+	subject：删除时一起删除，设为CASCADE
+test_question_list：
+	test：删除时一起删除，设为CASCADE
+	question：删除时一起删除，设为CASCADE
+test_history：
+	test：删除时一起删除，设为CASCADE
+	user：删除时一起删除，设为CASCADE
+test_history_question_reply：
+	history：删除时一起删除，设为CASCADE
+	question：删除时一起删除，设为CASCADE

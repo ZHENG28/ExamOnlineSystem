@@ -26,7 +26,7 @@
       <el-table-column prop="testName" label="测验标题">
         <template #default="scope">
           <el-popover trigger="hover" placement="right">
-            <p style="width: 200px">简介: {{ scope.row.description }}</p>
+            <p style="width: 150px">简介: {{ scope.row.description }}</p>
             <template #reference class="name-wrapper">
               <span>{{ scope.row.testName }}</span>
             </template>
@@ -36,20 +36,22 @@
       <el-table-column
         prop="subjectName"
         label="所属科目"
-        :filters="subIdFilterData"
-        :filter-method="subIdFilter"
-        filter-placement="bottom-end"
+        :filters="subjectFilterData"
+        :filter-method="subjectFilter"
+        width="150"
       >
+        <template #default="scope">
+          <el-popover trigger="hover" placement="right">
+            <p style="width: 150px">测验班级: {{ scope.row.clazzName }}</p>
+            <template #reference class="name-wrapper">
+              <span>{{ scope.row.subjectName }}</span>
+            </template>
+          </el-popover>
+        </template>
       </el-table-column>
-      <el-table-column
-        prop="clazzName"
-        label="测验班级"
-        :filters="clazzFilterData"
-        :filter-method="clazzFilter"
-        filter-placement="bottom-end"
-      >
+      <el-table-column prop="questionTotal" label="测验题数" width="90">
       </el-table-column>
-      <el-table-column prop="examTime" label="重测次数" width="90">
+      <el-table-column prop="examTime" label="测验次数" width="90">
       </el-table-column>
       <el-table-column prop="endDate" label="结束时间">
         <template #default="scope">
@@ -66,7 +68,11 @@
           <el-input v-model="search" placeholder="输入测验标题进行搜索" />
         </template>
         <template #default="scope">
-          <el-button @click="toTestBuild(scope.row.testId)">编辑</el-button>
+          <el-button
+            :disabled="Date.parse(scope.row.beginDate) < new Date()"
+            @click="toTestBuild(scope.row.testId)"
+            >编辑</el-button
+          >
           <el-button type="danger" @click="del([scope.row])">删除</el-button>
           <el-button type="primary" @click="toTestResult(scope.row.testId)"
             >查看测验结果</el-button
@@ -89,13 +95,13 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
       multiSelection: [],
-      subIdFilterData: [],
-      clazzFilterData: [],
+      subjectFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -110,23 +116,25 @@ export default {
     // 初始化页面
     loadData() {
       this.findAll();
-      this.findClazzAndSubIdFilterData();
+      this.loadSubjectByTeacherId();
     },
 
     findAll() {
       this.$axios
-        .post(
-          "/test/findAllByUserId",
-          this.$qs.stringify({
+        .get("/test/findAllByUserId", {
+          headers: { Authorization: userToken() },
+          params: {
             userId: this.$storage.getStorageSync("user").id,
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -139,42 +147,36 @@ export default {
       this.findAll();
     },
 
-    findClazzAndSubIdFilterData() {
+    loadSubjectByTeacherId() {
       this.$axios
-        .post(
-          "/subject/findAllSubIdByUserId",
-          this.$qs.stringify({
-            userId: this.$storage.getStorageSync("user").id,
-          }),
-          { headers: authHeader() }
-        )
+        .get("/subject/loadSubjectByTeacherId", {
+          headers: { Authorization: userToken() },
+          params: { teacherId: this.$storage.getStorageSync("user").id },
+        })
         .then((response) => {
-          this.subIdFilterData = response.data;
-        });
-      this.$axios
-        .get("/clazz/getDistinctClazz", { headers: authHeader() })
-        .then((response) => {
-          this.clazzFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectFilterData = [];
+            res.forEach((item) => {
+              this.subjectFilterData.push({
+                text: item.subjectName,
+                value: item.subjectId,
+              });
+            });
+          }
         });
     },
-    clazzFilter(value, row) {
-      return row.clazzName == value;
-    },
-    subIdFilter(value, row) {
-      return row.subName == value;
+    subjectFilter(value, row) {
+      return row.subjectId == value;
     },
 
     // 新增&编辑
     toTestBuild(testId) {
-      this.$router.push({
-        path: `/teacher/testBuild/${testId}`,
-      });
+      this.$router.push(`/teacher/testBuild/${testId}`);
     },
     // 查看测验结果
     toTestResult(testId) {
-      this.$router.push({
-        path: `/teacher/testResult/${testId}`,
-      });
+      this.$router.push(`/teacher/testResult/${testId}`);
     },
 
     // 删除
@@ -195,24 +197,16 @@ export default {
             });
             this.$axios
               .post(
-                "/test/del",
-                this.$qs.stringify(
-                  {
-                    testId: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/test/delete",
+                this.$qs.stringify({ testId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {

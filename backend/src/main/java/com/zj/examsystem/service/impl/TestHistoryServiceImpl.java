@@ -3,14 +3,15 @@ package com.zj.examsystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zj.examsystem.entity.Question;
-import com.zj.examsystem.entity.ShortAnswer;
-import com.zj.examsystem.entity.TestHistory;
+import com.zj.examsystem.entity.*;
 import com.zj.examsystem.mapper.ShortAnswerMapper;
 import com.zj.examsystem.mapper.TestHistoryMapper;
+import com.zj.examsystem.mapper.TestHistoryQuestionReplyMapper;
+import com.zj.examsystem.mapper.TestQuestionListMapper;
 import com.zj.examsystem.service.TestHistoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.utils.PythonExecute;
+import org.python.jline.console.history.History;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,10 @@ public class TestHistoryServiceImpl extends ServiceImpl<TestHistoryMapper, TestH
     private TestHistoryMapper testHistoryMapper;
 
     @Autowired
-    private ShortAnswerMapper shortAnswerMapper;
+    private TestQuestionListMapper testQuestionListMapper;
+
+    @Autowired
+    private TestHistoryQuestionReplyMapper testHistoryQuestionReplyMapper;
 
     @Override
     public List<Map<String, Object>> findScoreByTestId(Integer testId) {
@@ -72,34 +76,59 @@ public class TestHistoryServiceImpl extends ServiceImpl<TestHistoryMapper, TestH
     }
 
     @Override
-    public IPage<TestHistory> findAllByAccount(Integer pageno, Integer size, Integer userId) {
-        QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
-        Page<Map<String, Object>> page = new Page<>(pageno, size);
-        return testHistoryMapper.selectPageWithTest(page, queryWrapper);
-    }
-
-    @Override
-    public IPage<TestHistory> findAllByTestId(Integer pageno, Integer size, Integer testId) {
-        Page<TestHistory> page = new Page<>(pageno, size);
-        QueryWrapper<TestHistory> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("th.test_id", testId);
-        return testHistoryMapper.selectPageByTestId(page, queryWrapper);
-    }
-
-    public String[][] getReplyArrayFromString(String replyStr) {
-        String[] replys = replyStr.split(SHORT_ANSWER_QUESTION_LIST_SPLIT);
-        String[][] result = new String[replys.length][2];
-        for (int i = 0; i < replys.length; i++) {
-            String reply = replys[i];
-            result[i] = !reply.trim().isEmpty() ? reply.split(" ") : new String[2];
+    public List<Map<String, Object>> loadObjectChartData(Integer testId) {
+        List<Integer> historyIds = testHistoryMapper.findIdByTestId(testId);
+        List<Question> objectQuestionList = testQuestionListMapper.findObjectQuestionIdsByTestId(testId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<Integer, Integer> correct = new HashMap<>();
+        for (Question question : objectQuestionList) {
+            correct.put(question.getQuestionId(), 0);
+        }
+        for (Integer historyId : historyIds) {
+            List<Map<String, Object>> reply = testHistoryQuestionReplyMapper.findReplyByHistoryIdWithCorrect(historyId);
+            for (Map<String, Object> map : reply) {
+                switch ((Integer) map.get("type_id")) {
+                    case 1: // choice
+                        correct.put((Integer) map.get("question_id"), correct.get(map.get("question_id")) + (map.get("answer_sign").equals(map.get(
+                                "reply")) ? 1 : 0));
+                        break;
+                    case 2: // judge
+                        String res = Boolean.valueOf((String) map.get("reply")) ? "1" : "0";
+                        correct.put((Integer) map.get("question_id"), correct.get(map.get("question_id")) + (res.equals(map.get("answer_sign"))
+                                ? 1 : 0));
+                        break;
+                }
+            }
+        }
+        for (Question question : objectQuestionList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("questionTitle", question.getQuestionTitle());
+            map.put("correctNumber", correct.get(question.getQuestionId()));
+            result.add(map);
         }
         return result;
     }
 
+    @Override
+    public IPage<TestHistoryWithUserTestSubject> findAllByUserId(Integer pageno, Integer size, Integer userId) {
+        Page<TestHistory> page = new Page<>(pageno, size);
+        QueryWrapper<TestHistory> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("student_id", userId);
+        return testHistoryMapper.selectPageWithTest(page, queryWrapper);
+    }
+
+    @Override
+    public IPage<TestHistoryWithUserTestSubject> findAllByTestId(Integer pageno, Integer size, Integer testId) {
+        Page<TestHistory> page = new Page<>(pageno, size);
+        QueryWrapper<TestHistory> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("test_id", testId);
+        return testHistoryMapper.selectPageWithTest(page, queryWrapper);
+    }
+
     public Integer judgeAnswerByQuestionId(Integer questionId, List<Question> questionList, String answer) {
         for (Question question : questionList) {
-            if (questionId == question.getQuestionId()) {
+            // 封装类型的比较，直接使用==是在比较两者内存地址，建议均使用equals()
+            if (question.getQuestionId().equals(questionId)) {
                 switch (question.getTypeId()) {
                     case 1:
                     case 2:
@@ -109,60 +138,45 @@ public class TestHistoryServiceImpl extends ServiceImpl<TestHistoryMapper, TestH
                 }
             }
         }
-        return null;
-    }
-
-    public List<String> findShortAnswerListByTestIdAndQuestionId(TestHistory insert, Integer testId, Integer questionId) {
-        List<String> shortAnswerList = new ArrayList<>();
-        QueryWrapper<TestHistory> testHistoryQueryWrapper = new QueryWrapper<>();
-        testHistoryQueryWrapper.eq("test_id", testId);
-        List<TestHistory> testHistoryList = testHistoryMapper.selectList(testHistoryQueryWrapper);
-        testHistoryList.remove(insert);
-        for (TestHistory testHistory : testHistoryList) {
-            String answer = findShortAnswerBytestHistory(testHistory, questionId);
-            if (null != answer) {
-                shortAnswerList.add(answer);
-            }
-        }
-        return shortAnswerList;
-    }
-
-    public String findShortAnswerBytestHistory(TestHistory testHistory, Integer questionId) {
-        String[][] replys = getReplyArrayFromString(testHistory.getReply());
-        for (String[] reply : replys) {
-            if (null != reply[0] && questionId == Integer.valueOf(reply[0])) {
-                return reply[1];
-            }
-        }
-        return null;
+        return 0;
     }
 
     @Override
     @Transactional
-    public Boolean commit(TestHistory testHistory, List<Question> questionList) {
+    public Boolean commit(TestHistory testHistory, String[] reply, List<Question> questionList) {
         // 1. 计算分数
         Integer correct = 0;
-        String[][] replys = getReplyArrayFromString(testHistory.getReply());
-        for (String[] reply : replys) {
-            if (null != reply[0]) {
-                correct += judgeAnswerByQuestionId(Integer.valueOf(reply[0]), questionList, reply[1]);
-            }
+        for (String r : reply) {
+            String[] arr = r.split(" ");
+            correct += judgeAnswerByQuestionId(Integer.valueOf(arr[0]), questionList, arr[1]);
         }
         testHistory.setCorrect(correct);
-        // 3. 比较已有回答和新增回答之间的文本相似度
-        //        QueryWrapper<ShortAnswer> shortAnswerQueryWrapper = new QueryWrapper<>();
-        //        shortAnswerQueryWrapper.eq("test_id", testHistory.getTestId());
-        //        List<ShortAnswer> shortAnswerQuestionList = shortAnswerMapper.selectList(shortAnswerQueryWrapper);
-        //        for (ShortAnswer shortAnswer : shortAnswerQuestionList) {
-        //            List<String> shortAnswerList = findShortAnswerListByTestIdAndQuestionId(testHistory,
-        //                    testHistory.getTestId(), shortAnswer.getQuestionId());
-        //            //            System.out.println(shortAnswerList);
-        //            if (!shortAnswerList.isEmpty()) {
-        //                String insertAnswer = findShortAnswerBytestHistory(testHistory, shortAnswer.getQuestionId());
-        //                PythonExecute.getTextSimilarity(shortAnswerList, insertAnswer, shortAnswer.getThreshold());
-        //            }
-        //        }
+
         // 2. 保存历史记录
-        return testHistoryMapper.insert(testHistory) == 1;
+        int length = 0;
+        if (testHistoryMapper.insert(testHistory) == 1) {
+            for (String r : reply) {
+                String[] arr = r.split(" ");
+                TestHistoryQuestionReply questionReply = new TestHistoryQuestionReply(testHistory.getHistoryId(), Integer.valueOf(arr[0])
+                        , arr[1]);
+                length += testHistoryQuestionReplyMapper.insert(questionReply);
+            }
+        }
+        return length == reply.length;
+    }
+
+    @Override
+    public TestHistoryWithUserTestSubject findTestInfoByCompoundId(Integer testId, Integer studentId) {
+        return testHistoryMapper.findTestInfoByCompoundId(testId, studentId);
+    }
+
+    @Override
+    public TestHistory findHistoryByCompoundId(Integer testId, Integer studentId, Integer order) {
+        QueryWrapper<TestHistory> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("test_id", testId);
+        queryWrapper.eq("student_id", studentId);
+        queryWrapper.orderByDesc("take_time");
+        queryWrapper.last("LIMIT " + order + ",1");
+        return testHistoryMapper.selectOne(queryWrapper);
     }
 }

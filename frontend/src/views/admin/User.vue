@@ -8,7 +8,6 @@
             clearFormFields();
             isAdd = true;
             dialogFormVisible = true;
-            findAllMajorAndClazz();
           "
           >新增</el-button
         >
@@ -32,8 +31,10 @@
             <!-- eslint-disable-next-line -->
             <template #default="scope">
               <div v-if="!isAdd">
-                <el-tag :type="user.roleName == '学生' ? 'success' : 'danger'">
-                  {{ user.roleName }}
+                <el-tag
+                  :type="user.description == '学生' ? 'success' : 'danger'"
+                >
+                  {{ user.description }}
                 </el-tag>
               </div>
               <el-select
@@ -44,7 +45,7 @@
                 v-if="isAdd"
               >
                 <el-option
-                  v-for="roleData in roleListData"
+                  v-for="roleData in roleList"
                   :key="roleData.roleId"
                   :label="roleData.description"
                   :value="roleData.roleId"
@@ -76,23 +77,34 @@
               <span
                 :style="{
                   color: 'red',
-                  display: user.roleName == '' ? '' : 'none',
+                  display: user.roleId == '' ? '' : 'none',
                 }"
                 >请先选择用户角色</span
               >
+              <el-select
+                filterable
+                placeholder="请选择专业"
+                @change="valueToMajorId"
+                v-model="majorId"
+                v-if="user.roleId == '2'"
+              >
+                <el-option
+                  v-for="major in majorList"
+                  :key="major.majorId"
+                  :label="major.majorName"
+                  :value="major.majorId"
+                >
+                </el-option>
+              </el-select>
               <el-cascader
                 @change="valueToCascade"
                 v-model="majorclazzName"
                 placeholder="请选择专业班级"
-                :options="majorclazzArr"
+                :options="majorClazzList"
                 filterable1
                 :show-all-levels="false"
                 :props="{ expandTrigger: 'hover' }"
-                v-if="
-                  user.roleName != '' &&
-                  user.roleName != '1' &&
-                  user.roleName != '管理员'
-                "
+                v-if="user.roleId == '3'"
               ></el-cascader>
             </template>
           </el-form-item>
@@ -121,29 +133,26 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="80"> </el-table-column>
       <el-table-column
-        prop="roleName"
+        prop="description"
         label="角色"
         :filters="roleFilterData"
         :filter-method="roleFilter"
       >
         <template #default="scope">
-          <el-tag :type="scope.row.roleName == '学生' ? 'success' : 'danger'">{{
-            scope.row.roleName
-          }}</el-tag>
+          <el-tag
+            :type="
+              scope.row.description == '学生'
+                ? 'success'
+                : scope.row.description == '教师'
+                ? 'warning'
+                : 'danger'
+            "
+            >{{ scope.row.description }}</el-tag
+          >
         </template>
       </el-table-column>
       <el-table-column prop="account" label="账号"> </el-table-column>
       <el-table-column prop="username" label="名字"> </el-table-column>
-      <el-table-column
-        prop="clazzName"
-        label="专业班级"
-        :filters="clazzNameFilterData"
-        :filter-method="clazzNameFilter"
-      >
-        <template #default="scope">
-          {{ scope.row.clazzName }}
-        </template>
-      </el-table-column>
       <el-table-column width="300">
         <template #header>
           <el-input v-model="search" placeholder="输入账号或名字进行搜索" />
@@ -154,8 +163,8 @@
               clearFormFields();
               isAdd = false;
               dialogFormVisible = true;
-              findAllMajorAndClazz();
-              loadInfo(scope.row.account);
+              loadMajorClazzCascader();
+              loadInfo(scope.row.userId);
             "
             >编辑</el-button
           >
@@ -178,28 +187,29 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 import User from "@/services/user.js";
 export default {
   data() {
     return {
       isAdd: true,
       dialogFormVisible: false,
-      userId: "",
-      clazzId: "",
       user: new User("", "", "", "", ""),
+      oldPassword: "",
+      majorId: "",
+      majorList: [],
+      clazzId: "",
+      majorClazzList: [],
+      majorclazzName: [],
       formRules: {
         username: [{ required: true, message: "请填写名字", trigger: "blur" }],
         password: [{ required: true, message: "请填写密码", trigger: "blur" }],
       },
 
-      majorclazzArr: [],
-      majorclazzName: [],
-      roleListData: [],
-      roleFilterData: [],
-
       multiSelection: [],
-      clazzNameFilterData: [],
+      roleList: [],
+      roleFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -214,8 +224,7 @@ export default {
     // 初始化页面
     loadData() {
       this.findAll();
-      this.findDistinctRole();
-      this.findDistinctClazzName();
+      this.loadRoleList();
     },
     clearFormFields() {
       this.user = new User("", "", "", "", "");
@@ -223,23 +232,26 @@ export default {
         this.$refs.user.clearValidate();
       });
       this.majorclazzName = [];
-      this.userId = "";
+      this.majorId = "";
       this.clazzId = "";
+      this.oldPassword = "";
     },
 
     findAll() {
       this.$axios
-        .post(
-          "/user/findAll",
-          this.$qs.stringify({
+        .get("/user/findAll", {
+          headers: { Authorization: userToken() },
+          params: {
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -252,42 +264,61 @@ export default {
       this.findAll();
     },
 
-    findDistinctClazzName() {
+    loadRoleList() {
       this.$axios
-        .get("/clazz/getDistinctClazz", { headers: authHeader() })
+        .get("/role/findAll", { headers: { Authorization: userToken() } })
         .then((response) => {
-          this.clazzNameFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.roleList = res;
+            this.roleFilterData = [];
+            res.forEach((item) => {
+              this.roleFilterData.push({
+                text: item.description,
+                value: item.roleId,
+              });
+            });
+          }
         });
-    },
-    clazzNameFilter(value, row) {
-      return row.clazzName === value;
     },
     roleFilter(value, row) {
-      return row.roleName === value;
-    },
-
-    findDistinctRole() {
-      this.$axios
-        .get("/role/findAll", { headers: authHeader() })
-        .then((response) => {
-          this.roleListData = response.data;
-          response.data.forEach((item) => {
-            this.roleFilterData.push({
-              text: item.description,
-              value: item.description,
-            });
-          });
-        });
+      return row.roleId === value;
     },
     valueToRoleId(val) {
-      this.user.roleName = val;
-      this.findAllMajorAndClazz();
+      this.user.roleId = val;
+      switch (val) {
+        case 2:
+          this.loadMajorList();
+          break;
+        case 3:
+          this.loadMajorClazzCascader();
+          break;
+      }
     },
-    findAllMajorAndClazz() {
+
+    loadMajorList() {
       this.$axios
-        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
+        .get("/major/findAll", { headers: { Authorization: userToken() } })
         .then((response) => {
-          this.majorclazzArr = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.majorList = res;
+          }
+        });
+    },
+    valueToMajorId(val) {
+      this.majorId = val;
+    },
+    loadMajorClazzCascader() {
+      this.$axios
+        .get("/clazz/loadMajorClazzCascader", {
+          headers: { Authorization: userToken() },
+        })
+        .then((response) => {
+          let res = dealSelect(response.data);
+          if (res) {
+            this.majorClazzList = res;
+          }
         });
     },
     valueToCascade(row) {
@@ -295,51 +326,64 @@ export default {
     },
 
     // 新增&编辑
-    loadInfo(account) {
+    loadInfo(id) {
       this.$axios
-        .post("/user/findByAccount", this.$qs.stringify({ account: account }), {
-          headers: authHeader(),
+        .get("/user/findInfoById", {
+          headers: { Authorization: userToken() },
+          params: { userId: id },
         })
         .then((response) => {
-          this.user = response.data;
-          this.majorclazzName = [response.data.major, response.data.clazzId];
-          this.userId = response.data.userId;
-          this.clazzId = response.data.clazzId;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.user = res;
+            this.majorclazzName = [res.majorId, res.clazzId];
+            this.clazzId = res.clazzId;
+            this.majorId = res.majorId;
+            this.oldPassword = res.password;
+            switch (res.roleId) {
+              case 2:
+                this.loadMajorList();
+                break;
+              case 3:
+                this.loadMajorClazzCascader();
+                break;
+            }
+          }
         });
     },
     save() {
       this.$refs.user.validate((valid) => {
         if (valid) {
+          let data = {
+            userId: this.user.userId,
+            account: this.user.account,
+            username: this.user.username,
+            roleId: this.user.roleId,
+            status: this.isAdd ? "添加" : "修改",
+          };
+          if (this.user.password != this.oldPassword) {
+            data["password"] = this.user.password;
+          }
+          switch (this.user.roleId) {
+            case 2:
+              data["majorId"] = this.majorId;
+              break;
+            case 3:
+              data["clazzId"] = this.clazzId;
+              break;
+          }
           this.$axios
-            .post(
-              "/user/save",
-              this.$qs.stringify({
-                userId: this.userId,
-                account: this.user.account,
-                password: this.user.password,
-                username: this.user.username,
-                roleId: this.user.roleId,
-                clazzId: this.clazzId,
-              }),
-              { headers: authHeader() }
-            )
-            .then(
-              (response) => {
-                this.dialogFormVisible = false;
-                if (response.data) {
-                  this.$message.success(
-                    (this.isAdd ? "添加" : "修改") + "成功"
-                  );
-                  this.loadData();
-                } else {
-                  this.$message.error((this.isAdd ? "添加" : "修改") + "失败");
-                }
-              },
-              (error) => {
-                this.$message.error("账号已存在，请重新填写");
-                console.log(error);
-              }
-            );
+            .post("/user/save", this.$qs.stringify(data), {
+              headers: { Authorization: userToken() },
+            })
+            .then((response) => {
+              this.dialogFormVisible = false;
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              this.loadData();
+            });
         }
       });
     },
@@ -358,28 +402,20 @@ export default {
           .then(() => {
             let params = [];
             arr.forEach(function (item) {
-              params.push(item.account);
+              params.push(item.userId);
             });
             this.$axios
               .post(
-                "/user/del",
-                this.$qs.stringify(
-                  {
-                    account: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/user/delete",
+                this.$qs.stringify({ userId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败，请检查");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {

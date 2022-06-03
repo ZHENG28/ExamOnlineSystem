@@ -7,12 +7,12 @@
     <p v-for="(answer, index) in answers" :key="index">
       <el-button
         circle
-        @click="sendAnswer(index)"
+        @click="isable && sendAnswer(index)"
         :type="chooseFlag[index] ? 'primary' : ''"
       >
         {{ answer.answerSign }}
       </el-button>
-      <span class="answer-content" @click="sendAnswer(index)">
+      <span class="answer-content" @click="isable && sendAnswer(index)">
         {{ answer.content }}
       </span>
     </p>
@@ -29,6 +29,10 @@ export default {
       default: () => [],
     },
     choose: String,
+    isable: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {

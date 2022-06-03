@@ -8,9 +8,16 @@ import com.zj.examsystem.entity.Test;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 
 public interface TestMapper extends BaseMapper<Test> {
-    IPage<Test> selectPageWithClazzAndSubject(Page<Test> page, @Param(Constants.WRAPPER) QueryWrapper<Test> queryWrapper);
+    IPage<Test> selectPageWithSubject(Page<Test> page, @Param(Constants.WRAPPER) QueryWrapper<Test> queryWrapper);
+
+    Integer countByTeacherId(Integer userId);
+
+    List<Test> countNotFinishByUserId(Integer userId);
+
+    Test findById(Integer testId);
 }

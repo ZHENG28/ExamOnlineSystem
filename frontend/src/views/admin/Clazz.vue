@@ -27,8 +27,21 @@
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="专业" prop="major">
-            <el-input v-model="clazzForm.major"></el-input>
+          <el-form-item label="专业" prop="majorId">
+            <el-select
+              filterable
+              placeholder="请选择专业"
+              @change="valueToMajorId"
+              v-model="clazzForm.majorId"
+            >
+              <el-option
+                v-for="major in majorList"
+                :key="major.majorId"
+                :label="major.majorName"
+                :value="major.majorId"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="班级" prop="clazzName">
             <el-input v-model="clazzForm.clazzName"></el-input>
@@ -47,7 +60,6 @@
         tableData.filter(
           (data) =>
             !search ||
-            data.major.toLowerCase().includes(search.toLowerCase()) ||
             data.clazzName.toLowerCase().includes(search.toLowerCase())
         )
       "
@@ -58,19 +70,16 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="80"> </el-table-column>
       <el-table-column
-        prop="major"
+        prop="majorName"
         label="专业"
         :filters="majorFilterData"
         :filter-method="majorFilter"
       >
-        <template #default="scope">
-          {{ scope.row.major }}
-        </template>
       </el-table-column>
       <el-table-column prop="clazzName" label="班级"> </el-table-column>
       <el-table-column width="300">
         <template #header>
-          <el-input v-model="search" placeholder="输入专业或班级进行搜索" />
+          <el-input v-model="search" placeholder="输入班级进行搜索" />
         </template>
         <template #default="scope">
           <el-button
@@ -88,33 +97,21 @@
             @click="
               dialogTableVisible = true;
               dialogTableTitle = scope.row.clazzName;
-              loadUserByClazzId(scope.row.clazzId);
+              loadStudentByClazzId(scope.row.clazzId);
             "
-            >查看用户</el-button
+            >查看所有学生</el-button
           >
         </template>
       </el-table-column>
     </el-table>
     <el-dialog
-      :title="'查看' + dialogTableTitle + '班的用户信息'"
+      :title="dialogTableTitle + '班级所有学生信息'"
       v-model="dialogTableVisible"
       width="1000px"
       top="70px"
     >
       <el-table :data="dialogTableData" border height="540px">
         <el-table-column type="index" label="序号" width="80">
-        </el-table-column>
-        <el-table-column
-          prop="role"
-          label="角色"
-          :filters="roleFilterData"
-          :filter-method="roleFilter"
-        >
-          <template #default="scope">
-            <el-tag :type="scope.row.role == '学生' ? 'success' : 'danger'">{{
-              scope.row.role
-            }}</el-tag>
-          </template>
         </el-table-column>
         <el-table-column prop="username" label="名字"> </el-table-column>
       </el-table>
@@ -134,7 +131,8 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
@@ -142,13 +140,16 @@ export default {
       dialogFormVisible: false,
       clazzForm: {
         clazzId: "",
-        major: "",
         clazzName: "",
+        majorId: "",
+        majorName: "",
       },
       formRules: {
-        major: [{ required: true, message: "请填写专业名称", trigger: "blur" }],
         clazzName: [
           { required: true, message: "请填写班级名称", trigger: "blur" },
+        ],
+        majorId: [
+          { required: true, message: "请填写专业名称", trigger: "change" },
         ],
       },
 
@@ -158,6 +159,7 @@ export default {
       roleFilterData: [],
 
       multiSelection: [],
+      majorList: [],
       majorFilterData: [],
       search: "",
       tableData: [],
@@ -173,7 +175,7 @@ export default {
     // 初始化页面
     loadData() {
       this.findAll();
-      this.findDistinctMajor();
+      this.loadMajorList();
     },
     clearFormFields() {
       this.clazzForm = {};
@@ -184,17 +186,19 @@ export default {
 
     findAll() {
       this.$axios
-        .post(
-          "/clazz/findAll",
-          this.$qs.stringify({
+        .get("/clazz/findAll", {
+          headers: { Authorization: userToken() },
+          params: {
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -207,47 +211,65 @@ export default {
       this.findAll();
     },
 
-    findDistinctMajor() {
+    loadMajorList() {
       this.$axios
-        .get("/clazz/getDistinctMajor", { headers: authHeader() })
+        .get("/major/findAll", { headers: { Authorization: userToken() } })
         .then((response) => {
-          this.majorFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.majorList = res;
+            this.majorFilterData = [];
+            res.forEach((item) => {
+              this.majorFilterData.push({
+                text: item.majorName,
+                value: item.majorId,
+              });
+            });
+          }
         });
     },
     majorFilter(value, row) {
-      return row.major === value;
+      return row.majorId === value;
+    },
+    valueToMajorId(val) {
+      this.clazzForm.majorId = val;
     },
 
     // 新增&编辑
     loadInfo(id) {
       this.$axios
-        .post("/clazz/findById", this.$qs.stringify({ clazzId: id }), {
-          headers: authHeader(),
+        .get("/clazz/findById", {
+          headers: { Authorization: userToken() },
+          params: { clazzId: id },
         })
         .then((response) => {
-          this.clazzForm = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.clazzForm = res;
+          }
         });
     },
     save() {
       this.$refs.clazzForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/clazz/save", {
-              headers: authHeader(),
-              params: {
+            .post(
+              "/clazz/save",
+              this.$qs.stringify({
                 clazzId: this.clazzForm.clazzId,
-                major: this.clazzForm.major,
                 clazzName: this.clazzForm.clazzName,
-              },
-            })
+                majorId: this.clazzForm.majorId,
+                status: this.status,
+              }),
+              { headers: { Authorization: userToken() } }
+            )
             .then((response) => {
               this.dialogFormVisible = false;
-              if (response.data) {
-                this.$message.success(this.status + "成功");
-                this.loadData();
-              } else {
-                this.$message.error(this.status + "失败");
-              }
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              this.loadData();
             })
             .catch(function (error) {
               this.$message.info("数据出错");
@@ -275,24 +297,16 @@ export default {
             });
             this.$axios
               .post(
-                "/clazz/del",
-                this.$qs.stringify(
-                  {
-                    clazzId: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/clazz/delete",
+                this.$qs.stringify({ clazzId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {
@@ -304,34 +318,18 @@ export default {
     },
 
     // 查看用户
-    loadUserByClazzId(id) {
+    loadStudentByClazzId(id) {
       this.$axios
-        .get(
-          "/userClazz/findUserByClazzId",
-          this.$qs.stringify({ clazzId: id }),
-          {
-            headers: authHeader(),
+        .get("/user/loadStudentByClazzId", {
+          headers: { Authorization: userToken() },
+          params: { clazzId: id },
+        })
+        .then((response) => {
+          let res = dealSelect(response.data);
+          if (res) {
+            this.dialogTableData = res;
           }
-        )
-        .then((response) => {
-          this.dialogTableData = response.data.records;
         });
-      this.findDistinctRole();
-    },
-    findDistinctRole() {
-      this.$axios
-        .get("/role/getDistinctRole", { headers: authHeader() })
-        .then((response) => {
-          response.data.forEach((item) => {
-            this.roleFilterData.push({
-              text: item.description,
-              value: item.description,
-            });
-          });
-        });
-    },
-    roleFilter(value, row) {
-      return row.role === value;
     },
   },
 };

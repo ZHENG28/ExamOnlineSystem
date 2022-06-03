@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useStorage } from 'vue3-storage'
 
 const routes = [
   // 用户登录入口
@@ -22,6 +23,11 @@ const routes = [
         component: () => import('../views/Home.vue'),
       },
       // admin
+      {
+        path: '/admin/major',
+        name: '专业管理',
+        component: () => import('../views/admin/Major.vue'),
+      },
       {
         path: '/admin/clazz',
         name: '班级管理',
@@ -87,14 +93,68 @@ const routes = [
     path: '/student/testPaper/:testId',
     component: () => import('../views/student/TestPaper.vue'),
   },
+  {
+    path: '/student/testHistoryDetail/:testId/:studentId',
+    component: () => import('../views/student/TestHistoryDetail.vue'),
+  },
 
-  // { path: '*', component: NotFound },
-  // { path: '/noAuth', component: NoAuth },
+  {
+    path: '/:catchAll(.*)',
+    redirect: '/404',
+  },
+  {
+    path: '/404',
+    component: () => import('../views/NotFound.vue'),
+  },
+
+  {
+    path: '/noAuth',
+    component: () => import('../views/noAuthorization.vue'),
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+})
+
+function getRoutesList() {
+  let list = []
+  routes.forEach((item) => {
+    list.push(item['path'])
+    if (item['children']) {
+      item['children'].forEach((i) => {
+        list.push(i['path'])
+      })
+    }
+  })
+  return list
+}
+router.beforeEach((to, from, next) => {
+  let noAuthPath = ['/', '/admin/login', '/home', '/404', '/noAuth']
+  let user = useStorage().getStorageSync('user')
+  let routeList = getRoutesList()
+  if (!user && routeList.indexOf(to.path) != -1) {
+    // in routes && no token -> to login
+    if (noAuthPath.indexOf(to.path) != -1) {
+      // to login -> pass
+      next()
+    } else {
+      next('/')
+    }
+  } else {
+    let role = user.roles[0].toLowerCase().substring(5)
+    if (to.path.startsWith('/' + role) || noAuthPath.indexOf(to.path) != -1) {
+      // has authorization
+      next()
+    } else {
+      if (routeList.indexOf(to.path) != -1 && to.path != '/404') {
+        next('/noAuth')
+      } else {
+        next()
+      }
+    }
+  }
 })
 
 export default router

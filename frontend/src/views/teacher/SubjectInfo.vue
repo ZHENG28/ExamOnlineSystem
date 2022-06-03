@@ -8,7 +8,6 @@
             clearFormFields();
             this.status = '新增';
             dialogFormVisible = true;
-            findAllMajorAndClazz();
           "
           >新增</el-button
         >
@@ -22,25 +21,30 @@
         width="600px"
       >
         <el-form
-          :model="subForm"
+          :model="subjectForm"
           :rules="formRules"
-          ref="subForm"
+          ref="subjectForm"
           label-width="200px"
           label-position="right"
         >
           <el-form-item label="科目名称" prop="subjectName">
-            <el-input v-model="subForm.subjectName"></el-input>
+            <el-input v-model="subjectForm.subjectName"></el-input>
           </el-form-item>
           <el-form-item label="授课班级" prop="clazzId">
-            <el-cascader
-              @change="valueToClazzId"
-              v-model="majorclazzName"
-              placeholder="请选择授课班级"
-              :options="clazzList"
+            <el-select
               filterable
-              :show-all-levels="false"
-              :props="{ expandTrigger: 'hover' }"
-            ></el-cascader>
+              placeholder="请选择授课班级"
+              @change="valueToClazzId"
+              v-model="subjectForm.clazzId"
+            >
+              <el-option
+                v-for="clazz in clazzList"
+                :key="clazz.clazzId"
+                :label="clazz.clazzName"
+                :value="clazz.clazzId"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -69,12 +73,9 @@
       <el-table-column
         prop="clazzName"
         label="授课班级"
-        :filters="clazzNameFilterData"
-        :filter-method="clazzNameFilter"
+        :filters="clazzFilterData"
+        :filter-method="clazzFilter"
       >
-        <template #default="scope">
-          {{ scope.row.clazzName }}
-        </template>
       </el-table-column>
       <el-table-column width="300">
         <template #header>
@@ -109,16 +110,16 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
       status: "",
       dialogFormVisible: false,
-      clazzList: [],
-      majorclazzName: [],
       userId: "",
-      subForm: {
+      majorId: "",
+      subjectForm: {
         subjectId: "",
         subjectName: "",
         clazzId: "",
@@ -126,15 +127,16 @@ export default {
       },
       formRules: {
         subjectName: [
-          { required: true, message: "请填写科目", trigger: "blur" },
+          { required: true, message: "请填写科目名称", trigger: "blur" },
         ],
         clazzId: [
-          { required: true, message: "请选择授课班级", trigger: "blur" },
+          { required: true, message: "请选择授课班级", trigger: "change" },
         ],
       },
 
       multiSelection: [],
-      clazzNameFilterData: [],
+      clazzList: [],
+      clazzFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -150,31 +152,46 @@ export default {
     // 初始化页面
     loadData() {
       this.findAll();
-      this.findDistinctClazzName();
+      this.loadUserInfo().then((response) => {
+        this.loadClazzByMajorId();
+      });
+    },
+    loadUserInfo() {
+      return this.$axios
+        .get("/user/findInfoById", {
+          headers: { Authorization: userToken() },
+          params: { userId: this.userId },
+        })
+        .then((response) => {
+          let res = dealSelect(response.data);
+          if (res) {
+            this.majorId = res.majorId;
+          }
+        });
     },
     clearFormFields() {
-      this.subForm = {};
+      this.subjectForm = {};
       this.$nextTick(() => {
-        this.$refs.subForm.clearValidate();
+        this.$refs.subjectForm.clearValidate();
       });
-      this.majorclazzName = [];
     },
 
     findAll() {
       this.$axios
-        .post(
-          "/subject/findAllByTchIdOrNot",
-          this.$qs.stringify({
-            userId: this.userId,
-            // userId: "4",
+        .get("/subject/findAllByTeacherId", {
+          headers: { Authorization: userToken() },
+          params: {
+            teacherId: this.userId,
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -187,62 +204,69 @@ export default {
       this.findAll();
     },
 
-    findDistinctClazzName() {
+    loadClazzByMajorId() {
       this.$axios
-        .get("/clazz/getDistinctClazz", { headers: authHeader() })
+        .get("/clazz/loadClazzByMajorId", {
+          headers: { Authorization: userToken() },
+          params: { majorId: this.majorId },
+        })
         .then((response) => {
-          this.clazzNameFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.clazzList = res;
+            this.clazzFilterData = [];
+            res.forEach((item) => {
+              this.clazzFilterData.push({
+                text: item.clazzName,
+                value: item.clazzId,
+              });
+            });
+          }
         });
     },
-    clazzNameFilter(value, row) {
-      return row.clazzName === value;
+    clazzFilter(value, row) {
+      return row.clazzId === value;
     },
-
-    findAllMajorAndClazz() {
-      this.$axios
-        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
-        .then((response) => {
-          this.clazzList = response.data;
-        });
-    },
-    valueToClazzId(row) {
-      this.subForm.clazzId = row[1];
+    valueToClazzId(val) {
+      this.subjectForm.clazzId = val;
     },
 
     // 新增&编辑
     loadInfo(id) {
       this.$axios
-        .post("/subject/findById", this.$qs.stringify({ subjectId: id }), {
-          headers: authHeader(),
+        .get("/subject/findById", {
+          headers: { Authorization: userToken() },
+          params: { subjectId: id },
         })
         .then((response) => {
-          this.subForm = response.data;
-          this.findAllMajorAndClazz();
-          this.majorclazzName = [response.data.major, response.data.clazzId];
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectForm = res;
+          }
         });
     },
     save() {
-      this.$refs.subForm.validate((valid) => {
+      this.$refs.subjectForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/subject/save", {
-              headers: authHeader(),
-              params: {
-                subjectId: this.subForm.subjectId,
-                subjectName: this.subForm.subjectName,
+            .post(
+              "/subject/save",
+              this.$qs.stringify({
+                subjectId: this.subjectForm.subjectId,
+                subjectName: this.subjectForm.subjectName,
                 teacherId: this.userId,
-                // teacherId: "4",
-                clazzId: this.subForm.clazzId,
-              },
-            })
+                clazzId: this.subjectForm.clazzId,
+                status: this.status,
+              }),
+              { headers: { Authorization: userToken() } }
+            )
             .then((response) => {
               this.dialogFormVisible = false;
-              if (response.data) {
-                this.$message.success(this.status + "成功");
-                this.loadData();
-              } else {
-                this.$message.error(this.status + "失败");
-              }
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              this.loadData();
             })
             .catch(function (error) {
               this.$message.info("数据出错");
@@ -270,24 +294,16 @@ export default {
             });
             this.$axios
               .post(
-                "/subject/del",
-                this.$qs.stringify(
-                  {
-                    subjectId: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/subject/delete",
+                this.$qs.stringify({ subjectId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {

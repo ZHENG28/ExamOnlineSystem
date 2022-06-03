@@ -5,9 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.io.Serializable;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 public class Test implements Serializable {
@@ -25,27 +24,29 @@ public class Test implements Serializable {
 
     private LocalDateTime endDate;
 
+    /**
+     * 测验时长
+     */
     private Integer examDuration;
 
+    /**
+     * 测验次数
+     */
     private Integer examTime;
 
-    private String questionList;
-
+    /**
+     * 题目数量
+     */
     private Integer questionTotal;
 
     private Integer subjectId;
-
-    private Integer clazzId;
 
     @TableField(select = false)
     private String subjectName;
 
     @TableField(select = false)
-    private String major;
+    private Integer clazzId;
 
     @TableField(select = false)
     private String clazzName;
-
-    @TableField(select = false)
-    private String shortAnswer;
 }

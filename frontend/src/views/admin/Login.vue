@@ -57,7 +57,7 @@ export default {
     };
   },
   created() {
-    if (this.$storage.getStorageSync("isLogin")) {
+    if (this.$storage.getStorageSync("user")) {
       this.$router.push("/home");
     }
   },
@@ -84,7 +84,6 @@ export default {
             if (response.data.token) {
               // 将该登录用户的令牌移入store
               this.$storage.setStorageSync("user", response.data, 10800000);
-              this.$storage.setStorageSync("isLogin", true, 10800000);
               this.$router.push("/home");
             }
           })

@@ -3,11 +3,12 @@ package com.zj.examsystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.entity.QuestionType;
 import com.zj.examsystem.mapper.QuestionTypeMapper;
 import com.zj.examsystem.service.QuestionTypeService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,51 +26,42 @@ public class QuestionTypeServiceImpl extends ServiceImpl<QuestionTypeMapper, Que
     private QuestionTypeMapper questionTypeMapper;
 
     @Override
-    public IPage<QuestionType> findAll(Integer pageno, Integer size, Integer... userId) {
+    public IPage<QuestionType> findAll(Integer pageno, Integer size) {
         QueryWrapper<QuestionType> queryWrapper = new QueryWrapper<>();
         Page<QuestionType> page = new Page<>(pageno, size);
-
-        //        if (userId == null) {
-        //            return questionTypeMapper.selectPageWithQuestionType(page, queryWrapper);
-        //        } else {
-        //            //            Student stu = studentMapper.selectById(id);
-        //            //            queryWrapper.eq("test_clazz", stu.getClazzId());
-        //            return questionTypeMapper.selectPageWithQuestionType(page, queryWrapper);
-        //        }
         return questionTypeMapper.selectPage(page, queryWrapper);
     }
 
     @Override
-    public List<Map<String, Object>> findDistinctQuestionType() {
-        List<Map<String, Object>> tmp = questionTypeMapper.selectDistinctQuestionType();
-        List<Map<String, Object>> List = new ArrayList<>();
-        for (Map<String, Object> resMap : tmp) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("text", resMap.get("type_name"));
-            map.put("value", resMap.get("type_name"));
-            map.put("typeId", resMap.get("type_id"));
-            List.add(map);
-        }
-        return List;
-    }
-
-    @Override
-    public int saveQuestionType(QuestionType questionType) {
-        return questionType.getTypeId() != null ? questionTypeMapper.updateById(questionType) : questionTypeMapper.insert(questionType);
-    }
-
-    @Override
-    @Transactional
-    public int deleteQuestionType(Integer[] id) {
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < id.length; i++) {
-            ids.add(id[i]);
-        }
-        return questionTypeMapper.deleteBatchIds(ids);
+    public List<QuestionType> findAll() {
+        return questionTypeMapper.selectList(null);
     }
 
     @Override
     public QuestionType findById(Integer questionTypeId) {
         return questionTypeMapper.selectById(questionTypeId);
+    }
+
+    @Override
+    public Integer saveQuestionType(QuestionType questionType) {
+        try {
+            return questionType.getTypeId() != null ? questionTypeMapper.updateById(questionType) : questionTypeMapper.insert(questionType);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (e instanceof DuplicateKeyException) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    @Transactional
+    public Integer deleteQuestionType(Integer[] id) {
+        List<Integer> ids = new ArrayList<>();
+        for (int i = 0; i < id.length; i++) {
+            ids.add(id[i]);
+        }
+        return questionTypeMapper.deleteBatchIds(ids);
     }
 }

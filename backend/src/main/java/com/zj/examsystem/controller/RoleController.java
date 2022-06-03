@@ -2,6 +2,7 @@ package com.zj.examsystem.controller;
 
 
 import com.zj.examsystem.service.RoleService;
+import com.zj.examsystem.utils.response.BaseResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,13 @@ public class RoleController {
     @GetMapping("/findAll")
     @ResponseBody
     public Object findAll() {
-        return roleService.findAll();
+        return BaseResponseEntity.ok("", roleService.findAll());
+    }
+
+    @GetMapping("/getDistinctRole")
+    @ResponseBody
+    public Object getDistinctRole() {
+        return BaseResponseEntity.ok("", roleService.getDistinctRole());
     }
 }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zj.examsystem.mapper.TestQuestionListMapper">
+    <select id="findQuestionIdsByTestId" resultType="java.lang.Integer">
+        SELECT question_id
+        FROM test_question_list
+        WHERE test_id = #{testId}
+    </select>
+
+    <select id="findObjectQuestionIdsByTestId" resultType="com.zj.examsystem.entity.Question">
+        SELECT question.*
+        FROM test_question_list
+                 JOIN question ON question.question_id = test_question_list.question_id AND question.type_id != 3
+        WHERE test_question_list.test_id = #{testId}
+    </select>
+</mapper>

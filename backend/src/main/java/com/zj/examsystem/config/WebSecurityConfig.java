@@ -1,9 +1,8 @@
 package com.zj.examsystem.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zj.examsystem.config.security.CustomUserDetailsService;
 import com.zj.examsystem.config.security.AuthEntryPointJwt;
 import com.zj.examsystem.config.security.AuthTokenFilter;
+import com.zj.examsystem.config.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 // 告知框架 security 的存在

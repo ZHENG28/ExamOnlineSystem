@@ -12,11 +12,13 @@ import java.util.Map;
 public interface TestService extends IService<Test> {
     public IPage<Test> findAll(Integer pageno, Integer size, Integer userId);
 
-    public Boolean saveTest(Test test);
-
-    public int deleteTest(Integer[] id);
-
-    public Test findById(Integer testId);
+    public Map<String, Object> findById(Integer testId);
 
     public Boolean findExamTimeByTestId(Integer userId, Integer testId);
+
+    public Boolean saveTest(Test test, Integer[] questionList, String[] shortAnswer);
+
+    public Boolean updateTest(Test test, Integer[] questionList, String[] shortAnswer);
+
+    public Integer deleteTest(Integer[] id);
 }

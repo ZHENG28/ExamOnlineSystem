@@ -4,6 +4,8 @@ package com.zj.examsystem.controller;
 import com.zj.examsystem.config.security.JwtUtils;
 import com.zj.examsystem.entity.User;
 import com.zj.examsystem.service.UserService;
+import com.zj.examsystem.utils.response.BaseResponseEntity;
+import com.zj.examsystem.utils.response.ResponseCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,10 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -72,47 +72,60 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/save")
+    @ResponseBody
+    public Object save(User user, String status) {
+        Boolean result = user.getUserId() == null ? userService.saveUser(user) : userService.updateUser(user);
+        return result ? BaseResponseEntity.ok(status + "成功", null) : BaseResponseEntity.error(ResponseCode.FAIL, status + "失败");
+    }
+
+    @PostMapping("/delete")
+    @ResponseBody
+    public Object delete(Integer[] userId) {
+        int result = userService.deleteUser(userId);
+        return result != 0 ? BaseResponseEntity.ok("删除成功", result) :
+                BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
+    }
+
+    @GetMapping("/findAll")
+    @ResponseBody
+    public Object findAll(Integer pageno, Integer size) {
+        return BaseResponseEntity.ok("", userService.findAll(pageno, size));
+    }
+
     @GetMapping("/findInfoById")
     @ResponseBody
     public Object findInfoById(Integer userId) {
-        return userService.findInfoById(userId);
+        return BaseResponseEntity.ok("", userService.findById(userId));
     }
 
-    @PostMapping("/findAll")
+    @GetMapping("/loadTeacherByMajorId")
     @ResponseBody
-    public Object findAll(Integer pageno, Integer size) {
-        return userService.findAll(pageno, size);
+    public Object loadTeacherByMajorId(Integer majorId) {
+        return BaseResponseEntity.ok("", userService.findTeacherByMajorId(majorId));
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<?> save(User user) {
-        System.out.println(user);
-        return user.getUserId() == null ? userService.saveUserWithClazzId(user) : userService.updateUser(user);
+    @GetMapping("/loadStudentByClazzId")
+    @ResponseBody
+    public Object loadStudentByClazzId(Integer clazzId) {
+        return BaseResponseEntity.ok("", userService.findStudentByClazzId(clazzId));
     }
 
-    @PostMapping("/del")
-    public ModelAndView delete(String[] account, Integer pageno, Integer size) {
-        int result = userService.deleteUser(account);
-
-        ModelAndView mv = new ModelAndView();
-        if (result != 0) {
-            mv.addObject("pageno", pageno);
-            mv.addObject("size", size);
-            mv.setViewName("forward:/user/findAll");
+    @GetMapping("/loadHomeData")
+    @ResponseBody
+    public Object loadHomeData(Integer userId, Integer roleId) {
+        Map<String, Object> result = new HashMap<>();
+        switch (roleId) {
+            case 1: // admin
+                result = userService.loadAdminData(userId);
+                break;
+            case 2: // teacher
+                result = userService.loadTeacherData(userId);
+                break;
+            case 3: // student
+                result = userService.loadStudentData(userId);
+                break;
         }
-        return mv;
+        return BaseResponseEntity.ok("", result);
     }
-
-    @PostMapping("/findByAccount")
-    @ResponseBody
-    public Object findByAccount(String account) {
-        return userService.findByAccount(account);
-    }
-
-    @PostMapping("/findAllTeacher")
-    @ResponseBody
-    public Object findAllTeacher() {
-        return userService.findAllTeacher();
-    }
-
 }

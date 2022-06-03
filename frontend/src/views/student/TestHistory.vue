@@ -18,7 +18,7 @@
       <el-table-column prop="testName" label="测验标题">
         <template #default="scope">
           <el-popover trigger="hover" placement="right">
-            <p style="width: 200px">简介: {{ scope.row.description }}</p>
+            <p style="width: 150px">简介: {{ scope.row.description }}</p>
             <template #reference class="name-wrapper">
               <span>{{ scope.row.testName }}</span>
             </template>
@@ -26,34 +26,38 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="subName"
+        prop="subjectName"
         label="所属科目"
-        :filters="subNameFilterData"
-        :filter-method="subNameFilter"
-        filter-placement="bottom-end"
+        :filters="subjectFilterData"
+        :filter-method="subjectFilter"
       >
       </el-table-column>
-      <el-table-column prop="correct" label="成绩"> </el-table-column>
-      <el-table-column prop="finishDate" label="完成时间">
+      <el-table-column label="最高成绩/总分">
         <template #default="scope">
-          {{
-            scope.row.finishDate
-              .toLocaleString()
-              .replace(/T/g, " ")
-              .replace(/\.[\d]{3}Z/, "")
-          }}
+          {{ scope.row.maxCorrect }}
+          /
+          {{ scope.row.questionTotal }}
+        </template>
+      </el-table-column>
+      <el-table-column label="已完成次数/测验总次数">
+        <template #default="scope">
+          {{ scope.row.completeTime }}
+          /
+          {{ scope.row.examTime }}
         </template>
       </el-table-column>
       <el-table-column width="300">
         <template #header>
           <el-input v-model="search" placeholder="输入测验标题进行搜索" />
         </template>
-        <!-- <template #default="scope">
+        <template #default="scope">
           <el-button
-            @click="toTestDetail(scope.row.testId, scope.row.stuId)"
-            >查看详细</el-button
+            type="primary"
+            @click="toTestDetail(scope.row.testId, scope.row.studentId)"
           >
-        </template> -->
+            查看历史作答
+          </el-button>
+        </template>
       </el-table-column>
     </el-table>
     <div style="margin-top: 10px">
@@ -71,20 +75,13 @@
   </div>
 </template>
 <script>
-// import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
-      testHistoryForm: {
-        id: "",
-        stuId: "",
-        testId: "",
-        testName: "",
-        description: "",
-        right: "",
-        finishDate: "",
-      },
-      subNameFilterData: [],
+      userId: "",
+      subjectFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -93,28 +90,31 @@ export default {
     };
   },
   created() {
+    this.userId = this.$storage.getStorageSync("user").id;
     this.loadData();
   },
   methods: {
     loadData() {
       this.findAll();
-      this.findAllSubId();
+      this.loadSubjectByStudentId();
     },
 
     findAll() {
       this.$axios
-        .post(
-          "/testhistory/findAllByAccount",
-          this.$qs.stringify({
+        .get("/testHistory/findAllByUserId", {
+          headers: { Authorization: userToken() },
+          params: {
             userId: this.$storage.getStorageSync("user").id,
             pageno: this.pageno,
             size: this.size,
-          })
-          // { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -127,18 +127,31 @@ export default {
       this.findAll();
     },
 
-    findAllSubId() {
+    loadSubjectByStudentId() {
       this.$axios
-        .post(
-          "/subject/findAllSubId"
-          // { headers: authHeader() }
-        )
+        .get("/subject/loadSubjectByStudentId", {
+          headers: { Authorization: userToken() },
+          params: { studentId: this.userId },
+        })
         .then((response) => {
-          this.subNameFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectFilterData = [];
+            res.forEach((item) => {
+              this.subjectFilterData.push({
+                text: item.subjectName,
+                value: item.subjectId,
+              });
+            });
+          }
         });
     },
-    subNameFilter(value, row) {
-      return row.subName == value;
+    subjectFilter(value, row) {
+      return row.subjectId === value;
+    },
+
+    toTestDetail(testId, studentId) {
+      this.$router.push(`/student/testHistoryDetail/${testId}/${studentId}`);
     },
   },
 };

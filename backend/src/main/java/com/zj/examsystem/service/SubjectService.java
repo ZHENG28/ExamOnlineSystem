@@ -9,15 +9,15 @@ import java.util.Map;
 
 
 public interface SubjectService extends IService<Subject> {
-    public IPage<Subject> findAll(Integer pageno, Integer size, Integer... userId);
+    public IPage<Subject> findAll(Integer pageno, Integer size, Map<String, Object> condition);
 
-    public List<Map<String, Object>> findDistinctSubject();
+    public List<Subject> loadSubjectByUserId(Map<String, Object> condition);
 
-    public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId);
-
-    public int saveSubject(Subject subject);
-
-    public int deleteSubject(Integer[] id);
+    //    public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId);
 
     public Subject findById(Integer subjectId);
+
+    public Integer saveSubject(Subject subject);
+
+    public Integer deleteSubject(Integer[] id);
 }

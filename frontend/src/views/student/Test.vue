@@ -23,27 +23,35 @@
                   style="float: right; padding: 3px 0"
                   type="text"
                   @click="toTestPaper(testForm.testId)"
+                  :disabled="Date.parse(testForm.endDate) < new Date()"
                   >开始测验</el-button
                 >
               </div>
             </template>
             <div style="line-height: 25px">
-              <span>简介：{{ testForm.description }}</span>
-              <br />
-              <span
-                >结束时间：{{
-                  testForm.endDate
-                    .toLocaleString()
-                    .replace(/T/g, " ")
-                    .replace(/\.[\d]{3}Z/, "")
-                }}</span
-              >
-              <br />
-              <span>测验时长：{{ testForm.examDuration }} 分钟</span>
-              <br />
-              <span>测验次数：{{ testForm.examTime }} 次</span>
-              <br />
-              <span>测验题数：{{ testForm.questionTotal }} 道</span>
+              <el-scrollbar :height="150">
+                <span>简介：{{ testForm.description }}</span>
+                <br />
+                <span>
+                  所属科目：
+                  <el-tag type="success">{{ testForm.subjectName }}</el-tag>
+                </span>
+                <br />
+                <span
+                  >结束时间：{{
+                    testForm.endDate
+                      .toLocaleString()
+                      .replace(/T/g, " ")
+                      .replace(/\.[\d]{3}Z/, "")
+                  }}</span
+                >
+                <br />
+                <span>测验时长：{{ testForm.examDuration }} 分钟</span>
+                <br />
+                <span>测验次数：{{ testForm.examTime }} 次</span>
+                <br />
+                <span>测验题数：{{ testForm.questionTotal }} 道</span>
+              </el-scrollbar>
             </div>
           </el-card>
         </el-col>
@@ -64,7 +72,8 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
@@ -86,30 +95,30 @@ export default {
 
     findAll() {
       this.$axios
-        .post(
-          "/test/findAllByUserId",
-          this.$qs.stringify({
+        .get("/test/findAllByUserId", {
+          headers: { Authorization: userToken() },
+          params: {
             userId: this.userId,
-            // userId: "4",
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.totalItems = response.data.total;
-          let tableArr = [];
-          let arr = [];
-          response.data.records.forEach((elem, index) => {
-            arr.push(elem);
-            if ((index + 1) % 2 == 0) {
-              tableArr.push(arr);
-              arr = [];
-            } else if (index + 1 == this.totalItems) {
-              tableArr.push(arr);
-            }
-          });
-          this.tableData = tableArr;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.totalItems = res.total;
+            this.tableData = [];
+            let arr = [];
+            res.records.forEach((elem, index) => {
+              arr.push(elem);
+              if ((index + 1) % 2 == 0) {
+                this.tableData.push(arr);
+                arr = [];
+              } else if (index + 1 == this.totalItems) {
+                this.tableData.push(arr);
+              }
+            });
+          }
         });
     },
     handleSizeChange(size) {
@@ -124,23 +133,19 @@ export default {
 
     toTestPaper(testId) {
       this.$axios
-        .post(
-          "/test/findExamTimeByTestId",
-          this.$qs.stringify({
+        .get("/test/findExamTimeByTestId", {
+          headers: { Authorization: userToken() },
+          params: {
             userId: this.userId,
-            // userId: "8",
             testId: testId,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          if (response.data) {
-            this.$message.error("测验次数已达上限");
-            return;
+          if (response.data.success) {
+            this.$router.push(`/student/testPaper/${testId}`);
           } else {
-            this.$router.push({
-              path: `/student/testPaper/${testId}`,
-            });
+            this.$message.error(response.data.message);
+            return;
           }
         });
     },

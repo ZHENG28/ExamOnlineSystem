@@ -1,19 +1,25 @@
 package com.zj.examsystem.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.examsystem.entity.TestHistory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.zj.examsystem.entity.TestHistoryWithUserTestSubject;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 public interface TestHistoryMapper extends BaseMapper<TestHistory> {
-    public Integer countByTestAndStudent(@Param("userId") Integer userId, @Param("testId") Integer testId);
+    IPage<TestHistoryWithUserTestSubject> selectPageWithTest(Page<TestHistory> page,
+                                                             @Param(Constants.WRAPPER) QueryWrapper<TestHistory> queryWrapper);
 
-    public IPage<TestHistory> selectPageWithTest(Page<Map<String, Object>> page, QueryWrapper<Map<String, Object>> queryWrapper);
+    TestHistoryWithUserTestSubject findTestInfoByCompoundId(@Param("testId") Integer testId, @Param("studentId") Integer studentId);
 
-    public IPage<TestHistory> selectPageByTestId(Page<TestHistory> page, @Param(Constants.WRAPPER) QueryWrapper<TestHistory> queryWrapper);
+    List<Integer> findIdByTestId(Integer testId);
+
+    List<Float> findCorrectnessByStudentId(Integer userId);
 }

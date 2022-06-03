@@ -2,6 +2,7 @@ package com.zj.examsystem.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.zj.examsystem.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -10,11 +11,13 @@ import java.util.List;
 
 
 public interface UserMapper extends BaseMapper<User> {
-    public Integer insertUser(@Param("user") User user);
+    IPage<User> selectPageWithRole(IPage<User> page, @Param(Constants.WRAPPER) QueryWrapper<User> queryWrapper);
 
-    public IPage<User> selectPageWithRoleAndClazzName(IPage<User> page, QueryWrapper<User> queryWrapper);
+    User findByIdWithRole(Integer userId);
 
-    public User selectOneWithRoleAndClazzName(String account);
+    List<User> selectTeacherWithRoleAndClazz(@Param(Constants.WRAPPER) QueryWrapper<User> queryWrapper);
 
-    public List<User> selectTeacher();
+    List<User> selectStudentWithRoleAndClazz(@Param(Constants.WRAPPER) QueryWrapper<User> queryWrapper);
+
+    List<Integer> selectUserIdsByTestId(Integer testId);
 }

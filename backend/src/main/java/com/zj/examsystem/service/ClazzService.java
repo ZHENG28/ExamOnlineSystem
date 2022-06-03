@@ -11,13 +11,15 @@ import java.util.Map;
 public interface ClazzService extends IService<Clazz> {
     public IPage<Clazz> findAll(Integer pageno, Integer size);
 
-    public Object getDistinctMajorOrClazz(String condition);
+    public Clazz findById(Integer clazzId);
 
-    public List<Map<String, Object>> findAllMajorClazz();
+    public List<Map<String, Object>> getClazzFilter(String condition);
+
+    public List<Map<String, Object>> findMajorAndClazzList();
+
+    public List<Clazz> loadClazzByMajorId(Integer majorId);
 
     public Integer saveClazz(Clazz clazz);
 
     public Integer deleteClazz(Integer[] id);
-
-    public Clazz findById(Integer clazzId);
 }

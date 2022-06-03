@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 # noinspection PyInterpreter
-from sys import argv
-from gensim import corpora, models, similarities
-import jieba
 import re
+import socket
+import struct
 from collections import defaultdict
-import numpy
+
+import jieba
+from gensim import corpora, models, similarities
+
+TEXT_DELIMITER = "|"
+
+
+def deal_sentence(sentence):
+    return (re.split('。', sentence))[:-1]
 
 
 def deal_text(text):
@@ -14,8 +21,9 @@ def deal_text(text):
     return ' '.join(ppl).split(" ")
 
 
-def get_similarity(material, compare_text, threshold):
+def get_article_similarity(material, compare_text, threshold):
     # 1 处理material
+    material.insert(0, compare_text)
     texts = [deal_text(t) for t in material]
     # 2-1 计算词频
     frequency = defaultdict(int)
@@ -38,38 +46,78 @@ def get_similarity(material, compare_text, threshold):
     similarity_matrix = similarities.Similarity('index',
                                                 lsi[corpus],
                                                 num_features=lsi.num_topics)
+    # 6 处理结果
     for i, arr in enumerate(similarity_matrix):
-        print(material[i])
-        print(arr)
+        if i == 0:
+            for j in range(len(arr)):
+                if j != 0 and arr[j] * 100 >= threshold:
+                    # print(j, arr[j] * 100)
+                    client.sendall(str.encode(str(j) + " " + str(arr[j] * 100)) + b'\n')
+                    # print(material[j])
 
-    # 6-1 处理待对比文本
-    # new_doc = deal_text(compare_text)
-    # new_vec = dictionary.doc2bow(new_doc)
-    # 6-2 同material比较，获得文本相似度
-    # similarity = similarity_matrix[lsi[new_vec]]
-    # print(list(enumerate(similarity)))
-    # for i in range(len(similarity)):
-    #     if similarity[i] * 100 >= threshold:
-    #         print(i, similarity[i] * 100)
-    #         print(material[i])
 
+def get_sentence_similarity(sentence_text, compare_text, threshold):
+    material = sentence_text + compare_text
+    texts = [deal_text(t) for t in material]
+
+    frequency = defaultdict(int)
+    for text in texts:
+        for token in text:
+            frequency[token] += 1
+    processed_texts = [[token for token in text if frequency[token] > 1]
+                       for text in texts]
+    dictionary = corpora.Dictionary(processed_texts)
+    corpus = [dictionary.doc2bow(text) for text in processed_texts]
+    lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=400)
+    similarity_matrix = similarities.Similarity('index',
+                                                lsi[corpus],
+                                                num_features=lsi.num_topics)
+
+    textResult = []
+    compareResult = []
+    for i, arr in enumerate(similarity_matrix):
+        if i >= len(sentence_text):
+            # print(material[i])
+            for j in range(len(arr)):
+                if j != i and j < len(
+                        sentence_text) and arr[j] * 100 >= threshold:
+                    if str(j) not in textResult:
+                        textResult.append(str(j))
+                    if str(i - len(sentence_text)) not in compareResult:
+                        compareResult.append(str(i - len(sentence_text)))
+    client.sendall(str.encode(TEXT_DELIMITER.join(compareResult)) + b'\n')
+    client.sendall(str.encode(TEXT_DELIMITER.join(textResult)) + b'\n')
+
+
+serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+serverSocket.bind(("localhost", 9091))
+serverSocket.listen(5)
+while True:
+    tmp = b''
+    # 实时接收信息
+    client, clientAddr = serverSocket.accept()
+    # 接收数据，一次不一定接收得完
+    data = client.recv(1024)
+    while not data.endswith(b'over'):
+        tmp += data
+        data = client.recv(1024)
+    tmp += data
+
+    if data.endswith(b'over'):
+        tmp = tmp.decode('utf-8')
+        params = tmp.split(TEXT_DELIMITER)
+        # params: type (delimiter) text compare threshold
+        if params[0] == "article":
+            article = params[1].split(TEXT_DELIMITER)
+            get_article_similarity(article, params[2], int(params[3]))
+        elif params[0] == "sentence":
+            get_sentence_similarity(deal_sentence(params[1]),
+                                    deal_sentence(params[2]), int(params[3]))
+    elif data.endswith(b'finish'):
+        # 结束标志，必备！
+        break
+    # 一次请求结束，关闭客户端，以免造成资源浪费
+    client.close()
 
 if __name__ == "__main__":
-    # sentence = (re.split(
-    #     '[。；？！]',
-    #     "反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。这些邻近的恒星没有足够的热让云气像发射星云那样因被电离而发光，但有足够的亮度可以让尘粒因散射光线而被看见。因此，反射星云显示出的频率光谱与照亮他的恒星相似。在星云中散射光线的是含碳的微粒（像是钻石尘粒）和其他成分的元素，特别是铁和镍，后二者经常会排列在星系磁场中，造成星光轻微的偏极化（Kaler，1998）。吸纳之，模型你超级大人口减少到了评委利物浦巨大的红色反射星云围绕着。反射星云通常也是恒星形成的场所。所以反射星云通常都是蓝色的。反射星云和发射星云常结合在一起成为弥漫星云，例如猎户座大星云。,反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。这些邻近的恒星没有足够的热让云气像发射星云那样因被电离而发光，但有足够的亮度可以让尘粒因散射光线而被看见。因此，反射星云显示出的频率光谱与照亮他的恒星相似。在星云中散射光线的是含碳的微粒（像是钻石尘粒）和其他成分的元素，特别是铁和镍，后二者经常会排列在星系磁场中，造成星光轻微的偏极化（Kaler，1998）。已知的反射星云大约有500个，其中最好看的就是围绕在昴宿星团周czcdaeqwgjf通常都是蓝色的。反射星云和发射星云常结合在一起成为弥漫星云，例如猎户座大星云。"
-    # ))[:-1]
-    # get_similarity(sentence,
-    #                (re.split('[。；？！]',
-    #                          "反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。"))[0], 0)
-
-    # article = "反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。这些邻近的恒星没有足够的热让云气像发射jflsjdfoerwpierpxcl，但有足够的亮度可以让尘粒因散射光线而被看见。因此，反射星云显示出的频率光谱与照亮他的恒星相似。在星云中散射光线的是含碳的微粒（像是钻石尘粒）和其他成分的元素，特别是铁和镍，后二者经常会排列在星系磁场中，造成星光轻微的偏极化（Kaler，1998）。所以反射星云通常都是蓝色的。反射星云和发射星云常结合在一起成为弥漫星云，例如猎户座大星云。,反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。这些邻近的恒星没有足够的热让云气像发射，但有足够的亮度可以让尘粒因散射光线而被看见。因此，反射星云显示出的频率光谱与照亮他的恒星相似。在星云中散射光线的是含碳的微粒（像是钻石尘粒）和其他成分的元素，特别是铁和镍，后二者经常会排列在星系磁场中，造成星光轻微的偏极化（Kaler，1998）。反射星云和发射星云常结合在一起成为弥漫星云，例如猎户座大星云。,反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。这些邻近的恒星没有足够的热让云气像发射星云那样因被电离而发光，但有足够的亮度可以让尘粒因散射光线而被看见。因此，反射星云显示出的频率光谱与照亮他的恒星相似。在星云中散射光线的是含碳的微粒（像是钻石尘粒）和其他成分的元素，特别是铁和镍，后二者经常会排列在星系磁场中，造成星光轻微的偏极化（Kaler，1998）。吸纳之，模型你超级大人口减少到了评委利物浦巨大的红色反射星云围绕着。反射星云通常也是恒星形成的场所。所以反射星云通常都是蓝色的。反射星云和发射星云常结合在一起成为弥漫星云，例如猎户座大星云。".split(
-    #     ",")
-    # get_similarity(
-    #     article,
-    #     "反射星云，以天文学的观点，只是由尘埃组成，单纯的反射附近恒星或星团光线的云气。这些邻近的恒星没有足够的热让云气像发射星云那样因被电离而发光，但有足够的亮度可以让尘粒因散射光线而被看见。因此，反射星云显示出的频率光谱与照亮他的恒星相似。在星云中散射光线的是含碳的微粒（像是钻石尘粒）和其他成分的元素，特别是铁和镍，后二者经常会排列在星系磁场中，造成星光轻微的偏极化（Kaler，1998）。已知的反射星云大约有500个，其中最好看的就是围绕在昴宿星团周czcdaeqwgjf通常都是蓝色的。反射星云和发射星云常结合在一起成为弥漫星云，例如猎户座大星云。",
-    #     0)
-
-    # 1. 读取文档
-    article = argv[1].split(argv[3])
-    get_similarity(article, argv[2], 0)
+    serverSocket.close()

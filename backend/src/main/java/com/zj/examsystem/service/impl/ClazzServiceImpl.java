@@ -3,11 +3,14 @@ package com.zj.examsystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zj.examsystem.entity.Clazz;
-import com.zj.examsystem.mapper.ClazzMapper;
-import com.zj.examsystem.service.ClazzService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.examsystem.entity.Clazz;
+import com.zj.examsystem.entity.Major;
+import com.zj.examsystem.mapper.ClazzMapper;
+import com.zj.examsystem.mapper.MajorMapper;
+import com.zj.examsystem.service.ClazzService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,52 +26,52 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
     @Autowired
     private ClazzMapper clazzMapper;
 
+    @Autowired
+    private MajorMapper majorMapper;
+
     @Override
     public IPage<Clazz> findAll(Integer pageno, Integer size) {
-        QueryWrapper<Clazz> queryWrapper = new QueryWrapper<>();
         IPage<Clazz> page = new Page<>(pageno, size);
-        return clazzMapper.selectPage(page, queryWrapper);
+        return clazzMapper.selectPageWithMajor(page, null);
     }
 
     @Override
-    public Object getDistinctMajorOrClazz(String condition) {
-        List<String> tmp = null;
+    public List<Map<String, Object>> getClazzFilter(String condition) {
+        List<String> list = null;
         switch (condition) {
             case "major":
-                tmp = clazzMapper.selectDistinctMajor();
+                list = clazzMapper.selectDistinctMajor();
                 break;
             case "clazz":
-                tmp = clazzMapper.selectDistinctClazzName();
+                list = clazzMapper.selectDistinctClazzName();
         }
         List<Map<String, Object>> results = new ArrayList<>();
-        for (String major : tmp) {
+        for (String str : list) {
             Map<String, Object> result = new HashMap<>();
-            result.put("text", major);
-            result.put("value", major);
+            result.put("text", str);
+            result.put("value", str);
             results.add(result);
         }
         return results;
     }
 
     @Override
-    public List<Map<String, Object>> findAllMajorClazz() {
-        QueryWrapper<Clazz> clazzQueryWrapper = new QueryWrapper<>();
-
-        List<String> majorList = clazzMapper.selectDistinctMajor();
-        List<Clazz> clazzList = clazzMapper.selectList(clazzQueryWrapper);
+    public List<Map<String, Object>> findMajorAndClazzList() {
+        List<Major> majorList = majorMapper.selectList(null);
         List<Map<String, Object>> result = new ArrayList<>();
-        for (String major : majorList) {
+        for (Major major : majorList) {
             Map<String, Object> majorMap = new HashMap<>();
-            majorMap.put("value", major);
-            majorMap.put("label", major);
+            majorMap.put("label", major.getMajorName());
+            majorMap.put("value", major.getMajorId());
             List<Map<String, Object>> child = new ArrayList<>();
+            QueryWrapper<Clazz> clazzQueryWrapper = new QueryWrapper<>();
+            clazzQueryWrapper.eq("major_id", major.getMajorId());
+            List<Clazz> clazzList = clazzMapper.selectList(clazzQueryWrapper);
             for (Clazz clazz : clazzList) {
-                if (major.equals(clazz.getMajor())) {
-                    Map<String, Object> clazzMap = new HashMap<>();
-                    clazzMap.put("value", clazz.getClazzId());
-                    clazzMap.put("label", clazz.getClazzName());
-                    child.add(clazzMap);
-                }
+                Map<String, Object> clazzMap = new HashMap<>();
+                clazzMap.put("label", clazz.getClazzName());
+                clazzMap.put("value", clazz.getClazzId());
+                child.add(clazzMap);
             }
             majorMap.put("children", child);
             result.add(majorMap);
@@ -77,8 +80,23 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
     }
 
     @Override
+    public List<Clazz> loadClazzByMajorId(Integer majorId) {
+        QueryWrapper<Clazz> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("major_id", majorId);
+        return clazzMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public Integer saveClazz(Clazz clazz) {
-        return clazz.getClazzId() != null ? clazzMapper.updateById(clazz) : clazzMapper.insert(clazz);
+        try {
+            return clazz.getClazzId() != null ? clazzMapper.updateById(clazz) : clazzMapper.insert(clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (e instanceof DuplicateKeyException) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -93,6 +111,6 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
 
     @Override
     public Clazz findById(Integer clazzId) {
-        return clazzMapper.selectById(clazzId);
+        return clazzMapper.findById(clazzId);
     }
 }

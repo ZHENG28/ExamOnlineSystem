@@ -2,18 +2,36 @@
   <div>
     <div style="margin-bottom: 10px">
       <h2 style="display: inline">科目信息</h2>
+      <div style="display: inline; margin-left: 10px">
+        <el-select
+          filterable
+          placeholder="请选择专业"
+          @change="valueToMajorId"
+          v-model="majorForm.majorName"
+        >
+          <el-option
+            v-for="major in majorList"
+            :key="major.majorId"
+            :label="major.majorName"
+            :value="major.majorId"
+          >
+          </el-option>
+        </el-select>
+      </div>
       <div style="float: right">
         <el-button
           @click="
             clearFormFields();
             this.status = '新增';
             dialogFormVisible = true;
-            findAllTeacher();
-            findAllMajorAndClazz();
           "
+          :disabled="majorForm.majorName == ''"
           >新增</el-button
         >
-        <el-button type="danger" @click="del(this.multiSelection)"
+        <el-button
+          type="danger"
+          @click="del(this.multiSelection)"
+          :disabled="majorForm.majorName == ''"
           >删除</el-button
         >
       </div>
@@ -23,41 +41,46 @@
         width="600px"
       >
         <el-form
-          :model="subForm"
+          :model="subjectForm"
           :rules="formRules"
-          ref="subForm"
+          ref="subjectForm"
           label-width="200px"
           label-position="right"
         >
           <el-form-item label="科目名称" prop="subjectName">
-            <el-input v-model="subForm.subjectName"></el-input>
+            <el-input v-model="subjectForm.subjectName"></el-input>
           </el-form-item>
-          <el-form-item label="授课教师" prop="userId">
+          <el-form-item label="授课教师" prop="teacherId">
             <el-select
               filterable
               placeholder="请选择授课教师"
               @change="valueToUserId"
-              v-model="teacherName"
+              v-model="subjectForm.teacherId"
             >
               <el-option
-                v-for="tch in teacherList"
-                :key="tch.userId"
-                :label="tch.username"
-                :value="tch.userId"
+                v-for="teacher in teacherList"
+                :key="teacher.userId"
+                :label="teacher.username"
+                :value="teacher.userId"
               >
               </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="授课班级" prop="clazzId">
-            <el-cascader
-              @change="valueToClazzId"
-              v-model="majorclazzName"
-              placeholder="请选择授课班级"
-              :options="clazzList"
+            <el-select
               filterable
-              :show-all-levels="false"
-              :props="{ expandTrigger: 'hover' }"
-            ></el-cascader>
+              placeholder="请选择授课班级"
+              @change="valueToClazzId"
+              v-model="subjectForm.clazzId"
+            >
+              <el-option
+                v-for="clazz in clazzList"
+                :key="clazz.clazzId"
+                :label="clazz.clazzName"
+                :value="clazz.clazzId"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -88,12 +111,9 @@
       <el-table-column
         prop="clazzName"
         label="授课班级"
-        :filters="clazzNameFilterData"
-        :filter-method="clazzNameFilter"
+        :filters="clazzFilterData"
+        :filter-method="clazzFilter"
       >
-        <template #default="scope">
-          {{ scope.row.clazzName }}
-        </template>
       </el-table-column>
       <el-table-column width="300">
         <template #header>
@@ -131,21 +151,18 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
       status: "",
       dialogFormVisible: false,
-      teacherList: [],
-      teacherName: "",
-      clazzList: [],
-      majorclazzName: [],
-      subForm: {
+      subjectForm: {
         subjectId: "",
         subjectName: "",
-        userId: "",
-        username: "",
+        teacherId: "",
+        teacherName: "",
         clazzId: "",
         clazzName: "",
       },
@@ -153,16 +170,23 @@ export default {
         subjectName: [
           { required: true, message: "请填写科目", trigger: "blur" },
         ],
-        userId: [
-          { required: true, message: "请选择授课教师", trigger: "blur" },
+        teacherId: [
+          { required: true, message: "请选择授课教师", trigger: "change" },
         ],
         clazzId: [
-          { required: true, message: "请选择授课班级", trigger: "blur" },
+          { required: true, message: "请选择授课班级", trigger: "change" },
         ],
       },
 
       multiSelection: [],
-      clazzNameFilterData: [],
+      majorForm: {
+        majorId: 0,
+        majorName: "",
+      },
+      majorList: [],
+      teacherList: [],
+      clazzList: [],
+      clazzFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -176,31 +200,33 @@ export default {
   methods: {
     // 初始化页面
     loadData() {
-      this.findAll();
-      this.findDistinctClazzName();
+      this.loadMajorList().then((response) => {
+        this.findAll();
+      });
     },
     clearFormFields() {
-      this.subForm = {};
+      this.subjectForm = {};
       this.$nextTick(() => {
-        this.$refs.subForm.clearValidate();
+        this.$refs.subjectForm.clearValidate();
       });
-      this.teacherName = "";
-      this.majorclazzName = [];
     },
 
     findAll() {
       this.$axios
-        .post(
-          "/subject/findAllByTchIdOrNot",
-          this.$qs.stringify({
+        .get("/subject/findAllByMajorId", {
+          headers: { Authorization: userToken() },
+          params: {
+            majorId: this.majorForm.majorId,
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -213,75 +239,103 @@ export default {
       this.findAll();
     },
 
-    findDistinctClazzName() {
-      this.$axios
-        .get("/clazz/getDistinctClazz", { headers: authHeader() })
+    loadMajorList() {
+      return this.$axios
+        .get("/major/findAll", { headers: { Authorization: userToken() } })
         .then((response) => {
-          this.clazzNameFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.majorList = res;
+          }
         });
     },
-    clazzNameFilter(value, row) {
-      return row.clazzName === value;
+    valueToMajorId(val) {
+      this.majorForm.majorId = val;
+      this.findAll();
+      this.loadTeacherByMajorId();
+      this.loadClazzByMajorId();
     },
 
-    findAllTeacher() {
+    loadTeacherByMajorId() {
       this.$axios
-        .post("/user/findAllTeacher", { headers: authHeader() })
+        .get("/user/loadTeacherByMajorId", {
+          headers: { Authorization: userToken() },
+          params: { majorId: this.majorForm.majorId },
+        })
         .then((response) => {
-          this.teacherList = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.teacherList = res;
+          }
         });
     },
-    valueToUserId(row) {
-      this.subForm.userId = row;
+    valueToUserId(val) {
+      this.subjectForm.teacherId = val;
     },
 
-    findAllMajorAndClazz() {
+    loadClazzByMajorId() {
       this.$axios
-        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
+        .get("/clazz/loadClazzByMajorId", {
+          headers: { Authorization: userToken() },
+          params: { majorId: this.majorForm.majorId },
+        })
         .then((response) => {
-          this.clazzList = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.clazzList = res;
+            this.clazzFilterData = [];
+            res.forEach((item) => {
+              this.clazzFilterData.push({
+                text: item.clazzName,
+                value: item.clazzId,
+              });
+            });
+          }
         });
     },
-    valueToClazzId(row) {
-      this.subForm.clazzId = row[1];
+    clazzFilter(value, row) {
+      return row.clazzId === value;
+    },
+    valueToClazzId(val) {
+      this.subjectForm.clazzId = val;
     },
 
     // 新增&编辑
     loadInfo(id) {
       this.$axios
-        .post("/subject/findById", this.$qs.stringify({ subjectId: id }), {
-          headers: authHeader(),
+        .get("/subject/findById", {
+          headers: { Authorization: userToken() },
+          params: { subjectId: id },
         })
         .then((response) => {
-          this.subForm = response.data;
-          this.findAllTeacher();
-          this.teacherName = response.data.teacherId;
-          this.subForm.userId = response.data.teacherId;
-          this.findAllMajorAndClazz();
-          this.majorclazzName = [response.data.major, response.data.clazzId];
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectForm = res;
+          }
         });
     },
     save() {
-      this.$refs.subForm.validate((valid) => {
+      this.$refs.subjectForm.validate((valid) => {
         if (valid) {
           this.$axios
-            .get("/subject/save", {
-              headers: authHeader(),
-              params: {
-                subjectId: this.subForm.subjectId,
-                subjectName: this.subForm.subjectName,
-                teacherId: this.subForm.userId,
-                clazzId: this.subForm.clazzId,
-              },
-            })
+            .post(
+              "/subject/save",
+              this.$qs.stringify({
+                subjectId: this.subjectForm.subjectId,
+                subjectName: this.subjectForm.subjectName,
+                teacherId: this.subjectForm.teacherId,
+                clazzId: this.subjectForm.clazzId,
+                status: this.status,
+              }),
+              { headers: { Authorization: userToken() } }
+            )
             .then((response) => {
               this.dialogFormVisible = false;
-              if (response.data) {
-                this.$message.success(this.status + "成功");
-                this.loadData();
-              } else {
-                this.$message.error(this.status + "失败");
-              }
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              this.loadData();
             })
             .catch(function (error) {
               this.$message.info("数据出错");
@@ -309,24 +363,16 @@ export default {
             });
             this.$axios
               .post(
-                "/subject/del",
-                this.$qs.stringify(
-                  {
-                    subjectId: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/subject/delete",
+                this.$qs.stringify({ subjectId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {

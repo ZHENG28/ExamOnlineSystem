@@ -1,9 +1,8 @@
 package com.zj.examsystem.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.examsystem.entity.QuestionType;
 import com.baomidou.mybatisplus.extension.service.IService;
-
+import com.zj.examsystem.entity.QuestionType;
 
 import java.util.List;
 import java.util.Map;
@@ -11,13 +10,13 @@ import java.util.Map;
 
 public interface QuestionTypeService extends IService<QuestionType> {
 
-    public IPage<QuestionType> findAll(Integer pageno, Integer size, Integer... userId);
+    public IPage<QuestionType> findAll(Integer pageno, Integer size);
 
-    public List<Map<String, Object>> findDistinctQuestionType();
-
-    public int saveQuestionType(QuestionType questionType);
-
-    public int deleteQuestionType(Integer[] id);
+    public List<QuestionType> findAll();
 
     public QuestionType findById(Integer questionTypeId);
+
+    public Integer saveQuestionType(QuestionType questionType);
+
+    public Integer deleteQuestionType(Integer[] id);
 }

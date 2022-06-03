@@ -2,7 +2,7 @@
 <template>
   <el-container direction="horizontal">
     <!-- 左侧-题目索引 -->
-    <el-aside width="260px">
+    <el-aside width="260px" style="margin-top: 20px; margin-left: 20px">
       <el-card shadow="never" style="margin-bottom: 20px">
         <template #header>
           <span> {{ testForm.testName }} </span>
@@ -216,7 +216,8 @@
 </template>
 
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 import countDown from "@/components/CountDown.vue";
 import choiceQuestion from "@/components/ChoiceQuestion.vue";
 import judgeQuestion from "@/components/JudgeQuestion.vue";
@@ -263,8 +264,7 @@ export default {
     };
   },
   created() {
-    // this.userId = this.$storage.getStorageSync("user").id;
-    this.userId = "8";
+    this.userId = this.$storage.getStorageSync("user").id;
     this.testForm.testId = this.$route.params.testId;
     this.loadData();
   },
@@ -281,60 +281,64 @@ export default {
     },
     loadTestInfo() {
       return this.$axios
-        .post(
-          "/test/findById",
-          this.$qs.stringify({ testId: this.testForm.testId }),
-          { headers: authHeader() }
-        )
+        .get("/test/findById", {
+          headers: { Authorization: userToken() },
+          params: { testId: this.testForm.testId },
+        })
         .then((response) => {
-          this.testForm = response.data;
-          this.remainSecond = response.data.examDuration * 60;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.testForm = res.test;
+            this.remainSecond = res.test.examDuration * 60;
+          }
         });
     },
     loadTestPaper() {
       return this.$axios
-        .post(
-          "/question/findQuestionListByTestId",
-          this.$qs.stringify({ testId: this.testForm.testId }),
-          { headers: authHeader() }
-        )
+        .get("/question/findQuestionListByTestId", {
+          headers: { Authorization: userToken() },
+          params: { testId: this.testForm.testId },
+        })
         .then((response) => {
-          this.testForm.questionTotal = response.data.length;
-          this.testForm.questionList = [
-            {
-              name: "选择题",
-              length: 0,
-              list: [],
-            },
-            {
-              name: "判断题",
-              length: 0,
-              list: [],
-            },
-            {
-              name: "简答题",
-              length: 0,
-              list: [],
-            },
-          ];
-          let quesList = [[], [], []];
-          let quesNum = [0, 0, 0];
-          response.data.forEach((item, index) => {
-            quesList[item.typeId - 1].push(item);
-            quesNum[item.typeId - 1]++;
-            if (quesNum[item.typeId - 1] % this.CARD_COL_NUMBER == 0) {
-              this.testForm.questionList[item.typeId - 1].list.push(
-                quesList[item.typeId - 1]
-              );
-              quesList[item.typeId - 1] = [];
-            }
-            if (index + 1 == this.testForm.questionTotal) {
-              for (let i = 0; i < this.testForm.questionList.length; i++) {
-                this.testForm.questionList[i].list.push(quesList[i]);
-                this.testForm.questionList[i].length = quesNum[i];
+          let res = dealSelect(response.data);
+          if (res) {
+            this.testForm.questionTotal = res.length;
+            this.testForm.questionList = [
+              {
+                name: "选择题",
+                length: 0,
+                list: [],
+              },
+              {
+                name: "判断题",
+                length: 0,
+                list: [],
+              },
+              {
+                name: "简答题",
+                length: 0,
+                list: [],
+              },
+            ];
+            let quesList = [[], [], []];
+            let quesNum = [0, 0, 0];
+            res.forEach((item, index) => {
+              quesList[item.typeId - 1].push(item);
+              quesNum[item.typeId - 1]++;
+              if (quesNum[item.typeId - 1] % this.CARD_COL_NUMBER == 0) {
+                this.testForm.questionList[item.typeId - 1].list.push(
+                  quesList[item.typeId - 1]
+                );
+                quesList[item.typeId - 1] = [];
               }
-            }
-          });
+              if (index + 1 == this.testForm.questionTotal) {
+                for (let i = 0; i < this.testForm.questionList.length; i++) {
+                  this.testForm.questionList[i].list.push(quesList[i]);
+                  this.testForm.questionList[i].length = quesNum[i];
+                }
+              }
+            });
+          }
         });
     },
 
@@ -373,7 +377,6 @@ export default {
         console.log("function jumpTo(i):something error, please check out!");
       }
       this.questionRefreshKey = new Date();
-      console.log(this.testForm.questionList);
     },
     getReply(data) {
       this.reply[this.sequence - 1] = data;
@@ -420,18 +423,30 @@ export default {
       for (let i = 0; i < this.testForm.questionTotal; i++) {
         arr += (this.reply[i] == undefined ? " " : this.reply[i]) + ",";
       }
-      this.$axios.post(
-        "/testHistory/commit",
-        this.$qs.stringify({
-          studentId: this.userId,
-          testId: this.testForm.testId,
-          finishTime: moment().format("YYYY-MM-DD HH:mm:ss"),
-          takeTime: time,
-          reply: arr.substring(0, arr.length - 1),
-        }),
-        { headers: authHeader() }
-      );
-      // this.$router.push("/student/testHistory");
+      this.$axios
+        .post(
+          "/testHistory/commit",
+          this.$qs.stringify(
+            {
+              studentId: this.userId,
+              testId: this.testForm.testId,
+              finishTime: moment().format("YYYY-MM-DD HH:mm:ss"),
+              takeTime: time,
+              reply: this.reply,
+            },
+            { indices: false }
+          ),
+          { headers: { Authorization: userToken() } }
+        )
+        .then((response) => {
+          this.$message({
+            type: response.data.success ? "success" : "error",
+            message: response.data.message,
+          });
+          if (response.data.success) {
+            this.$router.push("/student/testHistory");
+          }
+        });
     },
   },
 };

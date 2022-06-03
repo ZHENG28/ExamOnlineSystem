@@ -8,6 +8,7 @@ import java.util.Map;
 
 
 public interface RoleService extends IService<Role> {
-
     public List<Role> findAll();
+
+    public List<Map<String, Object>> getDistinctRole();
 }

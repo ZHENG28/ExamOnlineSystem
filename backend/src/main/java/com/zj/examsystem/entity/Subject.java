@@ -28,6 +28,9 @@ public class Subject implements Serializable {
     private String clazzName;
 
     @TableField(select = false)
-    private String major;
+    private Integer majorId;
+
+    @TableField(select = false)
+    private String majorName;
 
 }

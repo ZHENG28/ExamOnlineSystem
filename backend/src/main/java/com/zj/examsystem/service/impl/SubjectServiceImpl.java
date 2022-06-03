@@ -8,6 +8,7 @@ import com.zj.examsystem.entity.Subject;
 import com.zj.examsystem.mapper.SubjectMapper;
 import com.zj.examsystem.service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,64 +25,61 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     private SubjectMapper subjectMapper;
 
     @Override
-    public IPage<Subject> findAll(Integer pageno, Integer size, Integer... userId) {
-        QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
+    public IPage<Subject> findAll(Integer pageno, Integer size, Map<String, Object> condition) {
         Page<Subject> page = new Page<>(pageno, size);
-
-        if (userId != null) {
-            queryWrapper.eq("teacher_id", userId[0]);
-        }
+        QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq((String) condition.get("column"), (Integer) condition.get("val"));
         return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
     }
 
     @Override
-    public List<Map<String, Object>> findDistinctSubject() {
+    public List<Subject> loadSubjectByUserId(Map<String, Object> condition) {
         QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
-        List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject(queryWrapper);
-        List<Map<String, Object>> List = new ArrayList<>();
-        for (Map<String, Object> resMap : tmp) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("text", resMap.get("subject_name"));
-            map.put("value", resMap.get("subject_name"));
-            map.put("subId", resMap.get("subject_id"));
-            List.add(map);
-        }
-        return List;
+        queryWrapper.eq((String) condition.get("column"), (Integer) condition.get("val"));
+        return subjectMapper.selectListByUserId(queryWrapper);
+    }
+
+    //    @Override
+    //    public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId) {
+    //        QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
+    //        queryWrapper.eq("u.user_id", userId);
+    //        List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject(queryWrapper);
+    //        List<Map<String, Object>> List = new ArrayList<>();
+    //        for (Map<String, Object> resMap : tmp) {
+    //            Map<String, Object> map = new HashMap<>();
+    //            map.put("text", resMap.get("subject_name"));
+    //            map.put("value", resMap.get("subject_name"));
+    //            map.put("subId", resMap.get("subject_id"));
+    //            List.add(map);
+    //        }
+    //        return List;
+    //    }
+
+    @Override
+    public Subject findById(Integer subjectId) {
+        return subjectMapper.findByIdWithTeacherAndClazz(subjectId);
     }
 
     @Override
-    public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId) {
-        QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("u.user_id", userId);
-        List<Map<String, Object>> tmp = subjectMapper.selectDistinctSubject(queryWrapper);
-        List<Map<String, Object>> List = new ArrayList<>();
-        for (Map<String, Object> resMap : tmp) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("text", resMap.get("subject_name"));
-            map.put("value", resMap.get("subject_name"));
-            map.put("subId", resMap.get("subject_id"));
-            List.add(map);
+    public Integer saveSubject(Subject subject) {
+        try {
+            return subject.getSubjectId() != null ? subjectMapper.updateById(subject) : subjectMapper.insert(subject);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (e instanceof DuplicateKeyException) {
+                return 0;
+            }
         }
-        return List;
-    }
-
-    @Override
-    public int saveSubject(Subject subject) {
-        return subject.getSubjectId() != null ? subjectMapper.updateById(subject) : subjectMapper.insert(subject);
+        return 0;
     }
 
     @Override
     @Transactional
-    public int deleteSubject(Integer[] id) {
+    public Integer deleteSubject(Integer[] id) {
         List<Integer> ids = new ArrayList<>();
         for (int i = 0; i < id.length; i++) {
             ids.add(id[i]);
         }
         return subjectMapper.deleteBatchIds(ids);
-    }
-
-    @Override
-    public Subject findById(Integer subjectId) {
-        return subjectMapper.findByIdWithTeacherAndClazz(subjectId);
     }
 }

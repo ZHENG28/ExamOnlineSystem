@@ -15,11 +15,5 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class UserClazzController {
     @Autowired
     private UserClazzService userClazzService;
-
-    @GetMapping("/findUserByClazzId")
-    @ResponseBody
-    public Object findUserByClazzId(Integer clazzId) {
-        return userClazzService.findUserByClazzId(clazzId);
-    }
 }
 

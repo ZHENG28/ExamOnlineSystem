@@ -1,18 +1,20 @@
 package com.zj.examsystem.controller;
 
 
-import com.zj.examsystem.entity.Question;
 import com.zj.examsystem.entity.TestHistory;
+import com.zj.examsystem.service.CompareShortAnswerService;
 import com.zj.examsystem.service.QuestionService;
 import com.zj.examsystem.service.TestHistoryService;
+import com.zj.examsystem.utils.response.BaseResponseEntity;
+import com.zj.examsystem.utils.response.ResponseCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -24,28 +26,55 @@ public class TestHistoryController {
     @Autowired
     private QuestionService questionService;
 
-    @PostMapping("/findScoreByTestId")
-    @ResponseBody
-    public Object findScoreByTestId(Integer testId) {
-        return testHistoryService.findScoreByTestId(testId);
-    }
-
-    @PostMapping("/findAllByAccount")
-    @ResponseBody
-    public Object findAllByAccount(Integer pageno, Integer size, Integer userId) {
-        return testHistoryService.findAllByAccount(pageno, size, userId);
-    }
-
-    @PostMapping("/findAllByTestId")
-    @ResponseBody
-    public Object findAllByTestId(Integer pageno, Integer size, Integer testId) {
-        return testHistoryService.findAllByTestId(pageno, size, testId);
-    }
+    @Autowired
+    private CompareShortAnswerService compareShortAnswerService;
 
     @PostMapping("/commit")
     @ResponseBody
-    public Object commit(TestHistory testHistory) {
-        return testHistoryService.commit(testHistory, questionService.findQuestionListByTestId(testHistory.getTestId()));
+    public Object commit(TestHistory testHistory, String[] reply) {
+        if (testHistoryService.commit(testHistory, reply, questionService.findQuestionListByTestId(testHistory.getTestId()))) {
+            return compareShortAnswerService.compareReplyWithOther(testHistory) ?
+                    BaseResponseEntity.ok("提交成功", "") : BaseResponseEntity.error(ResponseCode.FAIL,
+                    "提交失败");
+        } else {
+            return BaseResponseEntity.error(ResponseCode.FAIL, "提交失败");
+        }
+    }
+
+    @GetMapping("/findScoreByTestId")
+    @ResponseBody
+    public Object findScoreByTestId(Integer testId) {
+        return BaseResponseEntity.ok("", testHistoryService.findScoreByTestId(testId));
+    }
+
+    @GetMapping("/loadObjectChartData")
+    @ResponseBody
+    public Object loadObjectChartData(Integer testId) {
+        return BaseResponseEntity.ok("", testHistoryService.loadObjectChartData(testId));
+    }
+
+    @GetMapping("/findAllByUserId")
+    @ResponseBody
+    public Object findAllByUserId(Integer pageno, Integer size, Integer userId) {
+        return BaseResponseEntity.ok("", testHistoryService.findAllByUserId(pageno, size, userId));
+    }
+
+    @GetMapping("/findAllByTestId")
+    @ResponseBody
+    public Object findAllByTestId(Integer pageno, Integer size, Integer testId) {
+        return BaseResponseEntity.ok("", testHistoryService.findAllByTestId(pageno, size, testId));
+    }
+
+    @GetMapping("/findTestInfoByCompoundId")
+    @ResponseBody
+    public Object findTestInfoByCompoundId(Integer testId, Integer studentId) {
+        return BaseResponseEntity.ok("", testHistoryService.findTestInfoByCompoundId(testId, studentId));
+    }
+
+    @GetMapping("/findHistoryByCompoundId")
+    @ResponseBody
+    public Object findHistoryByCompoundId(Integer testId, Integer studentId, Integer order) {
+        return BaseResponseEntity.ok("", testHistoryService.findHistoryByCompoundId(testId, studentId, order));
     }
 }
 

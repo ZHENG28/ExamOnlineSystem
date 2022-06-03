@@ -8,7 +8,7 @@
         <el-menu
           router
           class="el-menu-vertical-demo"
-          background-color="#00BFA6"
+          background-color="#38d39f"
           text-color="#fff"
           active-text-color="#000"
           default-active="home"
@@ -23,13 +23,24 @@
 
           <!-- admin -->
           <el-menu-item
+            index="major"
+            route="/admin/major"
+            class="nav-font"
+            v-if="showAdmin"
+          >
+            <template #title>
+              <el-icon><grid /></el-icon>
+              专业管理
+            </template>
+          </el-menu-item>
+          <el-menu-item
             index="clazz"
             route="/admin/clazz"
             class="nav-font"
             v-if="showAdmin"
           >
             <template #title>
-              <el-icon><files /></el-icon>
+              <el-icon><expand /></el-icon>
               班级管理
             </template>
           </el-menu-item>
@@ -86,13 +97,13 @@
             v-if="showTeacher"
           >
             <template #title>
-              <el-icon><document /></el-icon>
+              <el-icon><trend-charts /></el-icon>
               管理题目信息
             </template>
           </el-menu-item>
           <el-sub-menu index="tch-test" v-if="showTeacher">
             <template #title>
-              <el-icon><edit /></el-icon>
+              <el-icon><promotion /></el-icon>
               <span class="nav-font">测验信息</span>
             </template>
             <el-menu-item-group>
@@ -101,7 +112,7 @@
                 class="nav-font"
                 route="/teacher/testBuild/0"
               >
-                <el-icon><document-checked /></el-icon>
+                <el-icon><checked /></el-icon>
                 发布测验
               </el-menu-item>
               <el-menu-item
@@ -109,7 +120,7 @@
                 route="/teacher/testInfo"
                 class="nav-font"
               >
-                <el-icon><document /></el-icon>
+                <el-icon><list /></el-icon>
                 管理测验信息
               </el-menu-item>
             </el-menu-item-group>
@@ -123,7 +134,7 @@
             v-if="showStudent"
           >
             <template #title>
-              <el-icon><edit /></el-icon>
+              <el-icon><promotion /></el-icon>
               测验
             </template>
           </el-menu-item>
@@ -134,7 +145,7 @@
             v-if="showStudent"
           >
             <template #title>
-              <el-icon><document /></el-icon>
+              <el-icon><list /></el-icon>
               测验记录
             </template>
           </el-menu-item>
@@ -156,9 +167,9 @@ export default {
   },
   data() {
     return {
-      showAdmin: true,
-      showTeacher: true,
-      showStudent: true,
+      showAdmin: false,
+      showTeacher: false,
+      showStudent: false,
       menuHeight: "",
     };
   },

@@ -19,16 +19,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="测验班级" prop="clazzId">
-            <el-cascader
-              @change="valueToClazzId"
-              v-model="majorclazzName"
-              placeholder="请选择专业班级"
-              :options="majorclazzArr"
-              filterable
-              :show-all-levels="false"
-              :props="{ expandTrigger: 'hover' }"
-            ></el-cascader>
+          <el-form-item label="测验日期" prop="date">
+            <el-date-picker
+              v-model="testForm.date"
+              type="datetimerange"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              format="YYYY-MM-DD HH:mm:ss"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            >
+            </el-date-picker>
           </el-form-item>
         </el-col>
       </el-row>
@@ -38,7 +39,7 @@
             type="textarea"
             :autosize="{ minRows: 2 }"
             v-model="testForm.description"
-            style="width: 700px"
+            style="width: 1100px"
             maxlength="50"
             show-word-limit
           ></el-input>
@@ -50,14 +51,14 @@
             <el-select
               filterable
               placeholder="请选择科目"
-              @change="valueTosubId"
-              v-model="testForm.subjectName"
+              @change="valueToSubjectId"
+              v-model="testForm.subjectId"
             >
               <el-option
-                v-for="sub in subIdFilterData"
-                :key="sub.subId"
-                :label="sub.text"
-                :value="sub.subId"
+                v-for="subject in subjectList"
+                :key="subject.subjectId"
+                :label="subject.subjectName"
+                :value="subject.subjectId"
               >
               </el-option>
             </el-select>
@@ -69,20 +70,18 @@
               type="primary"
               :disabled="testForm.subjectId == ''"
               @click="
-                findQuesBySubId(testForm.subjectId);
+                findQuestionBySubjectId(testForm.subjectId);
                 questionListVisible = true;
               "
               style="margin-right: 30px"
               >选择考题</el-button
             >
-            <span
-              :style="{
-                display: 'inline',
-                color: 'red',
-                visibility: testForm.subjectId != '' ? 'hidden' : 'visible',
-              }"
-            >
-              请先选择所属科目
+            <span style="display: inline; color: red">
+              {{
+                testForm.subjectId != ""
+                  ? "共" + testForm.questionTotal + "道题"
+                  : "请先选择所属科目"
+              }}
             </span>
             <div class="dialog-container">
               <el-dialog
@@ -93,8 +92,8 @@
               >
                 <div class="transfer-container">
                   <el-transfer
-                    :data="quesList"
-                    v-model="testQues"
+                    :data="subjectQuestionList"
+                    v-model="testForm.questionList"
                     :titles="['题库', '考题']"
                     filterable
                     filter-placeholder="输入题目信息进行搜索"
@@ -126,9 +125,7 @@
                       <el-button @click="questionListVisible = false"
                         >取 消</el-button
                       >
-                      <el-button
-                        type="primary"
-                        @click="testQuesToquestionList()"
+                      <el-button type="primary" @click="saveQuestionList()"
                         >确 定</el-button
                       >
                     </div>
@@ -159,7 +156,6 @@
                 <el-form
                   :model="shortAnswerList"
                   :rules="shortAnswerFormRules"
-                  ref="shortAnswerList"
                   label-width="200px"
                   label-position="left"
                 >
@@ -186,20 +182,6 @@
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="测验日期" prop="date">
-            <el-date-picker
-              v-model="testForm.date"
-              type="datetimerange"
-              value-format="YYYY-MM-DD hh:mm:ss"
-              format="YYYY-MM-DD hh:mm:ss"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            >
-            </el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
           <el-form-item label="测验时长" prop="examDuration">
             <el-input-number
               v-model="testForm.examDuration"
@@ -208,18 +190,6 @@
               placeholder="0"
             ></el-input-number>
             分钟
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item label="测验总分" prop="questionTotal">
-            <el-input-number
-              v-model="testForm.questionTotal"
-              :step="50"
-              :min="0"
-              placeholder="100"
-            ></el-input-number>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -237,11 +207,19 @@
     <div>
       <el-button @click="toTestInfo()">返回列表</el-button>
       <el-button type="primary" @click="save()">确 定</el-button>
+      <span style="display: inline; color: red; margin-left: 20px">
+        测验开始后{{
+          testForm.date[0] != undefined
+            ? "（即" + testForm.date[0] + "之后）"
+            : ""
+        }}，将无法修改测验信息！
+      </span>
     </div>
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
@@ -250,36 +228,24 @@ export default {
       testForm: {
         testId: "",
         testName: "",
-        clazzId: "",
-        major: "",
-        clazzName: "",
         description: "",
-        subjectId: "",
-        subjectName: "",
-        questionList: "",
         date: [],
         beginDate: "",
         endDate: "",
         examDuration: 0,
-        questionTotal: 100,
         examTime: 1,
-        shortAnswer: "",
+        questionTotal: 0,
+        subjectId: "",
+        subjectName: "",
+        questionList: [],
+        shortAnswer: [],
       },
       testFormRules: {
         testName: [
           { required: true, message: "请填写本次测验标题", trigger: "blur" },
         ],
-        clazzId: [
-          { required: true, message: "请选择测验班级", trigger: "blur" },
-        ],
         description: [
           { required: false, message: "请填写本次测验简介", trigger: "blur" },
-        ],
-        subjectId: [
-          { required: true, message: "请选择所属科目", trigger: "blur" },
-        ],
-        questionList: [
-          { required: true, message: "请选择题库", trigger: "blur" },
         ],
         date: [
           { required: true, message: "请填写开始-结束时间", trigger: "blur" },
@@ -296,21 +262,6 @@ export default {
               return new Promise((resolve, reject) => {
                 if (value == 0) {
                   reject("测验时长不能为0，请填写");
-                } else {
-                  resolve();
-                }
-              });
-            },
-          },
-        ],
-        questionTotal: [
-          { required: true, message: "请填写测验总分", trigger: "blur" },
-          {
-            type: "number",
-            asyncValidator: (rule, value) => {
-              return new Promise((resolve, reject) => {
-                if (value == 0) {
-                  reject("测验总分不能为0，请填写");
                 } else {
                   resolve();
                 }
@@ -337,6 +288,12 @@ export default {
             },
           },
         ],
+        subjectId: [
+          { required: true, message: "请选择所属科目", trigger: "blur" },
+        ],
+        questionList: [
+          { required: true, message: "请选择考试题目", trigger: "blur" },
+        ],
       },
 
       shortAnswerVisible: false,
@@ -346,11 +303,8 @@ export default {
         threshold: [{ required: true, message: "请填写阈值", trigger: "blur" }],
       },
 
-      majorclazzArr: [],
-      majorclazzName: [],
-      subIdFilterData: [],
-      quesList: [],
-      testQues: [],
+      subjectList: [],
+      subjectQuestionList: [],
       randomCheck: [],
     };
   },
@@ -367,8 +321,7 @@ export default {
   methods: {
     // 初始化页面
     loadData() {
-      this.findAllSub();
-      this.findAllMajorAndClazz();
+      this.loadSubjectByTeacherId();
     },
     toTestInfo() {
       this.$router.push("/teacher/testInfo");
@@ -380,88 +333,68 @@ export default {
         .replace(/\.[\d]{3}Z/, "");
     },
 
-    findAllSub() {
+    loadSubjectByTeacherId() {
       this.$axios
-        .post(
-          "/subject/findAllSubIdByUserId",
-          this.$qs.stringify({
-            userId: this.$storage.getStorageSync("user").id,
-          }),
-          { headers: authHeader() }
-        )
+        .get("/subject/loadSubjectByTeacherId", {
+          headers: { Authorization: userToken() },
+          params: { teacherId: this.$storage.getStorageSync("user").id },
+        })
         .then((response) => {
-          this.subIdFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectList = res;
+          }
         });
     },
-    findAllMajorAndClazz() {
-      this.$axios
-        .get("/clazz/findAllMajorAndClazz", { headers: authHeader() })
-        .then((response) => {
-          this.majorclazzArr = response.data;
-        });
-    },
-    valueTosubId(val) {
+    valueToSubjectId(val) {
       this.testForm.subjectId = val;
-      this.testQues = [];
-    },
-    valueToClazzId(row) {
-      this.testForm.clazzId = row[1];
+      this.testForm.questionList = [];
     },
 
-    findQuesBySubId(id) {
-      this.$axios
-        .post(
-          "/question/findQuesBySubId",
-          this.$qs.stringify({
-            subjectId: id,
-          }),
-          { headers: authHeader() }
-        )
+    findQuestionBySubjectId(id) {
+      return this.$axios
+        .get("/question/findQuestionBySubjectId", {
+          headers: { Authorization: userToken() },
+          params: { subjectId: id },
+        })
         .then((response) => {
-          this.quesList = [];
-          response.data.forEach((elem) => {
-            this.quesList.push({
-              key: elem.questionId,
-              label: elem.questionTitle,
-              type: elem.typeName,
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectQuestionList = [];
+            res.forEach((elem) => {
+              this.subjectQuestionList.push({
+                key: elem.questionId,
+                label: elem.questionTitle,
+                type: elem.typeName,
+              });
             });
-          });
+          }
         });
     },
     getRandom(begin, end) {
-      return parseInt(Math.random() * (end - begin + 1) + begin);
+      // [begin, end]
+      return Math.round(Math.random() * (end - begin) + begin);
     },
     randomSelect() {
-      let num = this.getRandom(1, this.quesList.length);
+      let num = this.getRandom(1, this.subjectQuestionList.length);
       let keys = [],
         result = [];
-      this.quesList.forEach((item) => {
+      this.subjectQuestionList.forEach((item) => {
         keys.push(item.key);
       });
       let i = 0;
       while (i < num) {
-        let ques = this.getRandom(1, keys[this.quesList.length - 1]);
-        if (keys.indexOf(ques) != -1 && result.indexOf(ques) == -1) {
-          result.push(ques);
-          i++;
-        }
+        let questionIndex = this.getRandom(0, keys.length - 1);
+        result.push(keys[questionIndex]);
+        keys.splice(questionIndex, 1);
+        i++;
       }
       this.randomCheck = result;
     },
-    testQuesToquestionList() {
-      let arr = [];
-      this.testQues.forEach((elem) => {
-        arr += elem + ",";
-      });
-      this.testForm.questionList = arr.substring(0, arr.length - 1);
-      this.questionListVisible = false;
-      this.shortAnswerBtnVisible = this.haveShortAnswer();
-    },
-
     haveShortAnswer() {
       this.shortAnswerList = [];
-      this.testQues.forEach((elem) => {
-        this.quesList.forEach((item) => {
+      this.testForm.questionList.forEach((elem) => {
+        this.subjectQuestionList.forEach((item) => {
           if (elem == item.key && item.type == "简答题") {
             this.shortAnswerList.push({
               questionId: item.key,
@@ -473,73 +406,100 @@ export default {
       });
       return this.shortAnswerList.length == 0;
     },
+    saveQuestionList() {
+      this.testForm.questionTotal = this.testForm.questionList.length;
+      this.questionListVisible = false;
+      this.shortAnswerBtnVisible = this.haveShortAnswer();
+    },
 
     loadInfo(id) {
       this.$axios
-        .post("/test/findById", this.$qs.stringify({ testId: id }), {
-          headers: authHeader(),
+        .get("/test/findById", {
+          headers: { Authorization: userToken() },
+          params: { testId: id },
         })
         .then((response) => {
-          this.testForm = response.data;
-          this.testForm.date = [
-            this.formatDate(this.testForm.beginDate),
-            this.formatDate(this.testForm.endDate),
-          ];
-          this.majorclazzName = [this.testForm.major, this.testForm.clazzId];
-          // 简答题阈值（quesList为空 异步问题）
-          this.findQuesBySubId(this.testForm.subjectId);
-          console.log(this.quesList);
-          let str = this.testForm.shortAnswer.split(",");
-          str.forEach((item) => {
-            let s = item.split(" ");
-            this.shortAnswerList.push({
-              questionId: s[0],
-              // questionTitle: item.label,
-              threshold: parseInt(s[1]),
-            });
-          });
-          this.shortAnswerBtnVisible = this.shortAnswerList.length == 0;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.testForm = res.test;
+            this.testForm.date = [
+              this.formatDate(this.testForm.beginDate),
+              this.formatDate(this.testForm.endDate),
+            ];
+            this.testForm.questionList = res.questionList;
+            this.testForm.shortAnswer = res.shortAnswer;
+            if (this.testForm.shortAnswer.length != 0) {
+              this.findQuestionBySubjectId(this.testForm.subjectId).then(
+                (response) => {
+                  this.testForm.shortAnswer.forEach((item) => {
+                    let s = item.split(" ");
+                    this.subjectQuestionList.forEach((elem) => {
+                      if (s[0] == elem.key && elem.type == "简答题") {
+                        this.shortAnswerList.push({
+                          questionId: s[0],
+                          questionTitle: elem.label,
+                          threshold: parseInt(s[1]),
+                        });
+                      }
+                    });
+                  });
+                  this.shortAnswerBtnVisible = this.shortAnswerList.length == 0;
+                }
+              );
+            }
+          }
         });
     },
     save() {
-      // this.$refs.testForm.validate((valid) => {
-      //   if (valid) {
-      let shortAnswer = [];
-      this.shortAnswerList.forEach((item) => {
-        shortAnswer += item.questionId + " " + item.threshold + ",";
-      });
-      this.$axios
-        .get("/test/save", {
-          headers: authHeader(),
-          params: {
-            testId: this.testForm.testId,
-            testName: this.testForm.testName,
-            description: this.testForm.description,
-            subjectId: this.testForm.subjectId,
-            questionList: this.testForm.questionList,
-            beginDate: this.testForm.date[0],
-            endDate: this.testForm.date[1],
-            examDuration: this.testForm.examDuration,
-            clazzId: this.testForm.clazzId,
-            questionTotal: this.testForm.questionTotal,
-            examTime: this.testForm.examTime,
-            shortAnswer: shortAnswer.substring(0, shortAnswer.length - 1),
-          },
-        })
-        .then((response) => {
-          if (response.data) {
-            this.$message.success(this.status + "成功");
-            this.$router.push("/teacher/testInfo");
-          } else {
-            this.$message.error(this.status + "失败");
+      this.$refs.testForm.validate((valid) => {
+        if (valid) {
+          if (this.shortAnswerList.length != 0) {
+            this.testForm.shortAnswer = [];
+            this.shortAnswerList.forEach((item) => {
+              this.testForm.shortAnswer.push(
+                item.questionId + " " + item.threshold
+              );
+            });
           }
-        })
-        .catch(function (error) {
-          this.$message.info("数据出错");
-          console.log(error);
-        });
-      //   }
-      // });
+          this.$axios
+            .post(
+              "/test/save",
+              this.$qs.stringify(
+                {
+                  testId: this.testForm.testId,
+                  testName: this.testForm.testName,
+                  description: this.testForm.description,
+                  beginDate: this.testForm.date[0],
+                  endDate: this.testForm.date[1],
+                  examDuration: this.testForm.examDuration,
+                  examTime: this.testForm.examTime,
+                  questionTotal: this.testForm.questionTotal,
+                  subjectId: this.testForm.subjectId,
+                  questionList: this.testForm.questionList,
+                  shortAnswer: this.testForm.shortAnswer,
+                  status: this.status,
+                },
+                { indices: false }
+              ),
+              {
+                headers: { Authorization: userToken() },
+              }
+            )
+            .then((response) => {
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              if (response.data.success) {
+                this.$router.push("/teacher/testInfo");
+              }
+            })
+            .catch(function (error) {
+              this.$message.info("数据出错");
+              console.log(error);
+            });
+        }
+      });
     },
   },
 };

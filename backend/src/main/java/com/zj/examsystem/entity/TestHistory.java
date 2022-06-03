@@ -20,18 +20,22 @@ public class TestHistory implements Serializable {
 
     private Integer correct;
 
+    /**
+     * 完成测验的结束时间
+     */
     private LocalDateTime finishTime;
 
+    /**
+     * 完成测验的时长（秒）
+     */
     private Integer takeTime;
 
-    private String reply;
+    private Integer testId;
 
     private Integer studentId;
 
     @TableField(select = false)
     private String studentName;
-
-    private Integer testId;
 
     @TableField(select = false)
     private String testName;

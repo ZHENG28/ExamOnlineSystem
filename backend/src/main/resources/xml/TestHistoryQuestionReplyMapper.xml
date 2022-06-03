@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zj.examsystem.mapper.TestHistoryQuestionReplyMapper">
+    <select id="findReplyByHistoryIdWithCorrect" resultType="java.util.Map">
+        SELECT test_history_question_reply.question_id,
+               test_history_question_reply.reply,
+               question.type_id,
+               answer.answer_sign
+        FROM test_history_question_reply
+                 JOIN question ON question.question_id = test_history_question_reply.question_id
+                 LEFT JOIN answer ON answer.question_id = test_history_question_reply.question_id AND answer.is_correct = 1
+        WHERE test_history_question_reply.history_id = #{historyId}
+    </select>
+</mapper>

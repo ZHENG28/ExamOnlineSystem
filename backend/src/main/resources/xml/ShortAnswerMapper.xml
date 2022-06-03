@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.mapper.ShortAnswerMapper">
-
+    <select id="findShortAnswerIdsByTestId" resultType="java.lang.Integer">
+        SELECT short_answer_id
+        FROM short_answer
+        WHERE test_id = #{testId}
+    </select>
+    <select id="findByCompoundId" resultType="com.zj.examsystem.entity.ShortAnswer">
+        SELECT *
+        FROM short_answer
+        WHERE question_id = #{questionId}
+          AND test_id = #{testId}
+    </select>
+    <select id="findQuestionsByTestId" resultType="com.zj.examsystem.entity.Question">
+        SELECT question.*
+        FROM short_answer
+                 JOIN question on short_answer.question_id = question.question_id
+        WHERE short_answer.test_id = #{testId}
+    </select>
 </mapper>

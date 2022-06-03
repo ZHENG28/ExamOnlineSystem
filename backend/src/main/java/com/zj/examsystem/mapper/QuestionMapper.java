@@ -15,7 +15,9 @@ import java.util.Map;
 public interface QuestionMapper extends BaseMapper<Question> {
     IPage<Question> findAllByTeacherId(@Param("userId") Integer userId, Page<Question> page);
 
-    Question selectById(Integer questionId);
+    Integer countByTeacherId(Integer userId);
 
-    List<Question> findBySubIdWithType(Integer subjectId);
+    Question findById(Integer questionId);
+
+    List<Question> findListById(@Param(Constants.WRAPPER) QueryWrapper<Question> wrapper);
 }

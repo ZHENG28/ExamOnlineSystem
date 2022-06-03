@@ -3,14 +3,16 @@ package com.zj.examsystem.controller;
 
 import com.zj.examsystem.entity.Test;
 import com.zj.examsystem.service.TestService;
+import com.zj.examsystem.utils.response.BaseResponseEntity;
+import com.zj.examsystem.utils.response.ResponseCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Arrays;
 
 
 @Controller
@@ -19,41 +21,39 @@ public class TestController {
     @Autowired
     private TestService testService;
 
-    @PostMapping("/findAllByUserId")
+    @GetMapping("/findAllByUserId")
     @ResponseBody
     public Object findAllByUserId(Integer pageno, Integer size, Integer userId) {
-        return testService.findAll(pageno, size, userId);
+        return BaseResponseEntity.ok("", testService.findAll(pageno, size, userId));
     }
 
-    @GetMapping("/save")
-    @ResponseBody
-    public Object save(Test test) {
-        return testService.saveTest(test);
-    }
-
-    @PostMapping("/del")
-    public ModelAndView delete(Integer[] testId, Integer pageno, Integer size) {
-        int result = testService.deleteTest(testId);
-
-        ModelAndView mv = new ModelAndView();
-        if (result != 0) {
-            mv.addObject("pageno", pageno);
-            mv.addObject("size", size);
-            mv.setViewName("forward:/test/findAllByUserId");
-        }
-        return mv;
-    }
-
-    @PostMapping("/findById")
+    @GetMapping("/findById")
     @ResponseBody
     public Object findById(Integer testId) {
-        return testService.findById(testId);
+        return BaseResponseEntity.ok("", testService.findById(testId));
     }
 
-    @PostMapping("/findExamTimeByTestId")
+    @GetMapping("/findExamTimeByTestId")
     @ResponseBody
     public Object findExamTimeByTestId(Integer userId, Integer testId) {
-        return testService.findExamTimeByTestId(userId, testId);
+        return testService.findExamTimeByTestId(userId, testId) ? BaseResponseEntity.ok("", "") : BaseResponseEntity.error(ResponseCode.FAIL,
+                "测验次数已达上限");
+    }
+
+    @PostMapping("/save")
+    @ResponseBody
+    public Object save(Test test, Integer[] questionList, String[] shortAnswer, String status) {
+        Boolean result = test.getTestId() == null ? testService.saveTest(test, questionList, shortAnswer) : testService.updateTest(test,
+                questionList, shortAnswer);
+        return result ? BaseResponseEntity.ok(status + "成功", "") : BaseResponseEntity.error(ResponseCode.FAIL,
+                status + "失败");
+    }
+
+    @PostMapping("/delete")
+    @ResponseBody
+    public Object delete(Integer[] testId) {
+        int result = testService.deleteTest(testId);
+        return result != 0 ? BaseResponseEntity.ok("删除成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
     }
 }
 

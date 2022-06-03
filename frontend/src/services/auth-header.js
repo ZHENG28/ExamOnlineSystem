@@ -1,6 +1,6 @@
 import { useStorage } from 'vue3-storage'
 
-export default function authHeader() {
+export default function userToken() {
   let user = useStorage().getStorageSync('user')
-  return user && user.token ? { Authorization: 'Bearer ' + user.token } : {}
+  return user ? 'Bearer ' + user.token : ''
 }

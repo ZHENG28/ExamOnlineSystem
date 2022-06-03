@@ -66,19 +66,19 @@ export default {
     };
   },
   created() {
-    if (this.$storage.getStorageSync("isLogin")) {
+    if (this.$storage.getStorageSync("user")) {
       this.$router.push("/home");
     }
   },
   methods: {
     changeIdentity(id) {
-      this.user.roleName = id;
+      this.user.roleId = id;
       this.isTch = id == 2 ? "primary" : "";
       this.isStu = id == 3 ? "primary" : "";
     },
 
     isEmptyFields() {
-      if (this.user.roleName == "") {
+      if (this.user.roleId == "") {
         this.$message.warning("请选择身份");
       } else if (this.user.account == "") {
         this.$message.warning("用户名不能为空");
@@ -93,7 +93,7 @@ export default {
       if (this.isEmptyFields()) {
         this.$axios
           .post("/user/login", {
-            roleId: this.user.roleName,
+            roleId: this.user.roleId,
             account: this.user.account,
             password: this.user.password,
           })
@@ -101,7 +101,6 @@ export default {
             if (response.data.token) {
               // 将该登录用户的令牌移入store
               this.$storage.setStorageSync("user", response.data, 10800000);
-              this.$storage.setStorageSync("isLogin", true, 10800000);
               this.$router.push("/home");
             }
           })

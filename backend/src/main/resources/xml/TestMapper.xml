@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.mapper.TestMapper">
-    <resultMap id="TestWithClazzAndSubject" type="com.zj.examsystem.entity.Test">
-        <id column="test_id" property="testId" jdbcType="INTEGER"/>
-        <result column="test_name" property="testName" jdbcType="VARCHAR"/>
-        <result column="description" property="description" jdbcType="VARCHAR"/>
-        <result column="begin_date" property="beginDate" jdbcType="DATE"/>
-        <result column="end_date" property="endDate" jdbcType="DATE"/>
-        <result column="exam_duration" property="examDuration" jdbcType="INTEGER"/>
-        <result column="exam_time" property="examTime" jdbcType="INTEGER"/>
-        <result column="question_list" property="questionList" jdbcType="VARCHAR"/>
-        <result column="question_total" property="questionTotal" jdbcType="INTEGER"/>
-        <result column="clazz_id" property="clazzId" jdbcType="INTEGER"/>
-        <result column="subject_id" property="subjectId" jdbcType="INTEGER"/>
-        <!-- extra property -->
-        <result column="major" property="major" jdbcType="VARCHAR"/>
-        <result column="clazz_name" property="clazzName" jdbcType="VARCHAR"/>
-        <result column="subject_name" property="subjectName" jdbcType="VARCHAR"/>
-    </resultMap>
+    <select id="selectPageWithSubject" resultType="com.zj.examsystem.entity.Test">
+        SELECT *
+        FROM test_with_subject_clazz ${ew.customSqlSegment}
+    </select>
 
-    <select id="selectPageWithClazzAndSubject" resultMap="TestWithClazzAndSubject">
-        SELECT t.*, c.clazz_name, s.subject_name, c.major
-        FROM test t
-                 JOIN clazz c on t.clazz_id = c.clazz_id
-                 JOIN subject s on t.subject_id = s.subject_id
-                 JOIN user u on s.teacher_id = u.user_id
-            ${ew.customSqlSegment}
+    <select id="countByTeacherId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM test_with_subject_clazz
+        WHERE teacher_id = #{userId}
+    </select>
+
+    <select id="countNotFinishByUserId" resultType="com.zj.examsystem.entity.Test">
+        SELECT *
+        FROM test
+                 JOIN subject_with_user_clazz ON subject_with_user_clazz.subject_id = test.subject_id
+                 JOIN student_with_role_clazz_major ON student_with_role_clazz_major.clazz_id = subject_with_user_clazz.clazz_id
+        WHERE end_date > NOW()
+          AND student_with_role_clazz_major.user_id = #{userId}
+    </select>
+
+    <select id="findById" resultType="com.zj.examsystem.entity.Test">
+        SELECT *
+        FROM test_with_subject_clazz
+        WHERE test_id = #{testId}
     </select>
 </mapper>

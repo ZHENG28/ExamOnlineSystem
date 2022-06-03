@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.mapper.TestHistoryMapper">
-    <resultMap id="TestWithClazzAndSubjectAndStudent" type="com.zj.examsystem.entity.TestHistory">
-        <id column="history_id" property="historyId" jdbcType="INTEGER"/>
-        <result column="finish_time" property="finishTime" jdbcType="DATE"/>
-        <result column="take_time" property="takeTime" jdbcType="INTEGER"/>
-        <result column="reply" property="reply" jdbcType="VARCHAR"/>
-        <result column="user_id" property="studentId" jdbcType="INTEGER"/>
-        <result column="test_id" property="testId" jdbcType="INTEGER"/>
-        <!-- extra property -->
-        <result column="student_name" property="studentName" jdbcType="VARCHAR"/>
-        <result column="test_name" property="testName" jdbcType="VARCHAR"/>
-        <result column="description" property="description" jdbcType="VARCHAR"/>
-        <result column="subject_name" property="subjectName" jdbcType="VARCHAR"/>
-    </resultMap>
-
-    <select id="countByTestAndStudent" resultType="integer">
-        SELECT COUNT(*)
-        FROM test_history th
-                 JOIN user u ON th.student_id = u.user_id
-        WHERE u.user_id = #{userId}
-          AND th.test_id = #{testId}
-    </select>
-
     <!--    <select id="selectPageWithTest" resultMap="TestWithClazzAndSubject">-->
     <!--        SELECT th.*,-->
     <!--               t.test_name,-->
@@ -34,10 +12,27 @@
     <!--                 JOIN subject sub ON t.sub_id = sub.sub_id-->
     <!--    </select>-->
 
-    <select id="selectPageByTestId" resultType="com.zj.examsystem.entity.TestHistory">
-        SELECT th.*, u.username AS student_name
-        FROM test_history th
-                 JOIN user u ON th.student_id = u.user_id
-            ${ew.customSqlSegment}
+    <select id="selectPageWithTest" resultType="com.zj.examsystem.entity.TestHistoryWithUserTestSubject">
+        SELECT *
+        FROM test_history_with_user_test_subject ${ew.customSqlSegment}
+    </select>
+
+    <select id="findTestInfoByCompoundId" resultType="com.zj.examsystem.entity.TestHistoryWithUserTestSubject">
+        SELECT *
+        FROM test_history_with_user_test_subject
+        WHERE test_id = #{testId}
+          AND student_id = #{studentId}
+    </select>
+    <select id="findIdByTestId" resultType="java.lang.Integer">
+        SELECT history_id
+        FROM test_history
+        WHERE test_id = #{testId}
+    </select>
+    <select id="findCorrectnessByStudentId" resultType="java.lang.Float">
+        SELECT test_history.correct / test.question_total * 100 AS score
+        FROM test_history
+                 JOIN test ON test.test_id = test_history.test_id
+        WHERE student_id = #{userId}
+        ORDER BY score DESC
     </select>
 </mapper>

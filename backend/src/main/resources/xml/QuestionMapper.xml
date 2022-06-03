@@ -1,36 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zj.examsystem.mapper.QuestionMapper">
-    <resultMap id="QuestionWithSubjectAndType" type="com.zj.examsystem.entity.Question">
-        <id column="question_id" property="questionId"/>
-        <result column="question_title" property="questionTitle" jdbcType="VARCHAR"/>
-        <result column="subject_id" property="subjectId" jdbcType="INTEGER"/>
-        <result column="type_id" property="typeId" jdbcType="INTEGER"/>
-        <!-- extra property -->
-        <result column="subject_name" property="subjectName" jdbcType="VARCHAR"/>
-        <result column="type_name" property="typeName" jdbcType="VARCHAR"/>
-    </resultMap>
-
-    <select id="findAllByTeacherId" resultMap="QuestionWithSubjectAndType">
-        SELECT q.*, s.subject_name, qt.type_name
-        FROM question q
-                 JOIN question_type qt on q.type_id = qt.type_id
-                 JOIN subject s on q.subject_id = s.subject_id
-                 JOIN user u on s.teacher_id = u.user_id
-        WHERE u.user_id = #{userId}
+    <select id="findAllByTeacherId" resultType="com.zj.examsystem.entity.Question">
+        SELECT q.*
+        FROM question_with_type_subject q
+                 JOIN subject_with_user_clazz swuc on q.subject_id = swuc.subject_id
+        WHERE swuc.teacher_id = #{userId}
     </select>
 
-    <select id="selectById" resultMap="QuestionWithSubjectAndType">
-        SELECT q.*, s.subject_name, qt.type_name
-        FROM question q
-                 JOIN question_type qt on q.type_id = qt.type_id
-                 JOIN subject s on q.subject_id = s.subject_id
-        WHERE q.question_id = #{questionId}
+    <select id="countByTeacherId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM question_with_type_subject q
+                 JOIN subject_with_user_clazz swuc on q.subject_id = swuc.subject_id
+        WHERE swuc.teacher_id = #{userId}
     </select>
-    <select id="findBySubIdWithType" resultMap="QuestionWithSubjectAndType">
-        SELECT q.*, qt.type_name
-        FROM question q
-                 JOIN question_type qt on q.type_id = qt.type_id
-        WHERE q.subject_id = #{subjectId}
+
+    <select id="findById" resultType="com.zj.examsystem.entity.Question">
+        SELECT *
+        FROM question_with_type_subject
+        WHERE question_id = #{questionId}
+    </select>
+
+    <select id="findListById" resultType="com.zj.examsystem.entity.Question">
+        SELECT *
+        FROM question_with_type_subject ${ew.customSqlSegment}
     </select>
 </mapper>

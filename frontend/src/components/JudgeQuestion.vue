@@ -5,10 +5,20 @@
       {{ title }}
     </p>
     <p>
-      <el-button circle size="large" @click="sendAnswer(true)" :type="isTrue">
+      <el-button
+        circle
+        size="large"
+        @click="isable && sendAnswer(true)"
+        :type="isTrue"
+      >
         <el-icon><check /></el-icon>
       </el-button>
-      <el-button circle size="large" @click="sendAnswer(false)" :type="isFalse">
+      <el-button
+        circle
+        size="large"
+        @click="isable && sendAnswer(false)"
+        :type="isFalse"
+      >
         <el-icon><close /></el-icon>
       </el-button>
     </p>
@@ -22,6 +32,10 @@ export default {
     title: String,
     choose: String,
     questionId: Number,
+    isable: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -31,8 +45,6 @@ export default {
   },
   // 每次刷新需要在component上加上key
   created() {
-    console.log(this.questionId);
-    console.log(this.choose);
     if (this.choose != undefined) {
       let reply = this.choose.split(" ");
       this.changeFlag(JSON.parse(reply[1]));

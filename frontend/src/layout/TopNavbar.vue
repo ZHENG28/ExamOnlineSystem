@@ -6,7 +6,7 @@
     <el-col :span="20">
       <el-dropdown>
         <el-avatar :style="{ backgroundColor: color }">{{
-          userName.substr(0, 1).toUpperCase()
+          username.substr(0, 1).toUpperCase()
         }}</el-avatar>
         <el-icon style="margin-left: 15px; float: right; margin-top: 15px">
           <arrow-down />
@@ -53,14 +53,15 @@
   </el-row>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 import User from "@/services/user";
 export default {
   data() {
     return {
       dialogFormVisible: false,
       oldPassword: "",
-      userName: "",
+      username: "",
       form: new User("", "", "", "", ""),
       formRules: {
         username: [{ required: true, message: "请填写名字", trigger: "blur" }],
@@ -76,9 +77,7 @@ export default {
     },
   },
   created() {
-    if (!this.$storage.getStorageSync("isLogin")) {
-      this.$router.replace("/");
-    } else {
+    if (this.$storage.getStorageSync("user")) {
       this.color = this.getColor();
       this.loadInfo(this.$storage.getStorageSync("user").id);
     }
@@ -114,15 +113,16 @@ export default {
     loadInfo(id) {
       this.$axios
         .get("/user/findInfoById", {
-          headers: authHeader(),
-          params: {
-            userId: id,
-          },
+          headers: { Authorization: userToken() },
+          params: { userId: id },
         })
         .then((response) => {
-          this.form = response.data;
-          this.oldPassword = response.data.password;
-          this.userName = response.data.username;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.form = res;
+            this.oldPassword = res.password;
+            this.username = res.username;
+          }
         });
     },
     updateUser() {
@@ -131,19 +131,22 @@ export default {
           let data = {
             userId: this.form.userId,
             username: this.form.username,
+            roleId: this.form.roleId,
+            status: "修改",
           };
           if (this.form.password != this.oldPassword) {
-            data.password = this.form.password;
+            data["password"] = this.form.password;
           }
           this.$axios
             .post("/user/save", this.$qs.stringify(data), {
-              headers: authHeader(),
+              headers: { Authorization: userToken() },
             })
             .then(
               (response) => {
                 this.dialogFormVisible = false;
                 if (response.data) {
                   this.$message.success("修改成功");
+                  this.username = this.form.username;
                 } else {
                   this.$message.error("修改失败");
                 }
@@ -159,8 +162,10 @@ export default {
     },
 
     logOut() {
+      this.$axios.post("/user/logout", {
+        headers: { Authorization: userToken() },
+      });
       this.$storage.removeStorageSync("user");
-      this.$storage.setStorageSync("isLogin", false);
       this.$router.replace("/");
     },
   },

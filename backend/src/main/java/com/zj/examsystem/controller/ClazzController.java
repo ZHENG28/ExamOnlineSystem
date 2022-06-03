@@ -3,70 +3,69 @@ package com.zj.examsystem.controller;
 
 import com.zj.examsystem.entity.Clazz;
 import com.zj.examsystem.service.ClazzService;
+import com.zj.examsystem.utils.response.ResponseCode;
+import com.zj.examsystem.utils.response.BaseResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 
 @Controller
 @RequestMapping("/clazz")
 public class ClazzController {
-
     @Autowired
     private ClazzService clazzService;
 
-    @PostMapping("/findAll")
+    @GetMapping("/findAll")
     @ResponseBody
     public Object findAll(Integer pageno, Integer size) {
-        return clazzService.findAll(pageno, size);
+        return BaseResponseEntity.ok("", clazzService.findAll(pageno, size));
+    }
+
+    @GetMapping("/findById")
+    @ResponseBody
+    public Object findById(Integer clazzId) {
+        return BaseResponseEntity.ok("", clazzService.findById(clazzId));
     }
 
     @GetMapping("/getDistinctMajor")
     @ResponseBody
     public Object getDistinctMajor() {
-        return clazzService.getDistinctMajorOrClazz("major");
+        return BaseResponseEntity.ok("", clazzService.getClazzFilter("major"));
     }
 
     @GetMapping("/getDistinctClazz")
     @ResponseBody
     public Object getDistinctClazz() {
-        return clazzService.getDistinctMajorOrClazz("clazz");
+        return BaseResponseEntity.ok("", clazzService.getClazzFilter("clazz"));
     }
 
-    @GetMapping("/findAllMajorAndClazz")
+    @GetMapping("/loadMajorClazzCascader")
     @ResponseBody
-    public Object findAllMajorAndClazz() {
-        return clazzService.findAllMajorClazz();
+    public Object loadMajorClazzCascader() {
+        return BaseResponseEntity.ok("", clazzService.findMajorAndClazzList());
     }
 
-    @GetMapping("/save")
+    @GetMapping("/loadClazzByMajorId")
     @ResponseBody
-    public Object save(Clazz clazz) {
+    public Object loadClazzByMajorId(Integer majorId) {
+        return BaseResponseEntity.ok("", clazzService.loadClazzByMajorId(majorId));
+    }
+
+    @PostMapping("/save")
+    @ResponseBody
+    public Object save(Clazz clazz, String status) {
         int result = clazzService.saveClazz(clazz);
-        return result != 0;
+        return result != 0 ? BaseResponseEntity.ok(status + "成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, status + "失败");
     }
 
-    @PostMapping("/del")
-    public ModelAndView delete(Integer[] clazzId, Integer pageno, Integer size) {
-        int result = clazzService.deleteClazz(clazzId);
-
-        ModelAndView mv = new ModelAndView();
-        if (result != 0) {
-            mv.addObject("pageno", pageno);
-            mv.addObject("size", size);
-            mv.setViewName("forward:/clazz/findAll");
-        }
-        return mv;
-    }
-
-    @PostMapping("/findById")
+    @PostMapping("/delete")
     @ResponseBody
-    public Object findById(Integer clazzId) {
-        return clazzService.findById(clazzId);
+    public Object delete(Integer[] clazzId) {
+        int result = clazzService.deleteClazz(clazzId);
+        return result != 0 ? BaseResponseEntity.ok("删除成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
     }
 }

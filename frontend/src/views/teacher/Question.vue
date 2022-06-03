@@ -27,34 +27,34 @@
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="所属科目" prop="subjectName">
+          <el-form-item label="所属科目" prop="subjectId">
             <el-select
               filterable
               placeholder="请选择所属科目"
-              @change="valueTosubId"
-              v-model="questionForm.subjectName"
+              @change="valueToSubjectId"
+              v-model="questionForm.subjectId"
             >
               <el-option
-                v-for="sub in subIdFilterData"
-                :key="sub.subId"
-                :label="sub.text"
-                :value="sub.subId"
+                v-for="subject in subjectList"
+                :key="subject.subjectId"
+                :label="subject.subjectName"
+                :value="subject.subjectId"
               >
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="题目类型" prop="typeName">
+          <el-form-item label="题目类型" prop="typeId">
             <el-select
               filterable
               placeholder="请选择题目类型"
-              @change="valueTotypeId"
-              v-model="questionForm.typeName"
+              @change="valueToTypeId"
+              v-model="questionForm.typeId"
             >
               <el-option
-                v-for="sub in typeIdFilterData"
-                :key="sub.typeId"
-                :label="sub.text"
-                :value="sub.typeId"
+                v-for="type in typeList"
+                :key="type.typeId"
+                :label="type.typeName"
+                :value="type.typeId"
               >
               </el-option>
             </el-select>
@@ -93,7 +93,7 @@
             :rules="{
               required: questionForm.typeId != '3',
               message: '请选择正确答案',
-              trigger: 'blur',
+              trigger: 'change',
             }"
             v-if="questionForm.typeId != undefined"
           >
@@ -159,16 +159,16 @@
       <el-table-column
         prop="subjectName"
         label="所属科目"
-        :filters="subIdFilterData"
-        :filter-method="subIdFilter"
+        :filters="subjectFilterData"
+        :filter-method="subjectFilter"
         width="150"
       >
       </el-table-column>
       <el-table-column
         prop="typeName"
         label="类型"
-        :filters="typeIdFilterData"
-        :filter-method="typeIdFilter"
+        :filters="typeFilterData"
+        :filter-method="typeFilter"
         width="100"
       >
         <template #default="scope">
@@ -180,8 +180,9 @@
                 ? 'danger'
                 : ''
             "
-            >{{ scope.row.typeName }}</el-tag
           >
+            {{ scope.row.typeName }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="questionTitle" label="题目"> </el-table-column>
@@ -237,12 +238,14 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
       status: "",
       dialogFormVisible: false,
+      userId: "",
       questionForm: {
         questionId: "",
         questionTitle: "",
@@ -264,19 +267,21 @@ export default {
         questionTitle: [
           { required: true, message: "请填写题目信息", trigger: "blur" },
         ],
-        subjectName: [
-          { required: true, message: "请选择所属科目", trigger: "blur" },
+        subjectId: [
+          { required: true, message: "请选择所属科目", trigger: "change" },
         ],
-        typeName: [
-          { required: true, message: "请选择题目类型", trigger: "blur" },
+        typeId: [
+          { required: true, message: "请选择题目类型", trigger: "change" },
         ],
       },
       isTrue: "",
       isFalse: "",
 
       multiSelection: [],
-      subIdFilterData: [],
-      typeIdFilterData: [],
+      subjectList: [],
+      subjectFilterData: [],
+      typeList: [],
+      typeFilterData: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -285,14 +290,15 @@ export default {
     };
   },
   created() {
+    this.userId = this.$storage.getStorageSync("user").id;
     this.loadData();
   },
   methods: {
     // 初始化页面
     loadData() {
       this.findAll();
-      this.findAllSubId();
-      this.findAllTypeId();
+      this.loadSubjectByTeacherId();
+      this.loadQuestionType();
     },
     clearFormFields() {
       this.questionForm = {};
@@ -316,19 +322,20 @@ export default {
 
     findAll() {
       this.$axios
-        .post(
-          "/question/findAllByTeacherId",
-          this.$qs.stringify({
-            // userId: this.$storage.getStorageSync("user").id,
-            userId: "4",
+        .get("/question/findAllByTeacherId", {
+          headers: { Authorization: userToken() },
+          params: {
+            userId: this.userId,
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -340,37 +347,57 @@ export default {
       this.pageno = pageno;
       this.findAll();
     },
-    subIdFilter(value, row) {
-      return row.subjectName === value;
-    },
-    typeIdFilter(value, row) {
-      return row.typeName === value;
-    },
 
-    findAllSubId() {
+    loadSubjectByTeacherId() {
       this.$axios
-        .post(
-          "/subject/findAllSubIdByUserId",
-          this.$qs.stringify({
-            userId: this.$storage.getStorageSync("user").id,
-          }),
-          { headers: authHeader() }
-        )
+        .get("/subject/loadSubjectByTeacherId", {
+          headers: { Authorization: userToken() },
+          params: { teacherId: this.userId },
+        })
         .then((response) => {
-          this.subIdFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.subjectList = res;
+            this.subjectFilterData = [];
+            res.forEach((item) => {
+              this.subjectFilterData.push({
+                text: item.subjectName,
+                value: item.subjectId,
+              });
+            });
+          }
         });
     },
-    valueTosubId(val) {
+    subjectFilter(value, row) {
+      return row.subjectId === value;
+    },
+    valueToSubjectId(val) {
       this.questionForm.subjectId = val;
     },
-    findAllTypeId() {
+
+    loadQuestionType() {
       this.$axios
-        .post("/questionType/findAllQuestionTypeId", { headers: authHeader() })
+        .get("/questionType/loadQuestionType", {
+          headers: { Authorization: userToken() },
+        })
         .then((response) => {
-          this.typeIdFilterData = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.typeList = res;
+            this.typeFilterData = [];
+            res.forEach((item) => {
+              this.typeFilterData.push({
+                text: item.typeName,
+                value: item.typeId,
+              });
+            });
+          }
         });
     },
-    valueTotypeId(val) {
+    typeFilter(value, row) {
+      return row.typeId === value;
+    },
+    valueToTypeId(val) {
       this.questionForm.typeId = val;
       this.questionForm.answer = [
         {
@@ -383,7 +410,6 @@ export default {
     },
 
     addOptions(index) {
-      console.log(this.questionForm.answer);
       this.questionForm.answer.push({
         answerId: "",
         answerSign: this.number2Letter(index),
@@ -413,17 +439,17 @@ export default {
     // 新增&编辑
     loadInfo(id) {
       this.$axios
-        .post(
-          "/question/findById",
-          this.$qs.stringify({
-            questionId: id,
-          }),
-          { headers: authHeader() }
-        )
+        .get("/question/findById", {
+          headers: { Authorization: userToken() },
+          params: { questionId: id },
+        })
         .then((response) => {
-          this.questionForm = response.data;
-          if (this.questionForm.typeId == "2") {
-            this.changeJudge(this.questionForm.correct == "1");
+          let res = dealSelect(response.data);
+          if (res) {
+            this.questionForm = res;
+            if (this.questionForm.typeId == "2") {
+              this.changeJudge(this.questionForm.correct == "1");
+            }
           }
         });
     },
@@ -436,13 +462,15 @@ export default {
             subjectId: this.questionForm.subjectId,
             typeId: this.questionForm.typeId,
             correct: this.questionForm.correct,
+            status: this.status,
           };
           let option = [""];
           if (this.questionForm.typeId == "1") {
             // choice
             this.questionForm.answer.forEach((item) => {
               option.push(
-                (item.answerId != "" ? item.answerId + " " : "") +
+                (item.answerId != "" ? item.answerId : "") +
+                  " " +
                   item.answerSign +
                   " " +
                   item.content
@@ -454,16 +482,15 @@ export default {
             .post(
               "/question/save",
               this.$qs.stringify(data, { indices: false }),
-              { headers: authHeader() }
+              { headers: { Authorization: userToken() } }
             )
             .then((response) => {
               this.dialogFormVisible = false;
-              if (response.data) {
-                this.$message.success(this.status + "成功");
-                this.loadData();
-              } else {
-                this.$message.error(this.status + "失败");
-              }
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              this.loadData();
             })
             .catch(function (error) {
               this.$message.info("数据出错");
@@ -491,26 +518,16 @@ export default {
             });
             this.$axios
               .post(
-                "/question/del",
-                this.$qs.stringify(
-                  {
-                    userId: this.$storage.getStorageSync("user").id,
-                    // userId: "4",
-                    questionId: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/question/delete",
+                this.$qs.stringify({ questionId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {

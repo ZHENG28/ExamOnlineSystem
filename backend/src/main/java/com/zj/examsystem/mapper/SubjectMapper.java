@@ -13,9 +13,9 @@ import java.util.Map;
 
 
 public interface SubjectMapper extends BaseMapper<Subject> {
-    List<Map<String, Object>> selectDistinctSubject(@Param(Constants.WRAPPER) QueryWrapper<Map<String, Object>> queryWrapper);
-
     IPage<Subject> selectPageWithTeacherAndClazz(Page<Subject> page, @Param(Constants.WRAPPER) QueryWrapper<Subject> queryWrapper);
+
+    List<Subject> selectListByUserId(@Param(Constants.WRAPPER) QueryWrapper<Map<String, Object>> queryWrapper);
 
     Subject findByIdWithTeacherAndClazz(Integer subjectId);
 }

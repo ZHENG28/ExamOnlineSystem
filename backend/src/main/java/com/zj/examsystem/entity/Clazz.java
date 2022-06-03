@@ -1,6 +1,7 @@
 package com.zj.examsystem.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -16,5 +17,8 @@ public class Clazz implements Serializable {
 
     private String clazzName;
 
-    private String major;
+    private Integer majorId;
+
+    @TableField(select = false)
+    private String majorName;
 }

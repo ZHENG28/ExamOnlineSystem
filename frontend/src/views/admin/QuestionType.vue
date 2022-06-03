@@ -99,7 +99,8 @@
   </div>
 </template>
 <script>
-import authHeader from "@/services/auth-header";
+import userToken from "@/services/auth-header";
+import { dealSelect } from "@/services/response";
 export default {
   data() {
     return {
@@ -141,17 +142,19 @@ export default {
 
     findAll() {
       this.$axios
-        .post(
-          "/questionType/findAll",
-          this.$qs.stringify({
+        .get("/questionType/findAll", {
+          headers: { Authorization: userToken() },
+          params: {
             pageno: this.pageno,
             size: this.size,
-          }),
-          { headers: authHeader() }
-        )
+          },
+        })
         .then((response) => {
-          this.tableData = response.data.records;
-          this.totalItems = response.data.total;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.tableData = res.records;
+            this.totalItems = res.total;
+          }
         });
     },
     handleSizeChange(size) {
@@ -167,11 +170,15 @@ export default {
     // 新增&编辑
     loadInfo(id) {
       this.$axios
-        .post("/questionType/findById", this.$qs.stringify({ typeId: id }), {
-          headers: authHeader(),
+        .get("/questionType/findById", {
+          headers: { Authorization: userToken() },
+          params: { typeId: id },
         })
         .then((response) => {
-          this.typeForm = response.data;
+          let res = dealSelect(response.data);
+          if (res) {
+            this.typeForm = res;
+          }
         });
     },
     save() {
@@ -184,17 +191,17 @@ export default {
                 typeId: this.typeForm.typeId,
                 typeName: this.typeForm.typeName,
                 description: this.typeForm.description,
+                status: this.status,
               }),
-              { headers: authHeader() }
+              { headers: { Authorization: userToken() } }
             )
             .then((response) => {
               this.dialogFormVisible = false;
-              if (response.data) {
-                this.$message.success(this.status + "成功");
-                this.loadData();
-              } else {
-                this.$message.error(this.status + "失败");
-              }
+              this.$message({
+                type: response.data.success ? "success" : "error",
+                message: response.data.message,
+              });
+              this.loadData();
             })
             .catch(function (error) {
               this.$message.info("数据出错");
@@ -222,24 +229,16 @@ export default {
             });
             this.$axios
               .post(
-                "/questionType/del",
-                this.$qs.stringify(
-                  {
-                    typeId: params,
-                    pageno: this.pageno,
-                    size: this.size,
-                  },
-                  { indices: false }
-                ),
-                { headers: authHeader() }
+                "/questionType/delete",
+                this.$qs.stringify({ typeId: params }, { indices: false }),
+                { headers: { Authorization: userToken() } }
               )
               .then((response) => {
-                this.tableData = response.data.records;
-                this.totalItems = response.data.total;
-                this.$message.success("删除成功！");
-              })
-              .catch(() => {
-                this.$message.error("删除失败");
+                this.$message({
+                  type: response.data.success ? "success" : "error",
+                  message: response.data.message,
+                });
+                this.loadData();
               });
           })
           .catch(() => {

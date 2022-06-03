@@ -6,21 +6,27 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-
+import java.util.Map;
 
 public interface UserService extends IService<User> {
 
-    public User findInfoById(Integer userId);
+    public Boolean saveUser(User user);
 
-    public ResponseEntity<?> saveUserWithClazzId(User user);
+    public Boolean updateUser(User user);
 
-    public ResponseEntity<?> updateUser(User user);
+    public Integer deleteUser(Integer[] userId);
 
     public IPage<User> findAll(Integer pageno, Integer size);
 
-    public Integer deleteUser(String[] account);
+    public User findById(Integer userId);
 
-    public User findByAccount(String account);
+    public List<User> findTeacherByMajorId(Integer majorId);
 
-    public List<User> findAllTeacher();
+    public List<User> findStudentByClazzId(Integer clazzId);
+
+    public Map<String, Object> loadAdminData(Integer userId);
+
+    public Map<String, Object> loadTeacherData(Integer userId);
+
+    public Map<String, Object> loadStudentData(Integer userId);
 }

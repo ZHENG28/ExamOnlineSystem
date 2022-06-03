@@ -48,7 +48,7 @@ form {
   align-items: center;
 }
 .icon i {
-  color: #32be8f;
+  color: #38d39f;
   transition: 0.5s;
 }
 
@@ -63,7 +63,7 @@ form {
 }
 .input {
   /* position: absolute; */
-  width: 100%;
+  width: 360px;
   height: 100%;
   top: 0;
   left: 0;
@@ -80,7 +80,7 @@ button {
   width: 30%;
   height: 50px;
   border-radius: 25px;
-  margin: 1rem 0;
+  margin: 3rem 0;
   font-size: 1.2rem;
   letter-spacing: 10px;
   outline: none;

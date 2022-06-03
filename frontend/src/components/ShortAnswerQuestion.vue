@@ -12,6 +12,7 @@
         :autosize="{ minRows: 10 }"
         maxlength="1000"
         show-word-limit
+        :readonly="isable"
       />
     </p>
   </div>
@@ -24,12 +25,15 @@ export default {
     title: String,
     content: String,
     questionId: Number,
+    isable: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return { text: "" };
   },
   created() {
-    console.log(this.content);
     if (this.content != undefined) {
       this.text = this.content.split(" ")[1];
     } else {
