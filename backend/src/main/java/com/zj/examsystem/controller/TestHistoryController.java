@@ -41,12 +41,6 @@ public class TestHistoryController {
         }
     }
 
-    @GetMapping("/findScoreByTestId")
-    @ResponseBody
-    public Object findScoreByTestId(Integer testId) {
-        return BaseResponseEntity.ok("", testHistoryService.findScoreByTestId(testId));
-    }
-
     @GetMapping("/loadObjectChartData")
     @ResponseBody
     public Object loadObjectChartData(Integer testId) {

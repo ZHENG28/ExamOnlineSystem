@@ -14,6 +14,7 @@ public class BaseResponseEntity<T> {
 
     private T data;
 
+    // 防止实例化
     private BaseResponseEntity() {}
 
     public static <T> BaseResponseEntity<T> ok(String message, T data) {

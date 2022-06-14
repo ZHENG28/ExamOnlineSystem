@@ -36,26 +36,6 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
     }
 
     @Override
-    public List<Map<String, Object>> getClazzFilter(String condition) {
-        List<String> list = null;
-        switch (condition) {
-            case "major":
-                list = clazzMapper.selectDistinctMajor();
-                break;
-            case "clazz":
-                list = clazzMapper.selectDistinctClazzName();
-        }
-        List<Map<String, Object>> results = new ArrayList<>();
-        for (String str : list) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("text", str);
-            result.put("value", str);
-            results.add(result);
-        }
-        return results;
-    }
-
-    @Override
     public List<Map<String, Object>> findMajorAndClazzList() {
         List<Major> majorList = majorMapper.selectList(null);
         List<Map<String, Object>> result = new ArrayList<>();

@@ -15,7 +15,5 @@ public interface ClazzMapper extends BaseMapper<Clazz> {
 
     Clazz findById(Integer clazzId);
 
-    List<String> selectDistinctMajor();
-
     List<String> selectDistinctClazzName();
 }

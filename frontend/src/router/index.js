@@ -145,7 +145,7 @@ router.beforeEach((to, from, next) => {
   } else {
     let role = user.roles[0].toLowerCase().substring(5)
     if (to.path.startsWith('/' + role) || noAuthPath.indexOf(to.path) != -1) {
-      // has authorization
+      // have authorization
       next()
     } else {
       if (routeList.indexOf(to.path) != -1 && to.path != '/404') {

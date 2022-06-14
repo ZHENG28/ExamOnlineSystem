@@ -47,6 +47,6 @@ public class MPAutoGenerator {
         autoGenerator.setStrategy(strategy);
 
         // 执行自动生成
-//        autoGenerator.execute();
+        autoGenerator.execute();
     }
 }

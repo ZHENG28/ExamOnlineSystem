@@ -23,17 +23,4 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public List<Role> findAll() {
         return roleMapper.selectList(null);
     }
-
-    @Override
-    public List<Map<String, Object>> getDistinctRole() {
-        List<Role> list = roleMapper.selectList(null);
-        List<Map<String, Object>> results = new ArrayList<>();
-        for (Role role : list) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("text", role.getDescription());
-            result.put("value", role.getDescription());
-            results.add(result);
-        }
-        return results;
-    }
 }

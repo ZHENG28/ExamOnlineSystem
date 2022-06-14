@@ -15,11 +15,6 @@
                  JOIN major m ON c.major_id = m.major_id
         WHERE clazz_id = ${clazzId}
     </select>
-    <select id="selectDistinctMajor" resultType="java.lang.String">
-        SELECT major
-        FROM Clazz
-        GROUP BY major
-    </select>
     <select id="selectDistinctClazzName" resultType="java.lang.String">
         SELECT clazz_name
         FROM Clazz

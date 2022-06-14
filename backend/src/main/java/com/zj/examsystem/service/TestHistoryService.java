@@ -13,8 +13,6 @@ import java.util.Map;
 public interface TestHistoryService extends IService<TestHistory> {
     public Boolean commit(TestHistory testHistory, String[] reply, List<Question> questionList);
 
-    public List<Map<String, Object>> findScoreByTestId(Integer testId);
-
     public List<Map<String, Object>> loadObjectChartData(Integer testId);
 
     public IPage<TestHistoryWithUserTestSubject> findAllByUserId(Integer pageno, Integer size, Integer userId);

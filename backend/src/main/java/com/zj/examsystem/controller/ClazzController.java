@@ -31,18 +31,6 @@ public class ClazzController {
         return BaseResponseEntity.ok("", clazzService.findById(clazzId));
     }
 
-    @GetMapping("/getDistinctMajor")
-    @ResponseBody
-    public Object getDistinctMajor() {
-        return BaseResponseEntity.ok("", clazzService.getClazzFilter("major"));
-    }
-
-    @GetMapping("/getDistinctClazz")
-    @ResponseBody
-    public Object getDistinctClazz() {
-        return BaseResponseEntity.ok("", clazzService.getClazzFilter("clazz"));
-    }
-
     @GetMapping("/loadMajorClazzCascader")
     @ResponseBody
     public Object loadMajorClazzCascader() {

@@ -13,8 +13,6 @@ public interface SubjectService extends IService<Subject> {
 
     public List<Subject> loadSubjectByUserId(Map<String, Object> condition);
 
-    //    public List<Map<String, Object>> findDistinctSubjectByUserId(Integer userId);
-
     public Subject findById(Integer subjectId);
 
     public Integer saveSubject(Subject subject);

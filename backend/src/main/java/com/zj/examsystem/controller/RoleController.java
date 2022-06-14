@@ -22,11 +22,5 @@ public class RoleController {
     public Object findAll() {
         return BaseResponseEntity.ok("", roleService.findAll());
     }
-
-    @GetMapping("/getDistinctRole")
-    @ResponseBody
-    public Object getDistinctRole() {
-        return BaseResponseEntity.ok("", roleService.getDistinctRole());
-    }
 }
 

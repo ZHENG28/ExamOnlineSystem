@@ -47,12 +47,6 @@ public class SubjectController {
         return BaseResponseEntity.ok("", subjectService.findAll(pageno, size, map));
     }
 
-    @GetMapping("/findAllSubId")
-    @ResponseBody
-    public Object findAllSubId() {
-        return BaseResponseEntity.ok("", subjectService.loadSubjectByUserId(null));
-    }
-
     @GetMapping("/loadSubjectByTeacherId")
     @ResponseBody
     public Object loadSubjectByTeacherId(Integer teacherId) {

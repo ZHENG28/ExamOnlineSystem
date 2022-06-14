@@ -2,7 +2,6 @@
 # noinspection PyInterpreter
 import re
 import socket
-import struct
 from collections import defaultdict
 
 import jieba

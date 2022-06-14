@@ -5,14 +5,6 @@
         SELECT *
         FROM subject_with_user_clazz ${ew.customSqlSegment}
     </select>
-
-    <select id="selectDistinctSubject" resultType="map">
-        SELECT subject_name, subject_id
-        FROM subject s
-                 JOIN user u on s.teacher_id = u.user_id
-            ${ew.customSqlSegment}
-        GROUP BY subject_name
-    </select>
     <select id="selectListByUserId" resultType="com.zj.examsystem.entity.Subject">
         SELECT *
         FROM subject_with_user_clazz ${ew.customSqlSegment}

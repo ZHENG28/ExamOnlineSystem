@@ -13,8 +13,6 @@ public interface ClazzService extends IService<Clazz> {
 
     public Clazz findById(Integer clazzId);
 
-    public List<Map<String, Object>> getClazzFilter(String condition);
-
     public List<Map<String, Object>> findMajorAndClazzList();
 
     public List<Clazz> loadClazzByMajorId(Integer majorId);
