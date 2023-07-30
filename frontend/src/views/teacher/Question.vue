@@ -241,6 +241,8 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="questionDifficulty" label="难度系数" width="85">
+      </el-table-column>
       <el-table-column width="300">
         <template #header>
           <el-input v-model="search" placeholder="输入题目信息进行搜索" />
@@ -358,6 +360,7 @@ export default {
       });
       this.isTrue = "";
       this.isFalse = "";
+      this.questionForm.questionDifficulty = 0.5;
     },
     number2Letter(num) {
       return String.fromCharCode("A".charCodeAt() + num);

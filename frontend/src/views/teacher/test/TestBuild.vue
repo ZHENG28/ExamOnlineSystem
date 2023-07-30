@@ -64,17 +64,39 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="7">
+        <el-col :span="8">
+          <el-form-item label="组卷方式" prop="generateWay">
+            <el-select
+              filterable
+              placeholder="请选择组卷方式"
+              @change="changeGeneratePaperWay"
+              v-model="testForm.generateWay"
+            >
+              <el-option :key="1" label="手动组卷" :value="1"> </el-option>
+              <el-option :key="2" label="智能组卷" :value="2"> </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item prop="questionList">
             <el-button
+              v-if="testForm.generateWay != '2'"
               type="primary"
-              :disabled="testForm.subjectId == ''"
               @click="
                 findQuestionBySubjectId(testForm.subjectId);
-                questionListVisible = true;
+                manualVisible = true;
               "
+              :disabled="testForm.subjectId == '' || testForm.generateWay == ''"
               style="margin-right: 30px"
               >选择考题</el-button
+            >
+            <el-button
+              v-if="testForm.generateWay == '2'"
+              type="primary"
+              @click="intelligentGenerate()"
+              :disabled="testForm.subjectId == '' || testForm.generateWay == ''"
+              style="margin-right: 30px"
+              >生成试卷</el-button
             >
             <span style="display: inline; color: red">
               {{ "共" + testForm.questionTotal + "道题" }}
@@ -82,7 +104,7 @@
             <div class="dialog-container">
               <el-dialog
                 title="添加考试题目"
-                v-model="questionListVisible"
+                v-model="manualVisible"
                 width="1200px"
                 top="20px"
               >
@@ -118,7 +140,7 @@
                       >
                     </div>
                     <div style="display: inline">
-                      <el-button @click="questionListVisible = false"
+                      <el-button @click="manualVisible = false"
                         >取 消</el-button
                       >
                       <el-button type="primary" @click="saveQuestionList()"
@@ -128,10 +150,115 @@
                   </span>
                 </template>
               </el-dialog>
+              <el-dialog
+                title="查看考试题目"
+                v-model="intelligentVisible"
+                z-index="1000"
+                width="1000px"
+                top="70px"
+              >
+                <el-table :data="intelligentQuestionList" border height="540px">
+                  <el-table-column type="index" label="序号" width="60">
+                  </el-table-column>
+                  <el-table-column prop="typeName" label="题目类型" width="85">
+                    <template #default="scope">
+                      <el-tag
+                        :type="
+                          scope.row.typeName == '判断题'
+                            ? 'success'
+                            : scope.row.typeName == '简答题'
+                            ? 'danger'
+                            : ''
+                        "
+                      >
+                        {{ scope.row.typeName }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="questionTitle" label="题目信息">
+                  </el-table-column>
+                  <el-table-column
+                    prop="knowledgeContent"
+                    label="关联知识点"
+                    width="200"
+                  >
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
             </div>
           </el-form-item>
         </el-col>
-        <el-col :span="11">
+      </el-row>
+      <el-row v-if="testForm.subjectId != '' && testForm.generateWay == '2'">
+        <el-col :span="6">
+          <el-form-item label="预设题数" prop="presetQuestionTotal">
+            <el-input-number
+              v-model="testForm.presetQuestionTotal"
+              :step="1"
+              :min="1"
+              :max="subjectQuestionList.length"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="预设难度" prop="presetTestDifficulty">
+            <el-input-number
+              v-model="testForm.presetTestDifficulty"
+              :precision="2"
+              :step="0.01"
+              :min="0"
+              :max="1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="难度权重" prop="difficultyWeight">
+            <el-input-number
+              v-model="testForm.difficultyWeight"
+              :precision="2"
+              :step="0.01"
+              :min="0"
+              :max="1"
+              @change="valueToKnowledgeWeight"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="知识点权重" prop="knowledgeWeight">
+            <el-input-number
+              v-model="testForm.knowledgeWeight"
+              :precision="2"
+              :step="0.01"
+              :min="0"
+              :max="1"
+              @change="valueToDifficultyWeight"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="测验时长" prop="testDuration">
+            <el-input-number
+              v-model="testForm.testDuration"
+              :step="30"
+              :min="0"
+              placeholder="0"
+            />
+            分钟
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="测验次数" prop="testTime">
+            <el-input-number
+              v-model="testForm.testTime"
+              :step="1"
+              :min="0"
+              placeholder="1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item>
             <el-button
               type="primary"
@@ -179,6 +306,12 @@
     <div>
       <el-button @click="toTestInfo()">返回列表</el-button>
       <el-button type="primary" @click="save()">确 定</el-button>
+      <el-button
+        v-if="testForm.questionTotal != 0"
+        type="primary"
+        @click="loadCurrentTestPaper()"
+        >预览试卷</el-button
+      >
       <span style="display: inline; color: red; margin-left: 20px">
         测验开始后{{
           testForm.date[0] != undefined
@@ -191,17 +324,76 @@
             : ""
         }}
       </span>
+      <el-dialog
+        title="查看当前生成的试卷"
+        v-model="currentTestPaperVisible"
+        width="1200px"
+        top="70px"
+      >
+        <el-scrollbar :height="mainHeight">
+          <div>
+            <div
+              style="padding: 0px 20px"
+              v-for="(question, index) in currentQuestionList"
+              :key="question.questionId"
+            >
+              <choice-question
+                v-if="question.typeName == '选择题'"
+                :number="index + 1"
+                :title="question.questionTitle"
+                :answers="question.answer"
+                :isable="false"
+              ></choice-question>
+              <judge-question
+                v-if="question.typeName == '判断题'"
+                :number="index + 1"
+                :questionId="question.questionId"
+                :title="question.questionTitle"
+                :isable="false"
+              ></judge-question>
+              <short-answer-question
+                v-if="question.typeName == '简答题'"
+                :number="index + 1"
+                :questionId="question.questionId"
+                :title="question.questionTitle"
+                :isable="true"
+              ></short-answer-question>
+              <span style="color: red"
+                >正确答案：{{
+                  question.correct == "true"
+                    ? "√"
+                    : question.correct == "false"
+                    ? "×"
+                    : question.correct == null
+                    ? "无"
+                    : question.correct
+                }}</span
+              >
+            </div>
+          </div>
+        </el-scrollbar>
+      </el-dialog>
     </div>
   </div>
 </template>
 <script>
 import userToken from "@/services/auth-header";
 import { dealSelect } from "@/services/response";
+
+import choiceQuestion from "@/components/ChoiceQuestion.vue";
+import judgeQuestion from "@/components/JudgeQuestion.vue";
+import shortAnswerQuestion from "@/components/ShortAnswerQuestion.vue";
 export default {
+  components: {
+    choiceQuestion,
+    judgeQuestion,
+    shortAnswerQuestion,
+  },
   data() {
     return {
       status: "",
-      questionListVisible: false,
+      manualVisible: false,
+      intelligentVisible: false,
       testForm: {
         testId: "",
         testName: "",
@@ -216,6 +408,11 @@ export default {
         subjectName: "",
         questionList: [],
         shortAnswer: [],
+        presetQuestionTotal: 10,
+        presetTestDifficulty: 0.5,
+        knowledgeWeight: 0.5,
+        difficultyWeight: 0.5,
+        generateWay: "",
       },
       testFormRules: {
         testName: [
@@ -268,6 +465,9 @@ export default {
         subjectId: [
           { required: true, message: "请选择所属科目", trigger: "blur" },
         ],
+        generateWay: [
+          { required: true, message: "请选择组卷方式", trigger: "blur" },
+        ],
         questionList: [
           { required: true, message: "请选择考试题目", trigger: "blur" },
         ],
@@ -283,14 +483,22 @@ export default {
       subjectList: [],
       subjectQuestionList: [],
       randomCheck: [],
+      intelligentQuestionList: [],
+      testDifficulty: 0,
+
+      currentTestPaperVisible: false,
+      currentQuestionList: [],
+      mainHeight: "565px",
     };
   },
   created() {
     if (this.$route.params.testId == 0) {
       this.status = "发布";
+      this.loadData();
     } else {
       this.status = "修改";
       this.testForm.testId = this.$route.params.testId;
+      this.subjectQuestionList.length = 100;
       this.loadInfo(this.$route.params.testId);
     }
     this.loadData();
@@ -333,6 +541,11 @@ export default {
     },
     changeGeneratePaperWay() {
       this.testForm.questionList = [];
+      this.testForm.questionTotal = 0;
+      this.shortAnswerBtnVisible = this.haveShortAnswer();
+      if (this.testForm.generateWay == "2" && this.testForm.subjectId != "") {
+        this.findQuestionBySubjectId(this.testForm.subjectId);
+      }
     },
 
     findQuestionBySubjectId(id) {
@@ -375,6 +588,71 @@ export default {
       }
       this.randomCheck = result;
     },
+    saveQuestionList() {
+      this.$axios
+        .post(
+          "/question/calculateActualDifficulty",
+          this.$qs.stringify(
+            { questionIds: this.testForm.questionList },
+            { indices: false }
+          ),
+          { headers: { Authorization: userToken() } }
+        )
+        .then((response) => {
+          let res = dealSelect(response.data);
+          if (res) {
+            this.testDifficulty = res;
+            this.testForm.questionTotal = this.testForm.questionList.length;
+            this.shortAnswerBtnVisible = this.haveShortAnswer();
+            this.manualVisible = false;
+          }
+        });
+    },
+
+    valueToKnowledgeWeight() {
+      this.testForm.knowledgeWeight = 1 - this.testForm.difficultyWeight;
+    },
+    valueToDifficultyWeight() {
+      this.testForm.difficultyWeight = 1 - this.testForm.knowledgeWeight;
+    },
+    intelligentGenerate() {
+      this.$axios
+        .get("/question/intelligentGenerate", {
+          headers: { Authorization: userToken() },
+          params: {
+            subjectId: this.testForm.subjectId,
+            presetQuestionTotal: this.testForm.presetQuestionTotal,
+            presetTestDifficulty: this.testForm.presetTestDifficulty,
+            difficultyWeight: this.testForm.difficultyWeight,
+            knowledgeWeight: this.testForm.knowledgeWeight,
+          },
+        })
+        .then((response) => {
+          let res = dealSelect(response.data);
+          this.$message({
+            type: response.data.success ? "success" : "error",
+            message: response.data.message,
+          });
+          if (res) {
+            this.testForm.questionList = [];
+            this.intelligentQuestionList = res;
+            let difficultySum = 0;
+            this.intelligentQuestionList.forEach((elem) => {
+              this.testForm.questionList.push(elem.questionId);
+              difficultySum += elem.questionDifficulty;
+            });
+            this.testForm.questionTotal = this.testForm.questionList.length;
+            this.testDifficulty = difficultySum / this.testForm.questionTotal;
+            this.shortAnswerBtnVisible = this.haveShortAnswer();
+            this.intelligentVisible = true;
+          }
+        })
+        .catch(function (error) {
+          this.$message.error("生成出错");
+          console.log(error);
+        });
+    },
+
     haveShortAnswer() {
       this.shortAnswerList = [];
       this.testForm.questionList.forEach((elem) => {
@@ -390,10 +668,24 @@ export default {
       });
       return this.shortAnswerList.length == 0;
     },
-    saveQuestionList() {
-      this.testForm.questionTotal = this.testForm.questionList.length;
-      this.questionListVisible = false;
-      this.shortAnswerBtnVisible = this.haveShortAnswer();
+
+    loadCurrentTestPaper() {
+      this.$axios
+        .post(
+          "/question/findQuestionListByQuestionIds",
+          this.$qs.stringify(
+            { questionIds: this.testForm.questionList },
+            { indices: false }
+          ),
+          { headers: { Authorization: userToken() } }
+        )
+        .then((response) => {
+          let res = dealSelect(response.data);
+          if (res) {
+            this.currentQuestionList = res;
+            this.currentTestPaperVisible = true;
+          }
+        });
     },
 
     loadInfo(id) {
@@ -461,6 +753,7 @@ export default {
                   subjectId: this.testForm.subjectId,
                   questionList: this.testForm.questionList,
                   shortAnswer: this.testForm.shortAnswer,
+                  testDifficulty: this.testDifficulty.toFixed(2),
                   status: this.status,
                 },
                 { indices: false }
