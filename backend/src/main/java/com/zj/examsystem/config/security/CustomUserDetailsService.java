@@ -3,7 +3,6 @@ package com.zj.examsystem.config.security;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zj.examsystem.entity.User;
 import com.zj.examsystem.mapper.UserMapper;
-import org.apache.catalina.Manager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -7,31 +7,30 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.entity.*;
 import com.zj.examsystem.mapper.*;
 import com.zj.examsystem.service.TestService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
-import static com.zj.examsystem.utils.Const.SHORT_ANSWER_QUESTION_LIST_SPLIT;
-
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@SuppressWarnings("all")
 public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements TestService {
-    @Autowired
+    @Resource
     private TestMapper testMapper;
 
-    @Autowired
+    @Resource
     private TestHistoryMapper testHistoryMapper;
 
-    @Autowired
+    @Resource
     private ShortAnswerMapper shortAnswerMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private TestQuestionListMapper testQuestionListMapper;
 
     @Override

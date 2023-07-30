@@ -7,21 +7,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.entity.Subject;
 import com.zj.examsystem.mapper.SubjectMapper;
 import com.zj.examsystem.service.SubjectService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Service
-@SuppressWarnings("all")
 public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> implements SubjectService {
-    @Autowired
+    @Resource
     private SubjectMapper subjectMapper;
 
     @Override

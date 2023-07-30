@@ -9,24 +9,22 @@ import com.zj.examsystem.entity.Major;
 import com.zj.examsystem.mapper.ClazzMapper;
 import com.zj.examsystem.mapper.MajorMapper;
 import com.zj.examsystem.service.ClazzService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Service
-@SuppressWarnings("all")
 public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements ClazzService {
-    @Autowired
+    @Resource
     private ClazzMapper clazzMapper;
 
-    @Autowired
+    @Resource
     private MajorMapper majorMapper;
 
     @Override

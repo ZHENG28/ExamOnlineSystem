@@ -5,10 +5,12 @@
         SELECT *
         FROM subject_with_user_clazz ${ew.customSqlSegment}
     </select>
+
     <select id="selectListByUserId" resultType="com.zj.examsystem.entity.Subject">
         SELECT *
         FROM subject_with_user_clazz ${ew.customSqlSegment}
     </select>
+
     <select id="findByIdWithTeacherAndClazz" resultType="com.zj.examsystem.entity.Subject">
         SELECT *
         FROM subject_with_user_clazz

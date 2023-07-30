@@ -12,11 +12,13 @@
         WHERE test_id = #{testId}
           AND student_id = #{studentId}
     </select>
+
     <select id="findIdByTestId" resultType="java.lang.Integer">
         SELECT history_id
         FROM test_history
         WHERE test_id = #{testId}
     </select>
+
     <select id="findCorrectnessByStudentId" resultType="java.lang.Float">
         SELECT test_history.correct / test.question_total * 100 AS score
         FROM test_history

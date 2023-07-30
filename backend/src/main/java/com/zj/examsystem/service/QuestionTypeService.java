@@ -5,18 +5,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.zj.examsystem.entity.QuestionType;
 
 import java.util.List;
-import java.util.Map;
-
 
 public interface QuestionTypeService extends IService<QuestionType> {
+    IPage<QuestionType> findAll(Integer pageno, Integer size);
 
-    public IPage<QuestionType> findAll(Integer pageno, Integer size);
+    List<QuestionType> findAll();
 
-    public List<QuestionType> findAll();
+    QuestionType findById(Integer questionTypeId);
 
-    public QuestionType findById(Integer questionTypeId);
+    Integer saveQuestionType(QuestionType questionType);
 
-    public Integer saveQuestionType(QuestionType questionType);
-
-    public Integer deleteQuestionType(Integer[] id);
+    Integer deleteQuestionType(Integer[] id);
 }

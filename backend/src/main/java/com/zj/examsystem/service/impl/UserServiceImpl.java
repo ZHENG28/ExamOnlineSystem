@@ -7,32 +7,29 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.entity.*;
 import com.zj.examsystem.mapper.*;
 import com.zj.examsystem.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Service
-@SuppressWarnings("all")
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private UserClazzMapper userClazzMapper;
 
-    @Autowired
+    @Resource
     private UserMajorMapper userMajorMapper;
 
-    @Autowired
+    @Resource
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -158,19 +155,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userMapper.selectStudentWithRoleAndClazz(queryWrapper);
     }
 
-    @Autowired
+    @Resource
     private SubjectMapper subjectMapper;
 
-    @Autowired
+    @Resource
     private QuestionMapper questionMapper;
 
-    @Autowired
+    @Resource
     private TestMapper testMapper;
 
-    @Autowired
+    @Resource
     private TestHistoryMapper testHistoryMapper;
 
-    @Autowired
+    @Resource
     private ClazzMapper clazzMapper;
 
     @Override
@@ -238,5 +235,4 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         return result;
     }
-
 }

@@ -3,34 +3,33 @@ package com.zj.examsystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zj.examsystem.entity.*;
-import com.zj.examsystem.mapper.ShortAnswerMapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.examsystem.entity.Question;
+import com.zj.examsystem.entity.TestHistory;
+import com.zj.examsystem.entity.TestHistoryQuestionReply;
+import com.zj.examsystem.entity.TestHistoryWithUserTestSubject;
 import com.zj.examsystem.mapper.TestHistoryMapper;
 import com.zj.examsystem.mapper.TestHistoryQuestionReplyMapper;
 import com.zj.examsystem.mapper.TestQuestionListMapper;
 import com.zj.examsystem.service.TestHistoryService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.examsystem.utils.PythonExecute;
-import org.python.jline.console.history.History;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
-import static com.zj.examsystem.utils.Const.SHORT_ANSWER_QUESTION_LIST_SPLIT;
-
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@SuppressWarnings("all")
 public class TestHistoryServiceImpl extends ServiceImpl<TestHistoryMapper, TestHistory> implements TestHistoryService {
-    @Autowired
+    @Resource
     private TestHistoryMapper testHistoryMapper;
 
-    @Autowired
+    @Resource
     private TestQuestionListMapper testQuestionListMapper;
 
-    @Autowired
+    @Resource
     private TestHistoryQuestionReplyMapper testHistoryQuestionReplyMapper;
 
     @Override
@@ -51,7 +50,7 @@ public class TestHistoryServiceImpl extends ServiceImpl<TestHistoryMapper, TestH
                                 "reply")) ? 1 : 0));
                         break;
                     case 2: // judge
-                        String res = Boolean.valueOf((String) map.get("reply")) ? "1" : "0";
+                        String res = Boolean.parseBoolean((String) map.get("reply")) ? "1" : "0";
                         correct.put((Integer) map.get("question_id"), correct.get(map.get("question_id")) + (res.equals(map.get("answer_sign"))
                                 ? 1 : 0));
                         break;

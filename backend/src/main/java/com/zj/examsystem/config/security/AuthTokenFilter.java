@@ -14,10 +14,9 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
 
-public class AuthTokenFilter extends OncePerRequestFilter
-{
+public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -28,8 +27,7 @@ public class AuthTokenFilter extends OncePerRequestFilter
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException
-    {
+            throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -57,8 +55,7 @@ public class AuthTokenFilter extends OncePerRequestFilter
     }
 
     // 从请求包中拿到JWT
-    private String parseJwt(HttpServletRequest request)
-    {
+    private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 
         // 如果authorization中有内容且是以本项目中设定好的字符串为前缀，则将该jwt返回

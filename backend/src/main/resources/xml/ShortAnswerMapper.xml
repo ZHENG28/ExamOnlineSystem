@@ -6,12 +6,14 @@
         FROM short_answer
         WHERE test_id = #{testId}
     </select>
+
     <select id="findByCompoundId" resultType="com.zj.examsystem.entity.ShortAnswer">
         SELECT *
         FROM short_answer
         WHERE question_id = #{questionId}
           AND test_id = #{testId}
     </select>
+
     <select id="findQuestionsByTestId" resultType="com.zj.examsystem.entity.Question">
         SELECT question.*
         FROM short_answer

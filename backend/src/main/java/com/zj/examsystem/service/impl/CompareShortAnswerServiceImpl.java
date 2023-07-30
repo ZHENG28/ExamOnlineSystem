@@ -3,6 +3,7 @@ package com.zj.examsystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.entity.CompareShortAnswer;
 import com.zj.examsystem.entity.ShortAnswer;
 import com.zj.examsystem.entity.TestHistory;
@@ -12,29 +13,29 @@ import com.zj.examsystem.mapper.ShortAnswerMapper;
 import com.zj.examsystem.mapper.TestHistoryMapper;
 import com.zj.examsystem.mapper.TestHistoryQuestionReplyMapper;
 import com.zj.examsystem.service.CompareShortAnswerService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.utils.PythonExecute;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@SuppressWarnings("all")
 public class CompareShortAnswerServiceImpl extends ServiceImpl<CompareShortAnswerMapper, CompareShortAnswer> implements CompareShortAnswerService {
 
-    @Autowired
+    @Resource
     private CompareShortAnswerMapper compareShortAnswerMapper;
 
-    @Autowired
+    @Resource
     private TestHistoryMapper testHistoryMapper;
 
-    @Autowired
+    @Resource
     private ShortAnswerMapper shortAnswerMapper;
 
-    @Autowired
+    @Resource
     private TestHistoryQuestionReplyMapper testHistoryQuestionReplyMapper;
 
     @Override
@@ -77,7 +78,8 @@ public class CompareShortAnswerServiceImpl extends ServiceImpl<CompareShortAnswe
                 if (!replyList.isEmpty()) {
                     TestHistoryQuestionReply reply = findShortAnswerReplyBytestHistory(testHistory.getHistoryId(), shortAnswer.getQuestionId());
                     replyIds.add(0, reply.getReplyId());
-                    List<String> compareResult = PythonExecute.getArticleSimilarityWithSocket(replyList, reply.getReply(), shortAnswer.getThreshold());
+                    List<String> compareResult = PythonExecute.getArticleSimilarityWithSocket(replyList, reply.getReply(),
+                            shortAnswer.getThreshold());
                     for (String result : compareResult) {
                         // replyId threshold
                         String[] arr = result.split(" ");

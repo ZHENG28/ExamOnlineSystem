@@ -6,19 +6,24 @@ import com.zj.examsystem.entity.Question;
 
 import java.util.List;
 
-
 public interface QuestionService extends IService<Question> {
-    public IPage<Question> findAllByTeacherId(Integer pageno, Integer size, Integer userId);
+    IPage<Question> findAllByTeacherId(Integer pageno, Integer size, Integer userId);
 
-    public Question findById(Integer questionId);
+    Question findById(Integer questionId);
 
-    public List<Question> findQuestionBySubjectId(Integer subjectId);
+    List<Question> findQuestionBySubjectId(Integer subjectId);
 
-    public List<Question> findQuestionListByTestId(Integer testId);
+    List<Question> findQuestionListByTestId(Integer testId);
+
+    List<Question> findQuestionListByQuestionIds(List<Integer> questionIds);
 
     public Boolean saveQuestion(Question question);
 
     public Boolean updateQuestion(Question question);
 
-    public Integer deleteQuestion(Integer[] id);
+    Boolean saveQuestion(Question question);
+
+    Boolean updateQuestion(Question question);
+
+    Integer deleteQuestion(Integer[] id);
 }

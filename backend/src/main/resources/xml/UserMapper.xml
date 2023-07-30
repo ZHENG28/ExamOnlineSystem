@@ -8,6 +8,7 @@
             ${ew.customSqlSegment}
         </if>
     </select>
+
     <select id="findByIdWithRole" resultType="com.zj.examsystem.entity.User">
         SELECT *
         FROM user_with_role
@@ -18,6 +19,7 @@
         SELECT *
         FROM teacher_with_role_major ${ew.customSqlSegment}
     </select>
+
     <select id="selectStudentWithRoleAndClazz" resultType="com.zj.examsystem.entity.User">
         SELECT *
         FROM student_with_role_clazz_major ${ew.customSqlSegment}

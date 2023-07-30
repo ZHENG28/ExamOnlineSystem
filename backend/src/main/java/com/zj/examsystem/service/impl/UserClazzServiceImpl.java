@@ -4,13 +4,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.examsystem.entity.UserClazz;
 import com.zj.examsystem.mapper.UserClazzMapper;
 import com.zj.examsystem.service.UserClazzService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 @Service
-@SuppressWarnings("all")
 public class UserClazzServiceImpl extends ServiceImpl<UserClazzMapper, UserClazz> implements UserClazzService {
-    @Autowired
-    private UserClazzMapper userClazzMapper;
 }

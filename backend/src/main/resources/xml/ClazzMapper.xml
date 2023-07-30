@@ -9,12 +9,14 @@
             ${ew.customSqlSegment}
         </if>
     </select>
+
     <select id="findById" resultType="com.zj.examsystem.entity.Clazz">
         SELECT *
         FROM clazz c
                  JOIN major m ON c.major_id = m.major_id
         WHERE clazz_id = ${clazzId}
     </select>
+
     <select id="selectDistinctClazzName" resultType="java.lang.String">
         SELECT clazz_name
         FROM Clazz
