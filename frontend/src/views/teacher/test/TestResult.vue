@@ -19,7 +19,7 @@
           border
           height="540px"
         >
-          <el-table-column type="index" label="序号" width="80">
+          <el-table-column type="index" label="序号" width="60">
           </el-table-column>
           <el-table-column prop="username" label="学生姓名"> </el-table-column>
           <el-table-column prop="maxCorrect" label="最高成绩 / 总分" sortable>
@@ -91,7 +91,7 @@
           border
           height="540px"
         >
-          <el-table-column type="index" label="序号" width="80">
+          <el-table-column type="index" label="序号" width="60">
           </el-table-column>
           <el-table-column
             prop="questionTitle"

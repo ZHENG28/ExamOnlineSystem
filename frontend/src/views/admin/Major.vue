@@ -52,7 +52,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="40"> </el-table-column>
-      <el-table-column type="index" label="序号" width="80"> </el-table-column>
+      <el-table-column type="index" label="序号" width="60"> </el-table-column>
       <el-table-column prop="majorName" label="专业"> </el-table-column>
       <el-table-column width="450">
         <template #header>
@@ -101,7 +101,7 @@
       top="70px"
     >
       <el-table :data="dialogTableData" border height="540px">
-        <el-table-column type="index" label="序号" width="80">
+        <el-table-column type="index" label="序号" width="60">
         </el-table-column>
         <el-table-column
           prop="clazzName"

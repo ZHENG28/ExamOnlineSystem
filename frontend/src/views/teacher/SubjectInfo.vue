@@ -68,7 +68,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="40"> </el-table-column>
-      <el-table-column type="index" label="序号" width="80"> </el-table-column>
+      <el-table-column type="index" label="序号" width="60"> </el-table-column>
       <el-table-column prop="subjectName" label="科目名称"> </el-table-column>
       <el-table-column
         prop="clazzName"

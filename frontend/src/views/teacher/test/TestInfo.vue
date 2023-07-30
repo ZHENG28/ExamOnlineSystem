@@ -22,7 +22,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="40"> </el-table-column>
-      <el-table-column type="index" label="序号" width="80"> </el-table-column>
+      <el-table-column type="index" label="序号" width="60"> </el-table-column>
       <el-table-column prop="testName" label="测验标题">
         <template #default="scope">
           <el-popover trigger="hover" placement="right">
@@ -51,7 +51,9 @@
       </el-table-column>
       <el-table-column prop="questionTotal" label="测验题数" width="90">
       </el-table-column>
-      <el-table-column prop="examTime" label="测验次数" width="90">
+      <el-table-column prop="testTime" label="测验次数" width="90">
+      </el-table-column>
+      <el-table-column prop="testDifficulty" label="难度系数" width="90">
       </el-table-column>
       <el-table-column prop="endDate" label="结束时间">
         <template #default="scope">
