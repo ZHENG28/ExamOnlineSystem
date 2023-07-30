@@ -19,6 +19,8 @@ public class Question implements Serializable {
 
     private String questionTitle;
 
+    private Float questionDifficulty;
+
     private Integer subjectId;
 
     private Integer typeId;

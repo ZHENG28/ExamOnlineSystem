@@ -23,6 +23,25 @@
 
     <select id="findListById" resultType="com.zj.examsystem.entity.Question">
         SELECT *
-        FROM question_with_type_subject ${ew.customSqlSegment}
+        FROM question_with_type_subject_knowledge ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectSameWithDifficultyAndTypeAndKnowledge" resultType="com.zj.examsystem.entity.Question">
+        SELECT *
+        FROM question_with_type_subject_knowledge
+        WHERE question_id != #{questionId}
+          AND question_difficulty BETWEEN #{difficultyLower} AND #{difficultyUpper}
+          AND type_id = #{typeId}
+          AND knowledge_id = #{knowledgeId}
+        ORDER BY ABS(question_difficulty - #{questionDifficulty})
+    </select>
+
+    <select id="selectSameWithTypeAndKnowledge" resultType="com.zj.examsystem.entity.Question">
+        SELECT *
+        FROM question_with_type_subject_knowledge
+        WHERE question_id != #{questionId}
+          AND type_id = #{typeId}
+          AND knowledge_id = #{knowledgeId}
+        ORDER BY ABS(question_difficulty - #{questionDifficulty})
     </select>
 </mapper>

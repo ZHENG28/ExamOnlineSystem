@@ -48,6 +48,44 @@ public class QuestionController {
         return BaseResponseEntity.ok("", questionService.findQuestionListByTestId(testId));
     }
 
+    @PostMapping("/findQuestionListByQuestionIds")
+    @ResponseBody
+    public BaseResponseEntity findQuestionListByQuestionIds(Integer[] questionIds) {
+        return BaseResponseEntity.ok("", questionService.findQuestionListByQuestionIds(Arrays.asList(questionIds)));
+    }
+
+    @PostMapping("/calculateActualDifficulty")
+    @ResponseBody
+    public BaseResponseEntity calculateActualDifficulty(Integer[] questionIds) {
+        return BaseResponseEntity.ok("", questionService.calculateActualDifficulty(questionIds));
+    }
+
+    @GetMapping("/intelligentGenerate")
+    @ResponseBody
+    public BaseResponseEntity intelligentGenerate(Integer subjectId, Integer presetQuestionTotal, Float presetTestDifficulty, Float difficultyWeight,
+                                                  Float knowledgeWeight) {
+        List<Question> questionList = questionService.findQuestionBySubjectId(subjectId);
+        // 1. 初始化种群
+        List<List<Question>> initialPopulation = new ArrayList<>();
+        for (int i = 0; i < INITIAL_POPULATION_SIZE; i++) {
+            List<Question> chromosome = new ArrayList<>();
+            for (int j = 0; j < presetQuestionTotal; j++) {
+                int rand = new Random().nextInt(questionList.size());
+                Question question = questionList.get(rand);
+                while (chromosome.contains(question)) {
+                    rand = new Random().nextInt(questionList.size());
+                    question = questionList.get(rand);
+                }
+                chromosome.add(question);
+            }
+            initialPopulation.add(chromosome);
+        }
+        return BaseResponseEntity.ok("生成成功", questionService.intelligentGenerate(initialPopulation,
+                knowledgeWeight,
+                presetTestDifficulty,
+                difficultyWeight, 1));
+    }
+
     @PostMapping("/save")
     @ResponseBody
     public BaseResponseEntity save(Question question, String status) {

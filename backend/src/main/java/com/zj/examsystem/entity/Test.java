@@ -39,6 +39,37 @@ public class Test implements Serializable {
      */
     private Integer questionTotal;
 
+    /**
+     * 实际难度系数
+     */
+    private Float testDifficulty;
+
+    /**
+     * 组卷方式
+     * 1-手动；2-智能
+     */
+    private Integer generateWay;
+
+    /**
+     * 预设题目数量
+     */
+    private Integer presetQuestionTotal;
+
+    /**
+     * 预设难度系数
+     */
+    private Float presetTestDifficulty;
+
+    /**
+     * 难度权重
+     */
+    private Float difficultyWeight;
+
+    /**
+     * 知识点覆盖率权重
+     */
+    private Float knowledgeWeight;
+
     private Integer subjectId;
 
     @TableField(select = false)

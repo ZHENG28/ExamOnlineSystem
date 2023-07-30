@@ -17,9 +17,10 @@ public interface QuestionService extends IService<Question> {
 
     List<Question> findQuestionListByQuestionIds(List<Integer> questionIds);
 
-    public Boolean saveQuestion(Question question);
+    Double calculateActualDifficulty(Integer[] questionIds);
 
-    public Boolean updateQuestion(Question question);
+    List<Question> intelligentGenerate(List<List<Question>> parent,
+                                       Float knowledgeWeight, Float examDifficulty, Float difficultyWeight, Integer iteration);
 
     Boolean saveQuestion(Question question);
 
