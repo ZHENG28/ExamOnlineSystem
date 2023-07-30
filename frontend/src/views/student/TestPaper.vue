@@ -289,7 +289,7 @@ export default {
           let res = dealSelect(response.data);
           if (res) {
             this.testForm = res.test;
-            this.remainSecond = res.test.examDuration * 60;
+            this.remainSecond = res.test.testDuration * 60;
           }
         });
     },

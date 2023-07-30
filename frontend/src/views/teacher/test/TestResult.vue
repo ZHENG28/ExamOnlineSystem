@@ -37,7 +37,7 @@
             <template #default="scope">
               {{ scope.row.completeTime }}
               /
-              {{ scope.row.examTime }}
+              {{ scope.row.testTime }}
             </template>
           </el-table-column>
           <el-table-column width="300">

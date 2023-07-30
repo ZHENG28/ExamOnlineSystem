@@ -5,7 +5,14 @@
       alt=""
       style="width: 100%; position: fixed; z-index: -1"
     />
-    <div style="width: 50%; text-align: center; padding: 0 2rem">
+    <div
+      style="
+        width: 50%;
+        text-align: center;
+        padding: 0 2rem;
+        box-sizing: border-box;
+      "
+    >
       <img
         src="@/assets/login/user_login_icon.png"
         alt=""

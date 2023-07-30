@@ -10,7 +10,7 @@
       style="padding: 20px 0"
     >
       <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="测验标题" prop="testName">
             <el-input
               v-model="testForm.testName"
@@ -18,7 +18,7 @@
             ></el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="16">
           <el-form-item label="测验日期" prop="date">
             <el-date-picker
               v-model="testForm.date"
@@ -46,12 +46,12 @@
         </el-form-item>
       </el-row>
       <el-row>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="所属科目" prop="subjectId">
             <el-select
               filterable
               placeholder="请选择科目"
-              @change="valueToSubjectId"
+              @change="changeSubjectId"
               v-model="testForm.subjectId"
             >
               <el-option
@@ -77,11 +77,7 @@
               >选择考题</el-button
             >
             <span style="display: inline; color: red">
-              {{
-                testForm.subjectId != ""
-                  ? "共" + testForm.questionTotal + "道题"
-                  : "请先选择所属科目"
-              }}
+              {{ "共" + testForm.questionTotal + "道题" }}
             </span>
             <div class="dialog-container">
               <el-dialog
@@ -118,7 +114,7 @@
                   <span class="dialog-footer">
                     <div style="float: left; display: inline">
                       <el-button type="primary" @click="randomSelect()"
-                        >随机选题</el-button
+                        >随机组卷</el-button
                       >
                     </div>
                     <div style="display: inline">
@@ -144,15 +140,14 @@
                 marginRight: '30px',
                 visibility: shortAnswerBtnVisible ? 'hidden' : 'visible',
               }"
-              >设置简答题阈值</el-button
+              >设置简答题相似度阈值</el-button
             >
             <div class="dialog-container">
               <el-dialog
-                title="设置简答题阈值"
+                title="设置简答题相似度阈值"
                 v-model="shortAnswerVisible"
                 width="600px"
               >
-                <span>阈值即</span>
                 <el-form
                   :model="shortAnswerList"
                   :rules="shortAnswerFormRules"
@@ -180,29 +175,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item label="测验时长" prop="examDuration">
-            <el-input-number
-              v-model="testForm.examDuration"
-              :step="30"
-              :min="0"
-              placeholder="0"
-            ></el-input-number>
-            分钟
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="测验次数" prop="examTime">
-            <el-input-number
-              v-model="testForm.examTime"
-              :step="1"
-              :min="0"
-              placeholder="1"
-            ></el-input-number>
-          </el-form-item>
-        </el-col>
-      </el-row>
     </el-form>
     <div>
       <el-button @click="toTestInfo()">返回列表</el-button>
@@ -213,6 +185,11 @@
             ? "（即" + testForm.date[0] + "之后）"
             : ""
         }}，将无法修改测验信息！
+        {{
+          testForm.subjectId != "" && testForm.generateWay == "2"
+            ? "（权重参数涉及智能生成的试卷更侧重于哪个方面，请慎重设置）"
+            : ""
+        }}
       </span>
     </div>
   </div>
@@ -232,8 +209,8 @@ export default {
         date: [],
         beginDate: "",
         endDate: "",
-        examDuration: 0,
-        examTime: 1,
+        testDuration: 0,
+        testTime: 1,
         questionTotal: 0,
         subjectId: "",
         subjectName: "",
@@ -250,7 +227,7 @@ export default {
         date: [
           { required: true, message: "请填写开始-结束时间", trigger: "blur" },
         ],
-        examDuration: [
+        testDuration: [
           {
             required: true,
             message: "请填写测验时长",
@@ -269,7 +246,7 @@ export default {
             },
           },
         ],
-        examTime: [
+        testTime: [
           {
             required: true,
             message: "请填写测验次数",
@@ -346,8 +323,15 @@ export default {
           }
         });
     },
-    valueToSubjectId(val) {
-      this.testForm.subjectId = val;
+    changeSubjectId() {
+      this.testForm.questionList = [];
+      this.testForm.questionTotal = 0;
+      this.shortAnswerBtnVisible = this.haveShortAnswer();
+      if (this.testForm.generateWay == "2") {
+        this.findQuestionBySubjectId(this.testForm.subjectId);
+      }
+    },
+    changeGeneratePaperWay() {
       this.testForm.questionList = [];
     },
 
@@ -471,8 +455,8 @@ export default {
                   description: this.testForm.description,
                   beginDate: this.testForm.date[0],
                   endDate: this.testForm.date[1],
-                  examDuration: this.testForm.examDuration,
-                  examTime: this.testForm.examTime,
+                  testDuration: this.testForm.testDuration,
+                  testTime: this.testForm.testTime,
                   questionTotal: this.testForm.questionTotal,
                   subjectId: this.testForm.subjectId,
                   questionList: this.testForm.questionList,

@@ -148,7 +148,7 @@ export default {
         testName: "",
         questionTotal: 0,
         questionList: [],
-        examTime: 0,
+        testTime: 0,
         completeTime: 0,
       },
 

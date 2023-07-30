@@ -34,7 +34,7 @@
                 <br />
                 <span>
                   所属科目：
-                  <el-tag type="success">{{ testForm.subjectName }}</el-tag>
+                  <el-tag>{{ testForm.subjectName }}</el-tag>
                 </span>
                 <br />
                 <span
@@ -46,9 +46,9 @@
                   }}</span
                 >
                 <br />
-                <span>测验时长：{{ testForm.examDuration }} 分钟</span>
+                <span>测验时长：{{ testForm.testDuration }} 分钟</span>
                 <br />
-                <span>测验次数：{{ testForm.examTime }} 次</span>
+                <span>测验次数：{{ testForm.testTime }} 次</span>
                 <br />
                 <span>测验题数：{{ testForm.questionTotal }} 道</span>
               </el-scrollbar>
