@@ -56,6 +56,11 @@ const routes = [
         component: () => import('../views/teacher/SubjectInfo.vue'),
       },
       {
+        path: '/teacher/knowledgeFrame/:subjectId',
+        name: '查看知识点框架',
+        component: () => import('../views/teacher/KnowledgeFrame.vue'),
+      },
+      {
         path: '/teacher/question',
         name: '管理题目信息',
         component: () => import('../views/teacher/Question.vue'),

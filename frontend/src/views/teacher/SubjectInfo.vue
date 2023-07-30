@@ -92,6 +92,11 @@
             >编辑</el-button
           >
           <el-button type="danger" @click="del([scope.row])">删除</el-button>
+          <el-button
+            type="primary"
+            @click="toKnowledgeFrame(scope.row.subjectId)"
+            >知识点框架</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -274,6 +279,11 @@ export default {
             });
         }
       });
+    },
+
+    // 查看知识点框架
+    toKnowledgeFrame(subjectId) {
+      this.$router.push(`/teacher/knowledgeFrame/${subjectId}`);
     },
 
     // 删除

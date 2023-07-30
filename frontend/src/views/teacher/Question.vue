@@ -127,6 +127,31 @@
               简答题默认无标准答案，并用相似度对比
             </span>
           </el-form-item>
+          <el-form-item label="关联知识点" prop="knowledgeId">
+            <el-select
+              filterable
+              placeholder="请选择关联知识点"
+              @change="valueToKnowledgeId"
+              v-model="questionForm.knowledgeId"
+            >
+              <el-option
+                v-for="knowledge in knowledgeList"
+                :key="knowledge.chapterId"
+                :label="knowledge.content"
+                :value="knowledge.chapterId"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="难度系数" prop="questionDifficulty">
+            <el-input-number
+              v-model="questionForm.questionDifficulty"
+              :precision="2"
+              :step="0.01"
+              :max="1"
+              :min="0"
+            />
+          </el-form-item>
         </el-form>
         <template #footer>
           <span class="dialog-footer">
@@ -185,8 +210,19 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="questionTitle" label="题目"> </el-table-column>
-      <el-table-column prop="answer" label="正确答案" width="100">
+      <el-table-column prop="questionTitle" label="题目">
+        <template #default="scope">
+          <el-popover trigger="hover" placement="right">
+            <p style="width: 150px">
+              关联知识点: {{ scope.row.knowledgeContent }}
+            </p>
+            <template #reference class="name-wrapper">
+              <span>{{ scope.row.questionTitle }}</span>
+            </template>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column prop="answer" label="正确答案" width="85">
         <template #default="scope">
           <el-popover
             trigger="hover"
@@ -216,6 +252,7 @@
               this.status = '修改';
               dialogFormVisible = true;
               loadInfo(scope.row.questionId);
+              loadKnowledgeBySubjectId(scope.row.subjectId);
             "
             >编辑</el-button
           >
@@ -262,6 +299,8 @@ export default {
           },
         ],
         correct: "",
+        knowledgeId: "",
+        questionDifficulty: 0.5,
       },
       formRules: {
         questionTitle: [
@@ -273,6 +312,9 @@ export default {
         typeId: [
           { required: true, message: "请选择题目类型", trigger: "change" },
         ],
+        knowledgeId: [
+          { required: true, message: "请选择关联知识点", trigger: "change" },
+        ],
       },
       isTrue: "",
       isFalse: "",
@@ -282,6 +324,7 @@ export default {
       subjectFilterData: [],
       typeList: [],
       typeFilterData: [],
+      knowledgeList: [],
       search: "",
       tableData: [],
       pageno: 1,
@@ -373,6 +416,7 @@ export default {
     },
     valueToSubjectId(val) {
       this.questionForm.subjectId = val;
+      this.loadKnowledgeBySubjectId(this.questionForm.subjectId);
     },
 
     loadQuestionType() {
@@ -407,6 +451,23 @@ export default {
           isCorrect: 0,
         },
       ];
+    },
+
+    loadKnowledgeBySubjectId(id) {
+      this.$axios
+        .get("/knowledgeFrame/loadKnowledgeBySubjectId", {
+          headers: { Authorization: userToken() },
+          params: { subjectId: id },
+        })
+        .then((response) => {
+          let res = dealSelect(response.data);
+          if (res) {
+            this.knowledgeList = res;
+          }
+        });
+    },
+    valueToKnowledgeId(val) {
+      this.questionForm.knowledgeId = val;
     },
 
     addOptions(index) {
@@ -462,6 +523,8 @@ export default {
             subjectId: this.questionForm.subjectId,
             typeId: this.questionForm.typeId,
             correct: this.questionForm.correct,
+            knowledgeId: this.questionForm.knowledgeId,
+            questionDifficulty: this.questionForm.questionDifficulty,
             status: this.status,
           };
           let option = [""];
