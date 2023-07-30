@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zj.examsystem.mapper.KnowledgeFrameMapper">
+    <select id="selectPageWithTeacherAndClazz" resultType="com.zj.examsystem.entity.Subject">
+        SELECT *
+        FROM subject_with_user_clazz ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectListByUserId" resultType="com.zj.examsystem.entity.Subject">
+        SELECT *
+        FROM subject_with_user_clazz ${ew.customSqlSegment}
+    </select>
+
+    <select id="findByIdWithTeacherAndClazz" resultType="com.zj.examsystem.entity.Subject">
+        SELECT *
+        FROM subject_with_user_clazz
+        WHERE subject_id = #{subjectId}
+    </select>
+
+    <select id="findIdBySubjectId" resultType="java.lang.Integer">
+        SELECT chapter_id
+        FROM knowledge_frame
+        WHERE subject_id = #{subjectId}
+    </select>
+
+    <select id="selectIdByKnowledgeFrame" resultType="java.lang.Integer">
+        SELECT chapter_id
+        FROM knowledge_frame ${ew.customSqlSegment}
+    </select>
+</mapper>

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,6 +23,9 @@ public class Question implements Serializable {
 
     private Integer typeId;
 
+    @NotBlank
+    private Integer knowledgeId;
+
     @TableField(select = false)
     private String subjectName;
 
@@ -33,4 +37,7 @@ public class Question implements Serializable {
 
     @TableField(select = false)
     private String correct;
+
+    @TableField(select = false)
+    private String knowledgeContent;
 }
