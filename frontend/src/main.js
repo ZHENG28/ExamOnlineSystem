@@ -9,6 +9,7 @@ import * as icons from '@element-plus/icons-vue'
 import Vue3Storage from 'vue3-storage'
 import * as echarts from 'echarts'
 import http from './services/loading.js'
+import autocounter from 'vue3-autocounter'
 
 const app = createApp(App)
 app.config.globalProperties.$qs = qs
@@ -23,6 +24,7 @@ Object.keys(icons).forEach((key) => {
   app.component(key, icons[key])
 })
 app.config.globalProperties.$echarts = echarts
+app.component('vue3-autocounter', autocounter)
 
 app.use(Vue3Storage)
 app.use(router)
