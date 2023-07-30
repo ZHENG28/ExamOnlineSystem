@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+/index.0
+/src/main/resources/python/index.0
