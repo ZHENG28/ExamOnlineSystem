@@ -3,21 +3,21 @@
 <mapper namespace="com.zj.examsystem.mapper.QuestionMapper">
     <select id="findAllByTeacherId" resultType="com.zj.examsystem.entity.Question">
         SELECT q.*
-        FROM question_with_type_subject q
+        FROM question_with_type_subject_knowledge q
                  JOIN subject_with_user_clazz swuc on q.subject_id = swuc.subject_id
         WHERE swuc.teacher_id = #{userId}
     </select>
 
     <select id="countByTeacherId" resultType="java.lang.Integer">
         SELECT COUNT(*)
-        FROM question_with_type_subject q
+        FROM question_with_type_subject_knowledge q
                  JOIN subject_with_user_clazz swuc on q.subject_id = swuc.subject_id
         WHERE swuc.teacher_id = #{userId}
     </select>
 
     <select id="findById" resultType="com.zj.examsystem.entity.Question">
         SELECT *
-        FROM question_with_type_subject
+        FROM question_with_type_subject_knowledge
         WHERE question_id = #{questionId}
     </select>
 

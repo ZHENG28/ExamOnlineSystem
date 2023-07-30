@@ -114,25 +114,22 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             question.setCorrect(null);
         }
         int result = questionMapper.insert(question);
-        if (!((Integer) 3).equals(question.getTypeId()) && result == 1) {
-            QueryWrapper<Question> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("question_title", question.getQuestionTitle());
+        if (3 != question.getTypeId() && result == 1) {
             switch (question.getTypeId()) {
                 case 1: // choice
                     String correct = answers[0];
-                    int insertResult = 1;
                     for (int i = 1; i < answers.length; i++) {
                         String[] arr = answers[i].split(" "); // sign content
                         Answer answer = new Answer(arr[1], arr[2], correct.equals(arr[1]) ? 1 : 0, question.getQuestionId());
-                        insertResult += answerMapper.insert(answer);
+                        result += answerMapper.insert(answer);
                     }
-                    return insertResult == answers.length;
+                    return result == answers.length;
                 case 2: // judge
                     Answer answer = new Answer(Boolean.valueOf(answers[0]) ? "1" : "0", 1, question.getQuestionId());
                     return answerMapper.insert(answer) != 0;
             }
         } else {
-            return ((Integer) 3).equals(question.getTypeId()) && result == 1;
+            return 3 == question.getTypeId() && result == 1;
         }
         return false;
     }

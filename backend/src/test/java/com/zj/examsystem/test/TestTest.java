@@ -25,8 +25,8 @@ public class TestTest extends BaseSpringBootTest {
             test.setDescription("这次考试没有简答题没有简答题没有简答题");
             test.setBeginDate(LocalDateTime.now());
             test.setEndDate(LocalDateTime.of(2022, 5, 20, 13, 14, 0));
-            test.setExamDuration(60);
-            test.setExamTime(3);
+            test.setTestDuration(60);
+            test.setTestTime(3);
             test.setSubjectId(subjectId);
 
             Integer[] questionList = new Integer[choiceIds.length + judgeIds.length];
@@ -55,8 +55,8 @@ public class TestTest extends BaseSpringBootTest {
             test.setDescription("这次考试有简答题，需要做相似度对比对比");
             test.setBeginDate(LocalDateTime.now());
             test.setEndDate(LocalDateTime.of(2022, 5, 21, 5, 5, 20));
-            test.setExamDuration(60);
-            test.setExamTime(3);
+            test.setTestDuration(60);
+            test.setTestTime(3);
             test.setSubjectId(subjectId);
 
             Integer[] questionList = new Integer[choiceIds.length + judgeIds.length + shortAnswerIds.length];

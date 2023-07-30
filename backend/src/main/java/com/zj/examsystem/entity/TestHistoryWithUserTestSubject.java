@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * view
+ * 视图
  */
 @Data
 public class TestHistoryWithUserTestSubject implements Serializable {

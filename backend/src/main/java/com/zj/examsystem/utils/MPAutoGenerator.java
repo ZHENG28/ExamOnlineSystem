@@ -28,7 +28,7 @@ public class MPAutoGenerator {
         dataSource.setDriverName("com.mysql.cj.jdbc.Driver");
         dataSource.setUrl("jdbc:mysql://localhost:3306/exam_online_system");
         dataSource.setUsername("root");
-        dataSource.setPassword("MySQL123!");
+        dataSource.setPassword("");
         autoGenerator.setDataSource(dataSource);
 
         // 设置Package信息

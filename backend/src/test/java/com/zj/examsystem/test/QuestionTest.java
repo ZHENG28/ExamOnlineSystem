@@ -14,7 +14,7 @@ public class QuestionTest extends BaseSpringBootTest {
     @Test
     public void insertChoiceQuestion() {
         Integer[] subjectIds = new Integer[]{11, 13, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42};
-            for (Integer subjectId : subjectIds) {
+        for (Integer subjectId : subjectIds) {
             for (int i = 0; i < 5; i++) {
                 Question question = new Question();
                 question.setQuestionTitle("这里是选择题选择题选择题" + (i + 1));

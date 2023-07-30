@@ -80,7 +80,7 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements Te
         QueryWrapper<TestHistory> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("student_id", userId);
         queryWrapper.eq("test_id", testId);
-        return ((Test) findById(testId).get("test")).getExamTime() > testHistoryMapper.selectCount(queryWrapper);
+        return ((Test) findById(testId).get("test")).getTestTime() > testHistoryMapper.selectCount(queryWrapper);
     }
 
     @Override

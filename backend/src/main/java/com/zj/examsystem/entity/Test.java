@@ -27,12 +27,12 @@ public class Test implements Serializable {
     /**
      * 测验时长
      */
-    private Integer examDuration;
+    private Integer testDuration;
 
     /**
      * 测验次数
      */
-    private Integer examTime;
+    private Integer testTime;
 
     /**
      * 题目数量

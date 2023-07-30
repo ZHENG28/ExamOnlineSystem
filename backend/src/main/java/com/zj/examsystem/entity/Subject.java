@@ -32,5 +32,4 @@ public class Subject implements Serializable {
 
     @TableField(select = false)
     private String majorName;
-
 }

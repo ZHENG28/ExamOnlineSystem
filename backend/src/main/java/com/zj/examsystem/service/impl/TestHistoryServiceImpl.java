@@ -102,6 +102,12 @@ public class TestHistoryServiceImpl extends ServiceImpl<TestHistoryMapper, TestH
     @Override
     @Transactional
     public Boolean commit(TestHistory testHistory, String[] reply, List<Question> questionList) {
+        // 特殊情况：提交空白卷
+        if (null == reply) {
+            testHistory.setCorrect(0);
+            return testHistoryMapper.insert(testHistory) == 1;
+        }
+
         // 1. 计算分数
         Integer correct = 0;
         for (String r : reply) {
