@@ -71,7 +71,7 @@ export default {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 27px;
+  width: 36px;
   height: 27px;
   background-color: #38d39f;
   color: #fff;

@@ -2,7 +2,14 @@
   <div>
     <el-card>
       <img id="card-icon" :src="src" />
-      <span id="card-number">{{ number }}</span>
+      <span id="card-number">
+        <!-- {{ number }} -->
+        <vue3-autocounter
+          :startAmount="0"
+          :endAmount="number"
+          :duration="1"
+        ></vue3-autocounter>
+      </span>
       <p id="card-title">{{ title }}</p>
       <p id="card-subtitle">{{ subtitle }}</p>
     </el-card>

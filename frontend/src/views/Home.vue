@@ -7,7 +7,8 @@
           :subtitle="data.subtitle"
           :src="data.src"
           :number="data.number"
-        ></number-card>
+        >
+        </number-card>
       </el-col>
     </el-row>
     <el-card style="margin-top: 20px">
@@ -207,8 +208,12 @@ export default {
       //   xData.push({ title: item.questionTitle, value: item.correctNumber });
       //   xAxisData.push(index + 1);
       // });
-      let nowMonth = new Date().getMonth() + 1;
-      let nowDate = new Date().getDate();
+      let now = new Date();
+      let date = [];
+      for (let i = 0; i < 7; i++) {
+        date[7 - i - 1] = now.getMonth() + 1 + "/" + now.getDate();
+        now = new Date(now - 24 * 60 * 60 * 1000);
+      }
       setTimeout(() => {
         this.chart = this.$echarts.init(this.$refs.lineChart);
         this.chart.setOption({
@@ -223,15 +228,7 @@ export default {
           // },
           xAxis: {
             type: "category",
-            data: [
-              nowMonth + "/" + (nowDate - 6),
-              nowMonth + "/" + (nowDate - 5),
-              nowMonth + "/" + (nowDate - 4),
-              nowMonth + "/" + (nowDate - 3),
-              nowMonth + "/" + (nowDate - 2),
-              nowMonth + "/" + (nowDate - 1),
-              nowMonth + "/" + nowDate,
-            ],
+            data: date,
           },
           yAxis: {
             type: "value",

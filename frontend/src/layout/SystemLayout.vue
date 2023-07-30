@@ -174,7 +174,12 @@ export default {
     };
   },
   created() {
-    this.menuHeight = document.documentElement.clientHeight - 180 + "px";
+    // windowHeight - headerHeight - margin (20px * 2)
+    this.menuHeight =
+      document.documentElement.clientHeight -
+      this.$storage.getStorageSync("headerHeight") -
+      40 +
+      "px";
 
     let user = this.$storage.getStorageSync("user");
     if (user && user.roles) {
@@ -190,8 +195,7 @@ export default {
   padding-right: 0px !important;
 }
 .el-menu {
-  margin-left: 20px;
-  margin-top: 20px;
+  margin: 20px 0 20px 20px;
   padding: 10px;
   border-radius: 24px;
 }

@@ -4,7 +4,7 @@
     <div class="container">
       <div class="img"></div>
       <div class="login-box">
-        <form action="#">
+        <form action="#" style="width: 360px">
           <img
             src="../assets/login/user_login_icon.png"
             alt=""

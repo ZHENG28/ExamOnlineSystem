@@ -80,6 +80,8 @@ export default {
     if (this.$storage.getStorageSync("user")) {
       this.color = this.getColor();
       this.loadInfo(this.$storage.getStorageSync("user").id);
+      // --el-header-height: 60px;
+      this.$storage.setStorageSync("headerHeight", 60);
     }
   },
   methods: {

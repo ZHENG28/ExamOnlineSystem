@@ -47,7 +47,9 @@ export default {
   created() {
     if (this.choose != undefined) {
       let reply = this.choose.split(" ");
-      this.changeFlag(JSON.parse(reply[1]));
+      if (reply != "") {
+        this.changeFlag(JSON.parse(reply[1]));
+      }
     }
   },
   methods: {
@@ -67,7 +69,7 @@ export default {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 27px;
+  width: 36px;
   height: 27px;
   background-color: #38d39f;
   color: #fff;
