@@ -1,6 +1,5 @@
 package com.zj.examsystem.controller;
 
-
 import com.zj.examsystem.service.ShortAnswerService;
 import com.zj.examsystem.utils.response.BaseResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ public class ShortAnswerController {
 
     @GetMapping("/findAllQuestion")
     @ResponseBody
-    public Object findAllQuestion(Integer testId) {
+    public BaseResponseEntity findAllQuestion(Integer testId) {
         return BaseResponseEntity.ok("", shortAnswerService.findAllQuestion(testId));
     }
 }

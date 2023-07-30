@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
-
 
 @Controller
 @RequestMapping("/testHistory")
@@ -31,7 +29,7 @@ public class TestHistoryController {
 
     @PostMapping("/commit")
     @ResponseBody
-    public Object commit(TestHistory testHistory, String[] reply) {
+    public BaseResponseEntity commit(TestHistory testHistory, String[] reply) {
         if (testHistoryService.commit(testHistory, reply, questionService.findQuestionListByTestId(testHistory.getTestId()))) {
             return compareShortAnswerService.compareReplyWithOther(testHistory) ?
                     BaseResponseEntity.ok("提交成功", "") : BaseResponseEntity.error(ResponseCode.FAIL,
@@ -43,31 +41,31 @@ public class TestHistoryController {
 
     @GetMapping("/loadObjectChartData")
     @ResponseBody
-    public Object loadObjectChartData(Integer testId) {
+    public BaseResponseEntity loadObjectChartData(Integer testId) {
         return BaseResponseEntity.ok("", testHistoryService.loadObjectChartData(testId));
     }
 
     @GetMapping("/findAllByUserId")
     @ResponseBody
-    public Object findAllByUserId(Integer pageno, Integer size, Integer userId) {
+    public BaseResponseEntity findAllByUserId(Integer pageno, Integer size, Integer userId) {
         return BaseResponseEntity.ok("", testHistoryService.findAllByUserId(pageno, size, userId));
     }
 
     @GetMapping("/findAllByTestId")
     @ResponseBody
-    public Object findAllByTestId(Integer pageno, Integer size, Integer testId) {
+    public BaseResponseEntity findAllByTestId(Integer pageno, Integer size, Integer testId) {
         return BaseResponseEntity.ok("", testHistoryService.findAllByTestId(pageno, size, testId));
     }
 
     @GetMapping("/findTestInfoByCompoundId")
     @ResponseBody
-    public Object findTestInfoByCompoundId(Integer testId, Integer studentId) {
+    public BaseResponseEntity findTestInfoByCompoundId(Integer testId, Integer studentId) {
         return BaseResponseEntity.ok("", testHistoryService.findTestInfoByCompoundId(testId, studentId));
     }
 
     @GetMapping("/findHistoryByCompoundId")
     @ResponseBody
-    public Object findHistoryByCompoundId(Integer testId, Integer studentId, Integer order) {
+    public BaseResponseEntity findHistoryByCompoundId(Integer testId, Integer studentId, Integer order) {
         return BaseResponseEntity.ok("", testHistoryService.findHistoryByCompoundId(testId, studentId, order));
     }
 }

@@ -19,35 +19,34 @@ public class QuestionTypeController {
 
     @GetMapping("/findAll")
     @ResponseBody
-    public Object findAll(Integer pageno, Integer size) {
+    public BaseResponseEntity findAll(Integer pageno, Integer size) {
         return BaseResponseEntity.ok("", questionTypeService.findAll(pageno, size));
     }
 
     @GetMapping("/loadQuestionType")
     @ResponseBody
-    public Object loadQuestionType() {
+    public BaseResponseEntity loadQuestionType() {
         return BaseResponseEntity.ok("", questionTypeService.findAll());
     }
 
     @GetMapping("/findById")
     @ResponseBody
-    public Object findById(Integer typeId) {
+    public BaseResponseEntity findById(Integer typeId) {
         return BaseResponseEntity.ok("", questionTypeService.findById(typeId));
     }
 
     @PostMapping("/save")
     @ResponseBody
-    public Object save(QuestionType questionType, String status) {
+    public BaseResponseEntity save(QuestionType questionType, String status) {
         int result = questionTypeService.saveQuestionType(questionType);
         return result != 0 ? BaseResponseEntity.ok(status + "成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, status + "失败");
     }
 
     @PostMapping("/delete")
     @ResponseBody
-    public Object delete(Integer[] typeId) {
+    public BaseResponseEntity delete(Integer[] typeId) {
         int result = questionTypeService.deleteQuestionType(typeId);
         return result != 0 ? BaseResponseEntity.ok("删除成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
     }
-
 }
 

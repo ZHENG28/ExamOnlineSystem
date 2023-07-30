@@ -1,6 +1,5 @@
 package com.zj.examsystem.controller;
 
-
 import com.zj.examsystem.config.security.JwtUtils;
 import com.zj.examsystem.entity.User;
 import com.zj.examsystem.service.UserService;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 
 @Controller
 @RequestMapping("/user")
@@ -74,14 +72,14 @@ public class UserController {
 
     @PostMapping("/save")
     @ResponseBody
-    public Object save(User user, String status) {
+    public BaseResponseEntity save(User user, String status) {
         Boolean result = user.getUserId() == null ? userService.saveUser(user) : userService.updateUser(user);
         return result ? BaseResponseEntity.ok(status + "成功", null) : BaseResponseEntity.error(ResponseCode.FAIL, status + "失败");
     }
 
     @PostMapping("/delete")
     @ResponseBody
-    public Object delete(Integer[] userId) {
+    public BaseResponseEntity delete(Integer[] userId) {
         int result = userService.deleteUser(userId);
         return result != 0 ? BaseResponseEntity.ok("删除成功", result) :
                 BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
@@ -89,31 +87,31 @@ public class UserController {
 
     @GetMapping("/findAll")
     @ResponseBody
-    public Object findAll(Integer pageno, Integer size) {
+    public BaseResponseEntity findAll(Integer pageno, Integer size) {
         return BaseResponseEntity.ok("", userService.findAll(pageno, size));
     }
 
     @GetMapping("/findInfoById")
     @ResponseBody
-    public Object findInfoById(Integer userId) {
+    public BaseResponseEntity findInfoById(Integer userId) {
         return BaseResponseEntity.ok("", userService.findById(userId));
     }
 
     @GetMapping("/loadTeacherByMajorId")
     @ResponseBody
-    public Object loadTeacherByMajorId(Integer majorId) {
+    public BaseResponseEntity loadTeacherByMajorId(Integer majorId) {
         return BaseResponseEntity.ok("", userService.findTeacherByMajorId(majorId));
     }
 
     @GetMapping("/loadStudentByClazzId")
     @ResponseBody
-    public Object loadStudentByClazzId(Integer clazzId) {
+    public BaseResponseEntity loadStudentByClazzId(Integer clazzId) {
         return BaseResponseEntity.ok("", userService.findStudentByClazzId(clazzId));
     }
 
     @GetMapping("/loadHomeData")
     @ResponseBody
-    public Object loadHomeData(Integer userId, Integer roleId) {
+    public BaseResponseEntity loadHomeData(Integer userId, Integer roleId) {
         Map<String, Object> result = new HashMap<>();
         switch (roleId) {
             case 1: // admin

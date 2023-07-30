@@ -1,6 +1,5 @@
 package com.zj.examsystem.controller;
 
-
 import com.zj.examsystem.entity.CompareShortAnswer;
 import com.zj.examsystem.service.CompareShortAnswerService;
 import com.zj.examsystem.utils.response.BaseResponseEntity;
@@ -18,19 +17,19 @@ public class CompareShortAnswerController {
 
     @GetMapping("/loadCompareTextData")
     @ResponseBody
-    public Object loadCompareTextData(Integer pageno, Integer size, Integer testId) {
+    public BaseResponseEntity loadCompareTextData(Integer pageno, Integer size, Integer testId) {
         return BaseResponseEntity.ok("", compareShortAnswerService.loadCompareTextData(pageno, size, testId));
     }
 
     @GetMapping("/findById")
     @ResponseBody
-    public Object findById(Integer compareId, Integer threshold) {
+    public BaseResponseEntity findById(Integer compareId, Integer threshold) {
         return BaseResponseEntity.ok("", compareShortAnswerService.findById(compareId, threshold));
     }
 
     @GetMapping("/getCompareList")
     @ResponseBody
-    public Object getCompareList(String reply1Text, String reply2Text, Integer threshold) {
+    public BaseResponseEntity getCompareList(String reply1Text, String reply2Text, Integer threshold) {
         CompareShortAnswer compareShortAnswer = new CompareShortAnswer();
         compareShortAnswer.setReply1Text(reply1Text);
         compareShortAnswer.setReply2Text(reply2Text);

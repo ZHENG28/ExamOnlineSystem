@@ -1,6 +1,5 @@
 package com.zj.examsystem.controller;
 
-
 import com.zj.examsystem.entity.Subject;
 import com.zj.examsystem.entity.User;
 import com.zj.examsystem.service.SubjectService;
@@ -8,17 +7,14 @@ import com.zj.examsystem.service.UserService;
 import com.zj.examsystem.utils.response.BaseResponseEntity;
 import com.zj.examsystem.utils.response.ResponseCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 @Controller
 @RequestMapping("/subject")
@@ -31,7 +27,7 @@ public class SubjectController {
 
     @GetMapping("/findAllByMajorId")
     @ResponseBody
-    public Object findAllByMajorId(Integer pageno, Integer size, Integer majorId) {
+    public BaseResponseEntity findAllByMajorId(Integer pageno, Integer size, Integer majorId) {
         Map<String, Object> map = new HashMap<>();
         map.put("column", "major_id");
         map.put("val", majorId);
@@ -40,7 +36,7 @@ public class SubjectController {
 
     @GetMapping("/findAllByTeacherId")
     @ResponseBody
-    public Object findAllByTeacherId(Integer pageno, Integer size, Integer teacherId) {
+    public BaseResponseEntity findAllByTeacherId(Integer pageno, Integer size, Integer teacherId) {
         Map<String, Object> map = new HashMap<>();
         map.put("column", "teacher_id");
         map.put("val", teacherId);
@@ -49,7 +45,7 @@ public class SubjectController {
 
     @GetMapping("/loadSubjectByTeacherId")
     @ResponseBody
-    public Object loadSubjectByTeacherId(Integer teacherId) {
+    public BaseResponseEntity loadSubjectByTeacherId(Integer teacherId) {
         Map<String, Object> map = new HashMap<>();
         map.put("column", "teacher_id");
         map.put("val", teacherId);
@@ -58,7 +54,7 @@ public class SubjectController {
 
     @GetMapping("/loadSubjectByStudentId")
     @ResponseBody
-    public Object loadSubjectByStudentId(Integer studentId) {
+    public BaseResponseEntity loadSubjectByStudentId(Integer studentId) {
         User student = userService.findById(studentId);
         Map<String, Object> map = new HashMap<>();
         map.put("column", "clazz_id");
@@ -68,20 +64,20 @@ public class SubjectController {
 
     @GetMapping("/findById")
     @ResponseBody
-    public Object findById(Integer subjectId) {
+    public BaseResponseEntity findById(Integer subjectId) {
         return BaseResponseEntity.ok("", subjectService.findById(subjectId));
     }
 
     @PostMapping("/save")
     @ResponseBody
-    public Object save(Subject subject, String status) {
+    public BaseResponseEntity save(Subject subject, String status) {
         int result = subjectService.saveSubject(subject);
         return result != 0 ? BaseResponseEntity.ok(status + "成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, status + "失败");
     }
 
     @PostMapping("/delete")
     @ResponseBody
-    public Object delete(Integer[] subjectId) {
+    public BaseResponseEntity delete(Integer[] subjectId) {
         int result = subjectService.deleteSubject(subjectId);
         return result != 0 ? BaseResponseEntity.ok("删除成功", result) : BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
     }
