@@ -3,7 +3,6 @@ package com.zj.examsystem.config;
 import com.zj.examsystem.config.security.AuthEntryPointJwt;
 import com.zj.examsystem.config.security.AuthTokenFilter;
 import com.zj.examsystem.config.security.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,16 +18,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.annotation.Resource;
+
 @Configuration
 // 告知框架 security 的存在
 @EnableWebSecurity
 // 提供 AOP security 的方法（如@PreAuthorize, @PostAuthorize）
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
+    @Resource
     private CustomUserDetailsService userDetailsService;
 
-    @Autowired
+    @Resource
     private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean

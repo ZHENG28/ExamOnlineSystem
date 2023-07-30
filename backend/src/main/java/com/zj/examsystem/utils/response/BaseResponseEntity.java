@@ -15,13 +15,13 @@ public class BaseResponseEntity<T> {
     private T data;
 
     // 防止实例化
-    private BaseResponseEntity() {}
+    //    private BaseResponseEntity() {}
 
     public static <T> BaseResponseEntity<T> ok(String message, T data) {
-        return new BaseResponseEntity<T>(true, ResponseCode.SUCCESS, message, data);
+        return new BaseResponseEntity<>(true, ResponseCode.SUCCESS, message, data);
     }
 
-    public static <T> BaseResponseEntity<String> error(StatusCode status, String message) {
-        return new BaseResponseEntity<String>(false, status, message, "");
+    public static <T> BaseResponseEntity<T> error(StatusCode status, String message) {
+        return new BaseResponseEntity<>(false, status, message, null);
     }
 }

@@ -4,10 +4,11 @@ import com.zj.examsystem.entity.User;
 import com.zj.examsystem.service.UserService;
 import com.zj.examsystem.utils.AutoNameUtil;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.Resource;
 
 public class UserTest extends BaseSpringBootTest {
-    @Autowired
+    @Resource
     private UserService userService;
 
     @Test

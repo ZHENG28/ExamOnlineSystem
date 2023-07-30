@@ -216,7 +216,7 @@
             <p style="width: 150px">
               关联知识点: {{ scope.row.knowledgeContent }}
             </p>
-            <template #reference class="name-wrapper">
+            <template #reference>
               <span>{{ scope.row.questionTitle }}</span>
             </template>
           </el-popover>
@@ -232,7 +232,7 @@
             <p v-for="option in scope.row.answer" :key="option.answerId">
               <span>选项{{ option.answerSign }}: {{ option.content }}</span>
             </p>
-            <template #reference class="name-wrapper">
+            <template #reference>
               <el-tag>{{ scope.row.correct }}</el-tag>
             </template>
           </el-popover>

@@ -4,37 +4,38 @@ import com.zj.examsystem.entity.KnowledgeFrame;
 import com.zj.examsystem.service.KnowledgeFrameService;
 import com.zj.examsystem.utils.response.BaseResponseEntity;
 import com.zj.examsystem.utils.response.ResponseCode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/knowledgeFrame")
 public class KnowledgeFrameController {
-    @Autowired
+    @Resource
     private KnowledgeFrameService knowledgeFrameService;
 
     @GetMapping("/loadKnowledgeBySubjectId")
     @ResponseBody
-    public BaseResponseEntity loadKnowledgeBySubjectId(Integer subjectId) {
+    public BaseResponseEntity<List<KnowledgeFrame>> loadKnowledgeBySubjectId(Integer subjectId) {
         return BaseResponseEntity.ok("", knowledgeFrameService.loadKnowledgeBySubjectId(subjectId));
     }
 
     @GetMapping("/loadKnowledgeFrameBySubjectId")
     @ResponseBody
-    public BaseResponseEntity loadKnowledgeFrameBySubjectId(Integer subjectId) {
+    public BaseResponseEntity<List<Map<String, Object>>> loadKnowledgeFrameBySubjectId(Integer subjectId) {
         return BaseResponseEntity.ok("", knowledgeFrameService.loadKnowledgeFrameBySubjectId(subjectId));
     }
 
     @PostMapping(value = "/save")
     @ResponseBody
-    public BaseResponseEntity save(String[] knowledgeFrames, Integer subjectId) {
+    public BaseResponseEntity<Integer> save(String[] knowledgeFrames, Integer subjectId) {
         List<KnowledgeFrame> knowledgeFrameList = new ArrayList<>();
         for (String s : knowledgeFrames) {
             String[] str = s.split(",");

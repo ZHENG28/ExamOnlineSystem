@@ -1,6 +1,9 @@
 package com.zj.examsystem.utils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +26,7 @@ public class PythonExecute {
             printStream.flush();
 
             BufferedReader inReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String info = null;
+            String info;
             while ((info = inReader.readLine()) != null) {
                 System.out.println(info);
                 result.add(info);
@@ -43,54 +46,54 @@ public class PythonExecute {
         return result;
     }
 
-    public static List<String> getArticleSimilarity(List<String> oldList, String insert, Integer threshold) {
-        List<String> result = new ArrayList<>();
-        String old = String.join(PYTHON_TEXT_DELIMITER, oldList);
-        Process process;
-        try {
-            String filePath = new File("").getAbsolutePath() + "\\src\\main\\resources\\python\\textSimilarity.py";
-            process = Runtime.getRuntime().exec(new String[]{"python", filePath, "article", old, insert,
-                    String.valueOf(threshold)});
-            // 中文乱码问题
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), "gb2312"));
-            String line;
-            while ((line = in.readLine()) != null) {
-                System.out.println(line);
-                result.add(line);
-            }
-            in.close();
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public static Map<String, int[]> getSentenceSimilarity(String compareText, String text, Integer threshold) {
-        Map<String, int[]> result = new HashMap<>();
-        Process process;
-        try {
-            String filePath = new File("").getAbsolutePath() + "\\src\\main\\resources\\python\\textSimilarity.py";
-            process = Runtime.getRuntime().exec(new String[]{"python", filePath, "sentence", text, compareText, String.valueOf(threshold)});
-            // 中文乱码问题
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), "gb2312"));
-            String line;
-            int index = 0;
-            while ((line = in.readLine()) != null) {
-                String[] list = line.split("\\" + PYTHON_TEXT_DELIMITER);
-                int[] res = new int[list.length];
-                for (int i = 0; i < list.length; i++) {
-                    res[i] = Integer.parseInt(list[i]);
-                }
-                result.put("reply" + ++index, res);
-            }
-            in.close();
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+    //    public static List<String> getArticleSimilarity(List<String> oldList, String insert, Integer threshold) {
+    //        List<String> result = new ArrayList<>();
+    //        String old = String.join(PYTHON_TEXT_DELIMITER, oldList);
+    //        Process process;
+    //        try {
+    //            String filePath = new File("").getAbsolutePath() + "\\src\\main\\resources\\python\\textSimilarity.py";
+    //            process = Runtime.getRuntime().exec(new String[]{"python", filePath, "article", old, insert,
+    //                    String.valueOf(threshold)});
+    //            // 中文乱码问题
+    //            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), "gb2312"));
+    //            String line;
+    //            while ((line = in.readLine()) != null) {
+    //                System.out.println(line);
+    //                result.add(line);
+    //            }
+    //            in.close();
+    //            process.waitFor();
+    //        } catch (IOException | InterruptedException e) {
+    //            e.printStackTrace();
+    //        }
+    //        return result;
+    //    }
+    //
+    //    public static Map<String, int[]> getSentenceSimilarity(String compareText, String text, Integer threshold) {
+    //        Map<String, int[]> result = new HashMap<>();
+    //        Process process;
+    //        try {
+    //            String filePath = new File("").getAbsolutePath() + "\\src\\main\\resources\\python\\textSimilarity.py";
+    //            process = Runtime.getRuntime().exec(new String[]{"python", filePath, "sentence", text, compareText, String.valueOf(threshold)});
+    //            // 中文乱码问题
+    //            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), "gb2312"));
+    //            String line;
+    //            int index = 0;
+    //            while ((line = in.readLine()) != null) {
+    //                String[] list = line.split("\\" + PYTHON_TEXT_DELIMITER);
+    //                int[] res = new int[list.length];
+    //                for (int i = 0; i < list.length; i++) {
+    //                    res[i] = Integer.parseInt(list[i]);
+    //                }
+    //                result.put("reply" + ++index, res);
+    //            }
+    //            in.close();
+    //            process.waitFor();
+    //        } catch (IOException | InterruptedException e) {
+    //            e.printStackTrace();
+    //        }
+    //        return result;
+    //    }
 
     public static List<String> getArticleSimilarityWithSocket(List<String> oldList, String insert, Integer threshold) {
         String old = String.join(SHORT_ANSWER_QUESTION_LIST_SPLIT, oldList);

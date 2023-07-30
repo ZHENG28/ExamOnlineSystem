@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -53,10 +54,7 @@ public class QuestionTypeServiceImpl extends ServiceImpl<QuestionTypeMapper, Que
     @Override
     @Transactional
     public Integer deleteQuestionType(Integer[] id) {
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < id.length; i++) {
-            ids.add(id[i]);
-        }
+        List<Integer> ids = new ArrayList<>(Arrays.asList(id));
         return questionTypeMapper.deleteBatchIds(ids);
     }
 }

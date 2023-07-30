@@ -1,11 +1,11 @@
 package com.zj.examsystem.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.examsystem.config.security.JwtUtils;
 import com.zj.examsystem.entity.User;
 import com.zj.examsystem.service.UserService;
 import com.zj.examsystem.utils.response.BaseResponseEntity;
 import com.zj.examsystem.utils.response.ResponseCode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -24,13 +25,13 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/user")
 public class UserController {
-    @Autowired
+    @Resource
     private UserService userService;
 
-    @Autowired
+    @Resource
     private AuthenticationManager authenticationManager;
 
-    @Autowired
+    @Resource
     private JwtUtils jwtUtils;
 
     /**
@@ -72,14 +73,14 @@ public class UserController {
 
     @PostMapping("/save")
     @ResponseBody
-    public BaseResponseEntity save(User user, String status) {
+    public BaseResponseEntity<Integer> save(User user, String status) {
         Boolean result = user.getUserId() == null ? userService.saveUser(user) : userService.updateUser(user);
         return result ? BaseResponseEntity.ok(status + "成功", null) : BaseResponseEntity.error(ResponseCode.FAIL, status + "失败");
     }
 
     @PostMapping("/delete")
     @ResponseBody
-    public BaseResponseEntity delete(Integer[] userId) {
+    public BaseResponseEntity<Integer> delete(Integer[] userId) {
         int result = userService.deleteUser(userId);
         return result != 0 ? BaseResponseEntity.ok("删除成功", result) :
                 BaseResponseEntity.error(ResponseCode.FAIL, "删除失败");
@@ -87,31 +88,31 @@ public class UserController {
 
     @GetMapping("/findAll")
     @ResponseBody
-    public BaseResponseEntity findAll(Integer pageno, Integer size) {
+    public BaseResponseEntity<IPage<User>> findAll(Integer pageno, Integer size) {
         return BaseResponseEntity.ok("", userService.findAll(pageno, size));
     }
 
     @GetMapping("/findInfoById")
     @ResponseBody
-    public BaseResponseEntity findInfoById(Integer userId) {
+    public BaseResponseEntity<User> findInfoById(Integer userId) {
         return BaseResponseEntity.ok("", userService.findById(userId));
     }
 
     @GetMapping("/loadTeacherByMajorId")
     @ResponseBody
-    public BaseResponseEntity loadTeacherByMajorId(Integer majorId) {
+    public BaseResponseEntity<List<User>> loadTeacherByMajorId(Integer majorId) {
         return BaseResponseEntity.ok("", userService.findTeacherByMajorId(majorId));
     }
 
     @GetMapping("/loadStudentByClazzId")
     @ResponseBody
-    public BaseResponseEntity loadStudentByClazzId(Integer clazzId) {
+    public BaseResponseEntity<List<User>> loadStudentByClazzId(Integer clazzId) {
         return BaseResponseEntity.ok("", userService.findStudentByClazzId(clazzId));
     }
 
     @GetMapping("/loadHomeData")
     @ResponseBody
-    public BaseResponseEntity loadHomeData(Integer userId, Integer roleId) {
+    public BaseResponseEntity<Map<String, Object>> loadHomeData(Integer userId, Integer roleId) {
         Map<String, Object> result = new HashMap<>();
         switch (roleId) {
             case 1: // admin

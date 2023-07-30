@@ -27,7 +27,7 @@
         <template #default="scope">
           <el-popover trigger="hover" placement="right">
             <p style="width: 150px">简介: {{ scope.row.description }}</p>
-            <template #reference class="name-wrapper">
+            <template #reference>
               <span>{{ scope.row.testName }}</span>
             </template>
           </el-popover>
@@ -43,7 +43,7 @@
         <template #default="scope">
           <el-popover trigger="hover" placement="right">
             <p style="width: 150px">测验班级: {{ scope.row.clazzName }}</p>
-            <template #reference class="name-wrapper">
+            <template #reference>
               <span>{{ scope.row.subjectName }}</span>
             </template>
           </el-popover>

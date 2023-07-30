@@ -6,7 +6,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -18,8 +17,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     // 在未受到权限验证的用户访问受保护的资源时触发，抛出AuthenticationException异常
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException,
-            ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         String errMsg = authException.getMessage();
         logger.error("Unauthorized error: {}", errMsg);
 

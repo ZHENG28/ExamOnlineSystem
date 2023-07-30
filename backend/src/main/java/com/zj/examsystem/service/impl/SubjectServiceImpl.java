@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -25,14 +26,14 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     public IPage<Subject> findAll(Integer pageno, Integer size, Map<String, Object> condition) {
         Page<Subject> page = new Page<>(pageno, size);
         QueryWrapper<Subject> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq((String) condition.get("column"), (Integer) condition.get("val"));
+        queryWrapper.eq((String) condition.get("column"), condition.get("val"));
         return subjectMapper.selectPageWithTeacherAndClazz(page, queryWrapper);
     }
 
     @Override
     public List<Subject> loadSubjectByUserId(Map<String, Object> condition) {
         QueryWrapper<Map<String, Object>> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq((String) condition.get("column"), (Integer) condition.get("val"));
+        queryWrapper.eq((String) condition.get("column"), condition.get("val"));
         return subjectMapper.selectListByUserId(queryWrapper);
     }
 
@@ -57,10 +58,7 @@ public class SubjectServiceImpl extends ServiceImpl<SubjectMapper, Subject> impl
     @Override
     @Transactional
     public Integer deleteSubject(Integer[] id) {
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < id.length; i++) {
-            ids.add(id[i]);
-        }
+        List<Integer> ids = new ArrayList<>(Arrays.asList(id));
         return subjectMapper.deleteBatchIds(ids);
     }
 }

@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements TestService {
@@ -110,11 +107,7 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements Te
             if (testMapper.updateById(test) == 1) {
                 List<Integer> questionIds = testQuestionListMapper.findQuestionIdsByTestId(test.getTestId());
                 for (Integer questionId : questionList) {
-                    if (questionIds.contains(questionId)) {
-                        questionIds.remove(questionId);
-                    } else {
-                        TestQuestionList testQuestionList = new TestQuestionList(test.getTestId(), questionId);
-                    }
+                    questionIds.remove(questionId);
                 }
                 if (!questionIds.isEmpty()) {
                     QueryWrapper<TestQuestionList> queryWrapper = new QueryWrapper<>();
@@ -156,10 +149,7 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements Te
     @Override
     @Transactional
     public Integer deleteTest(Integer[] id) {
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < id.length; i++) {
-            ids.add(id[i]);
-        }
+        List<Integer> ids = new ArrayList<>(Arrays.asList(id));
         return testMapper.deleteBatchIds(ids);
     }
 }

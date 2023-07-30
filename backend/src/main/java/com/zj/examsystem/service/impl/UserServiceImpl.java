@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -101,10 +98,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public Integer deleteUser(Integer[] userId) {
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < userId.length; i++) {
-            ids.add(userId[i]);
-        }
+        List<Integer> ids = new ArrayList<>(Arrays.asList(userId));
         return userMapper.deleteBatchIds(ids);
     }
 
@@ -214,7 +208,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // not complete total
         List<Test> finishList = testMapper.countNotFinishByUserId(userId);
-        Integer complete = 0;
+        int complete = 0;
         for (Test test : finishList) {
             complete += testHistoryMapper.findTestInfoByCompoundId(test.getTestId(), userId) == null ? 1 : 0;
         }

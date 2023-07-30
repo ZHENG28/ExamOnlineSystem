@@ -117,7 +117,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 knowledgeList.add(question.getKnowledgeId());
             }
         }
-        Double knoweledgeCoverage = Double.valueOf(knowledgeList.size() / questionList.size());
+        double knowledgeCoverage = (double) knowledgeList.size() / questionList.size();
 
         // 2-2 计算该套试卷的实际难度（各题的平均难度系数，优化情况应该是各题型的分数占比）
         Double difficulty = 0.0;
@@ -126,12 +126,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         }
         Double actualDifficulty = difficulty / questionList.size();
 
-        // = 1 - (1 - knoweledgeCoverage) * knowledgeWeight - |examDifficulty - actualDifficulty| * difficultyWeight
-        return 1 - (1 - knoweledgeCoverage) * knowledgeWeight - Math.abs(examDifficulty - actualDifficulty) * difficultyWeight;
+        // = 1 - (1 - knowledgeCoverage) * knowledgeWeight - |examDifficulty - actualDifficulty| * difficultyWeight
+        return 1 - (1 - knowledgeCoverage) * knowledgeWeight - Math.abs(examDifficulty - actualDifficulty) * difficultyWeight;
     }
 
     private Integer getFittestIndex(List<Double> fitnessList) {
-        Integer res = 0;
+        int res = 0;
         Double fittest = Double.MIN_VALUE;
         for (int i = 0; i < fitnessList.size(); i++) {
             if (fitnessList.get(i) > fittest) {
@@ -146,8 +146,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // 3-1 生成个体的选择概率和累积率
         List<Double> probabilityList = new ArrayList<>();
         List<Double> accumulationList = new ArrayList<>();
-        for (int i = 0; i < fitnessList.size(); i++) {
-            Double probability = fitnessList.get(i) / fitnessSum;
+        for (Double fitness : fitnessList) {
+            Double probability = fitness / fitnessSum;
             probabilityList.add(probability);
             accumulationList.add(computeAccumulation(probabilityList));
         }
@@ -165,7 +165,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         }
 
         // 3-3 去除集合中重复的元素
-        HashSet set = new HashSet(children);
+        LinkedHashSet<List<Question>> set = new LinkedHashSet<>(children);
         children.clear();
         children.addAll(set);
         return children;
@@ -191,8 +191,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private Map<String, Object> crossoverGenerate(List<List<Question>> children) {
         Map<String, Object> ret = new HashMap<>();
         // 4-1 随机选择两个个体配对
-        Integer random1 = new Random().nextInt(children.size());
-        Integer random2 = new Random().nextInt(children.size());
+        int random1 = new Random().nextInt(children.size());
+        int random2 = new Random().nextInt(children.size());
         while (random1 == random2) {
             random1 = new Random().nextInt(children.size());
             random2 = new Random().nextInt(children.size());
@@ -202,10 +202,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<Question> individual1 = children.get(random1);
         List<Question> individual2 = children.get(random2);
         // 4-2 生成[0, 1]之间的随机数，与交叉概率比较
-        Double random = new Random().nextDouble();
+        double random = new Random().nextDouble();
         if (random < PROBABILITY_CROSSOVER) {
             // 4-3 随机选择一个交叉点位置
-            Integer crossoverPoint = new Random().nextInt(individual1.size());
+            int crossoverPoint = new Random().nextInt(individual1.size());
             // 4-4 互换交叉点后的基因
             List<Question> newIndividual1 = new ArrayList<>();
             List<Question> newIndividual2 = new ArrayList<>();
@@ -264,7 +264,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private List<Question> mutationGenerate(List<Question> questionList) {
         for (int i = 0; i < questionList.size(); i++) {
             // 5-2 决定该基因位是否发生突变
-            Double random = new Random().nextDouble();
+            double random = new Random().nextDouble();
             if (random < PROBABILITY_MUTATION) {
                 Question question = questionList.get(i);
                 List<Question> sameConfigureQuestionList =
@@ -302,7 +302,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         if (iteration < GA_ITERATIONS_MAX) {
             // 2. 计算适应度值fitness
             List<Double> fitnessList = new ArrayList<>();
-            Double fitnessSum = 0.0;
+            double fitnessSum = 0.0;
             for (List<Question> chromosome : parent) {
                 Double fitness = computeFitness(chromosome, knowledgeWeight, examDifficulty, difficultyWeight);
                 if (fitness == 1) { // fitness 趋向于 1
@@ -317,7 +317,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             List<List<Question>> children = selectGenerate(fitnessSum, fitnessList, parent);
 
             // 4. 交叉crossover
-            Integer childrenLength = children.size();
+            int childrenLength = children.size();
             List<List<Question>> newChildren = new ArrayList<>();
             while (newChildren.size() < childrenLength) {
                 Map<String, Object> ret = crossoverGenerate(children);
@@ -345,7 +345,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             // 5. 突变mutation
             for (int i = 0; i < children.size(); i++) {
                 // 5-1 决定该个体是否发生突变
-                Double random = new Random().nextDouble();
+                double random = new Random().nextDouble();
                 if (random < PROBABILITY_MUTATION) {
                     // add: insert; set: replace
                     children.set(i, mutationGenerate(children.get(i)));
@@ -371,8 +371,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             // 6. 重复迭代
             return intelligentGenerate(children, knowledgeWeight, examDifficulty, difficultyWeight, iteration + 1);
         } else { // 达到迭代次数上限
-            Double fitnessMax = 0.0;
-            Integer index = -1;
+            double fitnessMax = 0.0;
+            int index = -1;
             for (int i = 0; i < parent.size(); i++) {
                 Double fitness = computeFitness(parent.get(i), knowledgeWeight, examDifficulty, difficultyWeight);
                 if (fitness == 1) { // fitness 趋向于 1
@@ -406,7 +406,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                     }
                     return result == answers.length;
                 case 2: // judge
-                    Answer answer = new Answer(Boolean.valueOf(answers[0]) ? "1" : "0", 1, question.getQuestionId());
+                    Answer answer = new Answer(Boolean.parseBoolean(answers[0]) ? "1" : "0", 1, question.getQuestionId());
                     return answerMapper.insert(answer) != 0;
             }
         } else {
@@ -434,9 +434,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                             Answer answer = new Answer(id, arr[1], arr[2], correct.equals(arr[1]) ? 1 : 0,
                                     question.getQuestionId());
                             insertResult += answerMapper.updateById(answer);
-                            if (answerIds.contains(id)) {
-                                answerIds.remove(id);
-                            }
+                            answerIds.remove(id);
                         } else { // insert new option
                             Answer answer = new Answer(arr[1], arr[2], correct.equals(arr[1]) ? 1 : 0,
                                     question.getQuestionId());
@@ -451,7 +449,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                     QueryWrapper<Answer> answerQueryWrapper = new QueryWrapper<>();
                     answerQueryWrapper.eq("question_id", question.getQuestionId());
                     Answer answer = answerMapper.selectOne(answerQueryWrapper);
-                    answer.setAnswerSign(Boolean.valueOf(answers[0]) ? "1" : "0");
+                    answer.setAnswerSign(Boolean.parseBoolean(answers[0]) ? "1" : "0");
                     return answerMapper.updateById(answer) != 0;
             }
         } else {
@@ -463,10 +461,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Override
     @Transactional
     public Integer deleteQuestion(Integer[] id) {
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < id.length; i++) {
-            ids.add(id[i]);
-        }
+        List<Integer> ids = new ArrayList<>(Arrays.asList(id));
         return questionMapper.deleteBatchIds(ids);
     }
 }

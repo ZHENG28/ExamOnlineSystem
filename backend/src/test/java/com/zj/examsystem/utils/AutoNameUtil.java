@@ -7,7 +7,7 @@ import java.util.Random;
  * 随机生成汉字或随机生成中文姓名
  */
 public abstract class AutoNameUtil {
-    private final static String[] CHINESESURNAME = {
+    private final static String[] CHINESE_SURNAME = {
             "李", "王", "张", "刘", "陈",
             "杨", "赵", "黄", "周", "吴",
             "徐", "孙", "胡", "朱", "高",
@@ -40,18 +40,13 @@ public abstract class AutoNameUtil {
 
     /**
      * 随机获取姓
-     *
-     * @return
      */
     public static String surname() {
-        return CHINESESURNAME[new Random().nextInt(CHINESESURNAME.length - 1)];
+        return CHINESE_SURNAME[new Random().nextInt(CHINESE_SURNAME.length - 1)];
     }
 
     /**
      * 获取N位常用字
-     *
-     * @param len
-     * @return
      */
     public static String name(int len) {
         StringBuilder ret = new StringBuilder();
@@ -80,8 +75,6 @@ public abstract class AutoNameUtil {
 
     /**
      * 随机获取中文姓名
-     *
-     * @return
      */
     public static String getChineseName() {
         return surname() + name(2);
@@ -89,8 +82,6 @@ public abstract class AutoNameUtil {
 
     /**
      * 随机获取英文姓名
-     *
-     * @return
      */
     public static String getEnglishName() {
         StringBuilder ret = new StringBuilder();

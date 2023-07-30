@@ -32,7 +32,7 @@ public class KnowledgeFrameServiceImpl extends ServiceImpl<KnowledgeFrameMapper,
     public List<Map<String, Object>> getTreeList(List<KnowledgeFrame> knowledgeFrameList, Integer parentId) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (KnowledgeFrame knowledgeFrame : knowledgeFrameList) {
-            if (parentId == knowledgeFrame.getChapterParentId()) {
+            if (parentId.equals(knowledgeFrame.getChapterParentId())) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("chapterId", knowledgeFrame.getChapterId());
                 map.put("chapterParentId", knowledgeFrame.getChapterParentId());
@@ -53,7 +53,7 @@ public class KnowledgeFrameServiceImpl extends ServiceImpl<KnowledgeFrameMapper,
     }
 
     public Integer insertKnowledgeList(List<KnowledgeFrame> knowledgeFrameList) {
-        Integer result = 0;
+        int result = 0;
         Map<Integer, Integer> replaceIds = new HashMap<>();
         for (KnowledgeFrame knowledgeFrame : knowledgeFrameList) {
             if (knowledgeFrame.getChapterParentId() >= NEW_CHAPTER_ID && !replaceIds.isEmpty()) {
@@ -86,9 +86,7 @@ public class KnowledgeFrameServiceImpl extends ServiceImpl<KnowledgeFrameMapper,
                     newKnowledgeList.clear();
                     result += knowledgeFrame.getChapterId() != null ? knowledgeFrameMapper.updateById(knowledgeFrame) :
                             knowledgeFrameMapper.insert(knowledgeFrame);
-                    if (chapterIds.contains(knowledgeFrame.getChapterId())) {
-                        chapterIds.remove(knowledgeFrame.getChapterId());
-                    }
+                    chapterIds.remove(knowledgeFrame.getChapterId());
                 }
             }
             if (!newKnowledgeList.isEmpty()) {

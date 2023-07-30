@@ -1,5 +1,6 @@
 package com.zj.examsystem.config.security;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
@@ -61,7 +62,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         // 如果authorization中有内容且是以本项目中设定好的字符串为前缀，则将该jwt返回
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             // 移除Bearer前缀
-            return headerAuth.substring(7, headerAuth.length());
+            return headerAuth.substring(7);
         }
 
         return null;

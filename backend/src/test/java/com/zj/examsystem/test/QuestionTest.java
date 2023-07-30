@@ -3,12 +3,12 @@ package com.zj.examsystem.test;
 import com.zj.examsystem.entity.Question;
 import com.zj.examsystem.service.QuestionService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import java.util.Random;
 
 public class QuestionTest extends BaseSpringBootTest {
-    @Autowired
+    @Resource
     private QuestionService questionService;
 
     @Test
@@ -23,7 +23,7 @@ public class QuestionTest extends BaseSpringBootTest {
                 StringBuilder str = new StringBuilder();
                 int correctIndex = new Random().nextInt(4);
                 for (int j = 0; j < 4; j++) {
-                    String content = "";
+                    String content;
                     if (j == correctIndex) {
                         content = "123789";
                     } else {
@@ -78,7 +78,7 @@ public class QuestionTest extends BaseSpringBootTest {
                 StringBuilder str = new StringBuilder();
                 int correctIndex = new Random().nextInt(4);
                 for (int j = 0; j < 4; j++) {
-                    String content = "";
+                    String content;
                     if (j == correctIndex) {
                         content = "123789";
                     } else {
@@ -112,7 +112,7 @@ public class QuestionTest extends BaseSpringBootTest {
     public void insertShortAnswerQuestionByKnowledgeIds() {
         Integer subjectId = 11;
         Integer[] knowledgeIds = new Integer[]{4, 5, 10, 11, 13, 15, 22, 25, 32, 34, 36, 38, 39, 41, 42, 43, 54, 57, 58};
-        Integer count = 1;
+        int count = 1;
         for (Integer knowledgeId : knowledgeIds) {
             Question question = new Question();
             question.setQuestionTitle("这里是第三种简答题" + (count++) + "，做相似度对比");
